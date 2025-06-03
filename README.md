@@ -1,7 +1,5 @@
 # Hexacore
 
-A TypeScript library built with tsup.
-
 ## Installation
 
 ```bash
