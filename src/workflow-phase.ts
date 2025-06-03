@@ -1,4 +1,4 @@
-import { WorkflowContext } from "./workflow-context"
+import { Workflow } from "./workflow"
 import { WorkflowPhaseRegistry } from "./workflow-phase-registry"
 
 /**
@@ -8,11 +8,11 @@ import { WorkflowPhaseRegistry } from "./workflow-phase-registry"
  */
 export abstract class WorkflowPhase<T = any>  {
     abstract name: string;
-    protected context !: WorkflowContext
+    protected workflow !: Workflow
     protected data!: T
   
-    setContext(context: WorkflowContext) {
-      this.context = context
+    setContext(workflow: Workflow) {
+      this.workflow = workflow
     }
   
     /**
@@ -33,7 +33,7 @@ export abstract class WorkflowPhase<T = any>  {
     transitionTo(name: string, data?: any) {
         const phase = WorkflowPhaseRegistry.get(name)
         if (!phase) throw new Error(`Phase "${name}" not found in registry.`)
-        this.context.transitionTo(phase, data)
+        this.workflow.transitionTo(phase, data)
     }
   
     abstract execute(input: any): any

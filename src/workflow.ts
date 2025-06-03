@@ -1,6 +1,6 @@
 import { WorkflowPhase } from "./workflow-phase"
 
-export class WorkflowContext {
+export class Workflow {
     private currentPhase: WorkflowPhase
   
     /**
