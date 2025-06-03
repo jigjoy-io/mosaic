@@ -1,0 +1,33 @@
+{
+  "name": "@honeycomb-app/hexacore",
+  "version": "0.0.1",
+  "description": "A TypeScript library for building workflows",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+		"type": "git",
+		"url": "https://github.com/honeycomb-app/hexacore.git"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com/"
+	},
+
+	"author": "Miodrag Vilotijević",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3",
+    "rimraf": "^5.0.5"
+  }
+} 
