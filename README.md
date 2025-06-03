@@ -8,8 +8,6 @@ A TypeScript library built with tsup.
 npm install @honeycomb-app/hexacore
 ```
 
-```
-
 ## Workflow System
 
 The library implements a flexible workflow system using the State Design Pattern, allowing you to create and manage complex workflows with multiple phases.
@@ -89,23 +87,6 @@ class SecondPhase extends WorkflowPhase {
 4. Handle edge cases explicitly
 5. Use meaningful phase names when transitioning
 6. Pass necessary data between phases using the transitionTo method
-
-## Development
-
-1. Install dependencies:
-```bash
-npm install
-```
-
-2. Build the library:
-```bash
-npm run build
-```
-
-3. Development mode with watch:
-```bash
-npm run dev
-```
 
 ## License
 
