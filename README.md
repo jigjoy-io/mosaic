@@ -1,91 +1,162 @@
-# Hexacore
+# Hexacore — Build Modular AI Workers & Agentic Workflows
 
-## Installation
+Hexacore is a powerful and lightweight framework for building **AI workers** and **multi-phase agentic workflows** using the **State Design Pattern**. It enables developers to modularize AI logic, manage context-rich interactions, and orchestrate complex agent behaviors with ease.
+
+---
+
+## 📦 Installation
 
 ```bash
-npm install @honeycomb-app/hexacore
+yarn add @honeycomb-app/hexacore
 ```
 
-## Workflow System
+---
 
-The library implements a flexible workflow system using the State Design Pattern, allowing you to create and manage complex workflows with multiple phases.
+## Getting Started with AI Workers
 
-### Creating a Workflow
+AI Workers are self-contained, modular units of logic that encapsulate the entire thinking process of an agent: setting context, executing an LLM, and transforming the result.
 
-Here's a simple example of creating and executing a workflow:
+Here’s how to build an AI Worker that refines project details from a raw task.
 
-```typescript
-import { 
-    WorkflowPhaseRegistry, 
-    Workflow,
-    FirstPhase,
-    SecondPhase
-} from '@honeycomb-app/hexacore';
+### ✅ Define Your AI Worker
 
-// Register the workflow phases
-WorkflowPhaseRegistry.register(FirstPhase);
-WorkflowPhaseRegistry.register(SecondPhase);
+```ts
+import { z } from "zod"
+import { ProjectDetails } from "@domain/types/project-details"
+import { AIWorker, Brain } from "@honeycomb-app/hexacore"
+import { Task } from "@domain/entities/task"
 
-// Create a workflow starting with FirstPhase
-const workflow = new Workflow(new FirstPhase());
+export class ProjectRefiner extends AIWorker {
+  brain = Brain.GPT_41_NANO
 
-// Execute the workflow
-await workflow.execute({
-    input: "some input"
-});
-```
+  thoughtShape = z.object({
+    project: z.object({
+      name: z.string().describe("Short and concise title of the task."),
+      description: z.string().describe("Concrete description what should be implemented, why it should be implemented and what shouldn't be implemented.")
+    }),
+  })
 
-### Workflow Components
+  task: Task
 
-1. **WorkflowPhaseRegistry**: Manages available workflow phases
-   - Use `register()` to add new phases
-   - Phases can be registered dynamically
+  constructor(task: Task) {
+    super()
+    this.task = task
+  }
 
-2. **Workflow**: The main context class that manages the workflow execution
-   - Takes an initial phase in the constructor
-   - Provides the `execute()` method to run the workflow
-
-3. **Workflow Phases**: Individual states in the workflow
-   - Each phase implements specific business logic
-   - Phases can transition to other phases
-
-### Creating Custom Phases
-
-To create a custom workflow phase:
-
-```typescript
-import { WorkflowPhase } from '@honeycomb-app/hexacore';
-
-class FirstPhase extends WorkflowPhase {
-    async execute(input: any): Promise<void> {
-        // Do some work
-        console.log("Executing FirstPhase with input:", input);
+  loadContext(): string {
+    return `
+      ### Role:
+      You are a product owner expert on React projects with Tailwind CSS and Framer Motion.
         
-        // Transition to next phase with updated state
-        this.transitionTo("SecondPhase", {
-            processed: true,
-            result: "First phase completed"
-        });
-    }
-}
+      ### **Your Task:**
+      1) Analyze task title and task description provided by user.
+      2) Based on the task details, create a project name and description.
 
-class SecondPhase extends WorkflowPhase {
-    async execute(input: any): Promise<void> {
-        // Access the input passed from the previous phase
-        console.log("Executing SecondPhase with input:", input);
-    }
+      ### **Task Details:** ${JSON.stringify(this.task)}
+
+      Important:
+      - Respond only in valid JSON. The JSON object must match the schema below.
+
+      ### **Output Format**
+      ${JSON.stringify(this.thoughtShape.shape)}
+    `
+  }
+
+  async afterThought(thought: z.infer<typeof this.thoughtShape>): Promise<ProjectDetails> {
+    const { project } = thought
+    return project
+  }
 }
 ```
 
-### Best Practices
+### 🐝 Run Your AI Worker
 
-1. Always register your phases before executing the workflow
-2. Keep phase logic focused and single-responsibility
-3. Implement proper error handling in your phases
-4. Handle edge cases explicitly
-5. Use meaningful phase names when transitioning
-6. Pass necessary data between phases using the transitionTo method
+```ts
+const worker = new ProjectRefiner(task)
+const projectDetails: ProjectDetails = await worker.execute(task)
+```
 
-## License
+The `execute` method wraps everything — from loading context, calling the AI, to transforming the output into your custom format.
 
-MIT
+---
+
+## Agentic Workflows with State Transitions
+
+You can build complex workflows by chaining multiple **AI Workers** using **workflow phases**. Each phase encapsulates a distinct responsibility and can transition to the next phase based on intermediate results.
+
+### Create Custom Workflow Phases
+
+Let’s say you want to:
+
+1. Refine a task into a project description.
+2. Generate a component list for that project using another AI worker.
+
+```ts
+import { WorkflowPhase } from "@honeycomb-app/hexacore"
+import { ProjectRefiner } from "./workers/project-refiner"
+import { ComponentGenerator } from "./workers/component-generator"
+
+export class ProjectRefinementPhase extends WorkflowPhase {
+  async execute(input: Task): Promise<void> {
+    const project = await new ProjectRefiner(input).execute(input)
+
+    this.transitionTo("ComponentGenerationPhase", { project })
+  }
+}
+
+export class ComponentGenerationPhase extends WorkflowPhase {
+  async execute(input: { project: ProjectDetails }): Promise<void> {
+    const components = await new ComponentGenerator(input.project).execute(input.project)
+
+    console.log("Generated components:", components)
+  }
+}
+```
+
+### Register and Run the Workflow
+
+```ts
+import { WorkflowPhaseRegistry, Workflow } from "@honeycomb-app/hexacore"
+
+WorkflowPhaseRegistry.register(ProjectRefinementPhase)
+WorkflowPhaseRegistry.register(ComponentGenerationPhase)
+
+const workflow = new Workflow(new ProjectRefinementPhase())
+
+await workflow.execute(task)
+```
+
+Each phase can decide where to transition next and pass along structured state — allowing flexible, dynamic, and intelligent workflows.
+
+---
+
+## When to Use Workflows
+
+Use `Workflow` when your logic:
+
+- Requires **multiple AI steps** (e.g., refine → plan → implement)
+- Needs **different agents for different tasks**
+- Benefits from **clear separation of responsibilities**
+- Should support **early exits, retries, or decision points**
+
+---
+
+## Design Principles
+
+- **Modular**: Workers and phases are small, composable units.
+- **Declarative**: Context and schema are explicitly defined.
+- **Extendable**: Easily add new phases or workers.
+- **Type-safe**: Built with `zod` for runtime validation.
+
+---
+
+## Coming Soon
+
+- Built-in support for logging and tracing
+
+---
+
+## Author & License
+
+Created by [JigJoy](https://jigjoy.io) team\
+Licensed under the MIT License.
