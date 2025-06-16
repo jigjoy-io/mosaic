@@ -9,7 +9,15 @@ Hexacore is a powerful and lightweight framework for building **AI workers** and
 ```bash
 yarn add @honeycomb-app/hexacore
 ```
+---
 
+## API Key Configuration
+
+Make sure to set your OpenAI API key in a `.env` file at the root of your project:
+
+```env
+OPENAI_API_KEY=your-api-key-here
+```
 ---
 
 ## Getting Started with AI Workers
