@@ -19,7 +19,25 @@
     "clean": "rimraf dist",
     "prepublishOnly": "npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "ai-agent",
+    "agentic-ai",
+    "agent-framework",
+    "ai-workflow",
+    "workflow-engine",
+    "workflow-system",
+    "state-machine",
+    "state-pattern",
+    "ai-orchestration",
+    "ai-worker",
+    "ai-developer-tools",
+    "autonomous-agent",
+    "multi-agent-system",
+    "openai",
+    "llm",
+    "ai-infrastructure",
+    "modular-ai"
+  ],
   "license": "MIT",
   "devDependencies": {
     "rimraf": "^5.0.5",
