@@ -52,7 +52,7 @@ export class ProductOwner extends Contributor {
     super()
   }
 
-  async loadContext(): Promise<string> {
+  loadContext(): string {
     return `You receive this user change request:\n${this.changeRequest}\nCreate a clear task with title and description.`
   }
 
@@ -70,7 +70,7 @@ export class ProductOwner extends Contributor {
 ### Define Developer contributor
 
 ```ts
-import { Contributor, Brain } from "@honeycomb-app/hexacore"
+import { Brain, Contributor } from "@honeycomb-app/hexacore"
 import { z } from "zod"
 
 export class Developer extends Contributor {
@@ -81,10 +81,14 @@ export class Developer extends Contributor {
     implementationPlan: z.string()
   })
 
-  private project: { name: string; description: string } | null = null
+  private task: { title: string; description: string } | null = null
+
+  async preThought(task: { title: string; description: string }) {
+    this.task = task
+  }
 
   loadContext(): string {
-    return \`You are a developer. Based on the project details below, create an implementation plan:\n\${JSON.stringify(this.project)}\`
+    return `You are a developer. Based on the project details below, create an implementation plan:\n${JSON.stringify(this.task)}`
   }
 
   async afterThought(thought: z.infer<typeof this.thoughtShape>) {
@@ -97,6 +101,11 @@ Make sure to register them into team:
 
 ```ts
 import { Team, Contributor } from "@honeycomb-app/hexacore"
+import { Developer } from "./developer"
+import { ProductOwner } from "./po"
+
+import dotenv from "dotenv"
+dotenv.config()
 
 const changeRequest = "Add login feature with secure authentication."
 
@@ -111,6 +120,8 @@ async function run() {
   console.log("Refined Task:", result.refinedTask)
   console.log("Implementation Plan:", result.implementation)
 }
+
+run()
 ```
 ---
 
