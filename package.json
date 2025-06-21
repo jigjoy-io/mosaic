@@ -1,6 +1,6 @@
 {
   "name": "@honeycomb-app/hexacore",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "A TypeScript library for building workflows",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -24,10 +24,6 @@
     "agentic-ai",
     "agent-framework",
     "ai-workflow",
-    "workflow-engine",
-    "workflow-system",
-    "state-machine",
-    "state-pattern",
     "ai-orchestration",
     "ai-worker",
     "ai-developer-tools",
@@ -36,7 +32,10 @@
     "openai",
     "llm",
     "ai-infrastructure",
-    "modular-ai"
+    "modular-ai",
+    "oop",
+    "object-oriented-programming",
+    "domain-driven-design"
   ],
   "license": "MIT",
   "devDependencies": {
