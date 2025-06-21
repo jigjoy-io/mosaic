@@ -1,6 +1,6 @@
 {
   "name": "@honeycomb-app/hexacore",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A TypeScript library for building workflows",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
