@@ -123,6 +123,9 @@ async function run() {
 
 run()
 ```
+
+See [hexacore-examples](https://github.com/Mijura/hexacore-examples) for working demos.
+
 ---
 
 ## Philosophy
