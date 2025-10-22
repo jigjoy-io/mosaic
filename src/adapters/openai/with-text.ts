@@ -9,7 +9,7 @@ export class OpenAIText implements TextGen {
 
     async text(messages: Message[], opts?: GenOpts): Promise<TextOut> {
 
-        const oaiMsgs = this.mapper.toProvider(messages);
+        const oaiMsgs = this.mapper.toProvider(messages)
         const r = await this.client.chat.completions.create({
             model: this.model, 
             messages: oaiMsgs, 

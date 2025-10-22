@@ -11,6 +11,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "@jigjoy-io/mosaic": "file:../../jigjoy-io-mosaic-0.1.1.tgz",
+    "dotenv": "^17.2.3",
     "openai": "^6.6.0",
     "zod": "^3.25.64"
   },

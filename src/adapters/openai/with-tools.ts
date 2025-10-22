@@ -9,7 +9,7 @@ export class OpenAITools implements ToolUse {
 
     async withTools(messages: Message[], tools: ToolSpec[], opts?: GenOpts) {
  
-        const oaiMsgs = this.mapper.toProvider(messages);
+        const oaiMsgs = this.mapper.toProvider(messages)
         const r = await this.client.chat.completions.create({
             model: this.model,
             messages: oaiMsgs,

@@ -1,8 +1,6 @@
-import { OpenAIText } from "../adapters/openai/with-text"
-import { OpenAITools } from "../adapters/openai/with-tools"
-import { TextGen, ToolSpec, ToolUse } from "../core/capabilities"
-import { OpenAIModel } from "../core/model"
-import { Mosaic } from "../core/mosaic"
+import { OpenAIText, OpenAITools, TextGen, ToolSpec, ToolUse, OpenAIModel, Mosaic } from "@jigjoy-io/mosaic/dist/index.js"
+
+import 'dotenv/config'
 
 const mosaic = new Mosaic()
   .withText(new OpenAIText(OpenAIModel.GPT_5_MINI))
@@ -43,9 +41,10 @@ const planner = new PlannerAgent(mosaic)
 
 const message = "I'm planning a weekend trip. What's the weather in Novi Sad?"
 
-planner.plan(message)
-
-class RouterAgent {
+const output = await planner.plan(message)
+console.log("Answer →", output.text)
+console.log("--------------------")
+class WeatherAgent {
 
     constructor(private llm: ToolUse, private tools: ToolSpec[]) {}
 
@@ -54,7 +53,7 @@ class RouterAgent {
     }
 }
 
-const router  = new RouterAgent(mosaic, [weatherTool(new WeatherDB())])
+const router  = new WeatherAgent(mosaic, [weatherTool(new WeatherDB())])
 
 const exec = await router.execute(message)
 console.log("ToolCalls →", exec.toolCalls)
