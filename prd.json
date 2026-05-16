@@ -44,9 +44,9 @@
       "retries": 2,
       "acceptance": [],
       "tests": [],
-      "passes": false,
-      "completedAt": null,
-      "durationSecs": null,
+      "passes": true,
+      "completedAt": "2026-05-16T18:16:14.219Z",
+      "durationSecs": 18,
       "model": "opus"
     },
     {
@@ -62,9 +62,9 @@
       "retries": 2,
       "acceptance": [],
       "tests": [],
-      "passes": false,
-      "completedAt": null,
-      "durationSecs": null,
+      "passes": true,
+      "completedAt": "2026-05-16T18:16:53.142Z",
+      "durationSecs": 37,
       "model": "opus"
     },
     {
