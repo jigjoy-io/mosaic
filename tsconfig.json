@@ -13,7 +13,8 @@
 		"baseUrl": ".",
 		"paths": {
 			"@core/*": ["src/core/*"],
-			"@openai/*": ["src/providers/openai/*"]
+			"@openai/*": ["src/providers/openai/*"],
+			"@anthropic/*": ["src/providers/anthropic/*"]
 		},
 		"esModuleInterop": true,
 		"skipLibCheck": true,
