@@ -29,6 +29,11 @@ import { OpenAIInferenceRunner } from "@app/openai-inference-runner"
 import { DefaultFunctionCallRunner } from "@app/function-call-runner"
 import { Gpt55 } from "@infra/providers/openai/models/gpt-5-5"
 import { BaseObserverParticipant } from "@app/observer"
+import { AnthropicMessages } from "@infra/providers/anthropic/runtime/anthropic-messages"
+import { Claude47Opus } from "@infra/providers/anthropic/models/claude-4-7-opus"
+import { Claude46Sonnet } from "@infra/providers/anthropic/models/claude-4-6-sonnet"
+import { Claude45Haiku } from "@infra/providers/anthropic/models/claude-4-5-haiku"
+import { AnthropicInferenceRunner } from "@app/anthropic-inference-runner"
 
 export {
 	ModelContext,
@@ -64,4 +69,9 @@ export {
 	BaseHumanParticipant,
 	BaseObserverParticipant,
 	OpenAIInferenceRunner,
+	AnthropicMessages,
+	Claude47Opus,
+	Claude46Sonnet,
+	Claude45Haiku,
+	AnthropicInferenceRunner,
 }
