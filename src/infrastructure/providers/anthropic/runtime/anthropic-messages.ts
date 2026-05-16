@@ -108,7 +108,7 @@ export class AnthropicMessages implements ModelRuntime {
 						{
 							type: "tool_result",
 							tool_use_id: item.callId,
-							content: item.output.toJSON()[0].text,
+							content: item.output.text,
 						},
 					],
 				})
