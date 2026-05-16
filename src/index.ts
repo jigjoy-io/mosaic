@@ -13,6 +13,11 @@ import { InferenceRequest } from "@core/generative-model/inference-request"
 import { Gpt54Nano } from "@openai/models/gpt-5-4-nano"
 import { Gpt54 } from "@openai/models/gpt-5-4"
 import { Gpt54Mini } from "@openai/models/gpt-5-4-mini"
+import { AnthropicMessages } from "@anthropic/runtime/anthropic-messages"
+import { Claude47Opus } from "@anthropic/models/claude-4-7-opus"
+import { Claude46Sonnet } from "@anthropic/models/claude-4-6-sonnet"
+import { Claude45Haiku } from "@anthropic/models/claude-4-5-haiku"
+import type { AnthropicReasoningEffortType } from "@anthropic/reasoning-effort"
 import { InferenceResponse } from "@core/generative-model/inference-response"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@core/generative-model/token-usage"
 import { Tool } from "@core/generative-model/tool"
@@ -36,6 +41,10 @@ export {
 	Gpt54,
 	Gpt54Mini,
 	Gpt54Nano,
+	AnthropicMessages,
+	Claude47Opus,
+	Claude46Sonnet,
+	Claude45Haiku,
 	InferenceRequest,
 	InferenceResponse,
 	TokenUsage,
@@ -51,3 +60,5 @@ export {
 	If,
 	Loop,
 }
+
+export type { AnthropicReasoningEffortType }
