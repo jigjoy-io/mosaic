@@ -12,6 +12,9 @@
 			],
 			"providers/openai": [
 				"dist/providers/openai/index.d.ts"
+			],
+			"providers/anthropic": [
+				"dist/providers/anthropic/index.d.ts"
 			]
 		}
 	},

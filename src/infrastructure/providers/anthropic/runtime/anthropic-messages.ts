@@ -130,7 +130,7 @@ export class AnthropicMessages implements ModelRuntime {
 	}
 
 	private extractContextItems(response: Anthropic.Messages.Message): ContextItem[] {
-		return response.content.flatMap((block) => {
+		return response.content.flatMap((block): ContextItem[] => {
 			if (block.type === "text") {
 				return [ModelMessageItem.rehydrate({ text: block.text })]
 			}

@@ -26,6 +26,15 @@ import { FunctionCallRunner } from "@domain/agentic-environment/function-call-ru
 import { InferenceRunner } from "@domain/agentic-environment/inference-runner"
 import { InputStream } from "@domain/agentic-environment/input-stream"
 import { OpenAIInferenceRunner } from "@app/openai-inference-runner"
+import { AnthropicMessages } from "@infra/providers/anthropic/runtime/anthropic-messages"
+import { AnthropicInferenceRunner } from "@app/anthropic-inference-runner"
+import { Claude47Opus } from "@infra/providers/anthropic/models/claude-4-7-opus"
+import { Claude46Sonnet } from "@infra/providers/anthropic/models/claude-4-6-sonnet"
+import { Claude45Haiku } from "@infra/providers/anthropic/models/claude-4-5-haiku"
+import {
+	AnthropicReasoningEffort,
+	AnthropicReasoningEffortType,
+} from "@infra/providers/anthropic/reasoning-effort"
 import { DefaultFunctionCallRunner } from "@app/function-call-runner"
 import { Gpt55 } from "@infra/providers/openai/models/gpt-5-5"
 import { BaseObserverParticipant } from "@app/observer"
@@ -44,10 +53,16 @@ export {
 	ReasoningItem,
 	GenerativeModel,
 	OpenAIResponses,
+	AnthropicMessages,
 	Gpt54,
 	Gpt54Mini,
 	Gpt54Nano,
 	Gpt55,
+	Claude47Opus,
+	Claude46Sonnet,
+	Claude45Haiku,
+	AnthropicReasoningEffort,
+	AnthropicReasoningEffortType,
 	InferenceRequest,
 	InferenceResponse,
 	TokenUsage,
@@ -64,4 +79,5 @@ export {
 	BaseHumanParticipant,
 	BaseObserverParticipant,
 	OpenAIInferenceRunner,
+	AnthropicInferenceRunner,
 }
