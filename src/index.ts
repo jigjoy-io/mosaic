@@ -29,6 +29,15 @@ import { Human } from "@domain/agentic-environment/participants/human"
 import { Agent } from "@domain/agentic-environment/participants/agent"
 import { Observer } from "@domain/agentic-environment/participants/observer"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { ModelRuntime } from "@domain/generative-model/runtime/model-runtime"
+import { StreamingRuntime } from "@domain/generative-model/runtime/streaming-runtime"
+import { InferenceRequest } from "@domain/generative-model/inference-request"
+import { InferenceResponse } from "@domain/generative-model/inference-response"
+import { OpenAIResponses } from "@infra/providers/openai/runtime/openai-responses"
+import { AnthropicMessages } from "@infra/providers/anthropic/runtime/anthropic-messages"
+import { ClaudeOpus47 } from "@infra/providers/anthropic/models/claude-4-7-opus"
+import { ClaudeSonnet46 } from "@infra/providers/anthropic/models/claude-4-6-sonnet"
+import { ClaudeHaiku45 } from "@infra/providers/anthropic/models/claude-4-5-haiku"
 
 export {
 	ModelContext,
@@ -64,4 +73,13 @@ export {
 	BaseHuman,
 	BaseObserver,
 	OpenAIInferenceRunner,
+	ModelRuntime,
+	StreamingRuntime,
+	InferenceRequest,
+	InferenceResponse,
+	OpenAIResponses,
+	AnthropicMessages,
+	ClaudeOpus47,
+	ClaudeSonnet46,
+	ClaudeHaiku45,
 }
