@@ -8,7 +8,6 @@ import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-eve
 export class AgenticEnvironment {
 	protected subscribers: Participant[] = []
 	private name?: string
-	private isActive = false
 
 	constructor(name?: string) {
 		this.name = name
@@ -103,16 +102,5 @@ export class AgenticEnvironment {
 				handlers?.external?.(subscriber)
 			}
 		}
-	}
-
-	async start() {
-		this.isActive = true
-		while (this.isActive) {
-			await new Promise((resolve) => setTimeout(resolve, 100))
-		}
-	}
-
-	stop() {
-		this.isActive = false
 	}
 }
