@@ -97,10 +97,14 @@ export class AgenticEnvironment {
 		const authorizedListeners = this.getListeningParticipants(source)
 
 		for (const subscriber of this.subscribers) {
-			if (subscriber === source) {
-				handlers?.internal?.(subscriber)
-			} else if (authorizedListeners.includes(subscriber)) {
-				handlers?.external?.(subscriber)
+			try {
+				if (subscriber === source) {
+					handlers?.internal?.(subscriber)
+				} else if (authorizedListeners.includes(subscriber)) {
+					handlers?.external?.(subscriber)
+				}
+			} catch (error) {
+				console.error("Event delivery failed for subscriber", error)
 			}
 		}
 	}
