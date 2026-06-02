@@ -17,6 +17,7 @@ import { InMemoryModelContextRepository } from "@infra/repository/in-memory-mode
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
 import { Participant } from "@domain/agentic-environment/participants/participant"
 import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { AgenticError } from "@domain/agentic-environment/errors/base-error"
 import { BaseAgent } from "@app/participants/agent"
 import { BaseHuman } from "@app/participants/human"
 import { FunctionCallRunner } from "@domain/agentic-environment/runners/function-call-runner"
@@ -75,6 +76,7 @@ export {
 	Participant,
 	Human,
 	Agent,
+	AgenticError,
 	Observer,
 	BaseAgent,
 	BaseHuman,
