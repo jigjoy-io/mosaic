@@ -7,6 +7,7 @@ import { FunctionCallOutputItem } from "@domain/model-context/context-item/clien
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { AgenticError } from "@domain/agentic-environment/errors/base-error"
 
 interface Call {
 	m: string
@@ -26,21 +27,57 @@ class RecordingParticipant extends Participant {
 		return this.calls.filter((c) => c.m === m)
 	}
 
-	onParticipantJoined(p: Participant) { this.rec("onParticipantJoined", p) }
-	onParticipantLeft(p: Participant) { this.rec("onParticipantLeft", p) }
-	onJoined() { this.rec("onJoined") }
-	onLeft() { this.rec("onLeft") }
-	onFunctionCall(i: FunctionCallItem) { this.rec("onFunctionCall", i) }
-	onExternalFunctionCall(s: Participant, i: FunctionCallItem) { this.rec("onExternalFunctionCall", s, i) }
-	onFunctionCallOutput(i: FunctionCallOutputItem) { this.rec("onFunctionCallOutput", i) }
-	onExternalFunctionCallOutput(s: Participant, i: FunctionCallOutputItem) { this.rec("onExternalFunctionCallOutput", s, i) }
-	onReasoning(i: ReasoningItem) { this.rec("onReasoning", i) }
-	onExternalReasoning(s: Participant, i: ReasoningItem) { this.rec("onExternalReasoning", s, i) }
-	onModelMessage(i: ModelMessageItem) { this.rec("onModelMessage", i) }
-	onExternalModelMessage(s: Participant, i: ModelMessageItem) { this.rec("onExternalModelMessage", s, i) }
-	onMessage(m: string) { this.rec("onMessage", m) }
-	onInternalEvent(i: SemanticEvent<unknown>) { this.rec("onInternalEvent", i) }
-	onExternalEvent(s: Participant, i: SemanticEvent<unknown>) { this.rec("onExternalEvent", s, i) }
+	onParticipantJoined(p: Participant) {
+		this.rec("onParticipantJoined", p)
+	}
+	onParticipantLeft(p: Participant) {
+		this.rec("onParticipantLeft", p)
+	}
+	onJoined() {
+		this.rec("onJoined")
+	}
+	onLeft() {
+		this.rec("onLeft")
+	}
+	onFunctionCall(i: FunctionCallItem) {
+		this.rec("onFunctionCall", i)
+	}
+	onExternalFunctionCall(s: Participant, i: FunctionCallItem) {
+		this.rec("onExternalFunctionCall", s, i)
+	}
+	onFunctionCallOutput(i: FunctionCallOutputItem) {
+		this.rec("onFunctionCallOutput", i)
+	}
+	onExternalFunctionCallOutput(s: Participant, i: FunctionCallOutputItem) {
+		this.rec("onExternalFunctionCallOutput", s, i)
+	}
+	onReasoning(i: ReasoningItem) {
+		this.rec("onReasoning", i)
+	}
+	onExternalReasoning(s: Participant, i: ReasoningItem) {
+		this.rec("onExternalReasoning", s, i)
+	}
+	onModelMessage(i: ModelMessageItem) {
+		this.rec("onModelMessage", i)
+	}
+	onExternalModelMessage(s: Participant, i: ModelMessageItem) {
+		this.rec("onExternalModelMessage", s, i)
+	}
+	onMessage(m: string) {
+		this.rec("onMessage", m)
+	}
+	onInternalEvent(i: SemanticEvent<unknown>) {
+		this.rec("onInternalEvent", i)
+	}
+	onExternalEvent(s: Participant, i: SemanticEvent<unknown>) {
+		this.rec("onExternalEvent", s, i)
+	}
+	onError(err: AgenticError) {
+		this.rec("onError", err)
+	}
+	onParticipantError(s: Participant, err: AgenticError) {
+		this.rec("onParticipantError", s, err)
+	}
 }
 
 /** Concrete Human used to exercise sendMessage. */
@@ -58,9 +95,25 @@ class TestHuman extends Human {
 	onExternalReasoning() {}
 	onModelMessage() {}
 	onExternalModelMessage() {}
-	onMessage(message: string) { this.received.push(message) }
+	onMessage(message: string) {
+		this.received.push(message)
+	}
 	onInternalEvent() {}
 	onExternalEvent() {}
+}
+
+class ErroringParticipant extends RecordingParticipant {
+	override onFunctionCall() {
+		throw new Error("boom")
+	}
+}
+
+class AgenticErroringParticipant extends RecordingParticipant {
+	override onFunctionCall() {
+		throw new AgenticError({
+			message: "agentic failure",
+		})
+	}
 }
 
 const aFunctionCall = () => FunctionCallItem.rehydrate({ callId: "c1", name: "fn", args: "{}" })
@@ -208,5 +261,106 @@ describe("Human", () => {
 		human.sendMessage(env, "hello")
 
 		expect(listener.find("onMessage")).toEqual([{ m: "onMessage", args: ["hello"] }])
+	})
+})
+
+describe("AgenticEnvironment error delivery", () => {
+	it("delivers onError to the participant that failed and onParticipantError to others", () => {
+		const env = new AgenticEnvironment()
+
+		const source = new ErroringParticipant()
+		const observer = new RecordingParticipant()
+
+		source.join(env)
+		observer.join(env)
+
+		env.deliverFunctionCall(source, aFunctionCall())
+
+		expect(source.find("onError").length).toBe(1)
+
+		const participantErrors = observer.find("onParticipantError")
+
+		expect(participantErrors.length).toBe(1)
+		expect(participantErrors[0]?.args[0]).toBe(source)
+		expect(participantErrors[0]?.args[1]).toBeInstanceOf(AgenticError)
+	})
+
+	it("marks a participant inactive after onError", () => {
+		const env = new AgenticEnvironment()
+
+		const source = new ErroringParticipant()
+		const observer = new RecordingParticipant()
+
+		source.join(env)
+		observer.join(env)
+
+		expect(source.getEnvironmentState(env)).toBe(true)
+
+		env.deliverFunctionCall(source, aFunctionCall())
+
+		expect(source.getEnvironmentState(env)).toBe(false)
+	})
+
+	it("does not deliver future events to an inactive participant", () => {
+		const env = new AgenticEnvironment()
+
+		const source = new ErroringParticipant()
+		const observer = new RecordingParticipant()
+
+		source.join(env)
+		observer.join(env)
+
+		env.deliverFunctionCall(source, aFunctionCall())
+
+		const previousErrors = source.find("onError").length
+
+		env.deliverModelMessage(
+			source,
+			ModelMessageItem.rehydrate({ text: "hello" }),
+		)
+
+		expect(source.find("onModelMessage")).toEqual([])
+		expect(source.find("onError").length).toBe(previousErrors)
+	})
+
+	it("continues delivering to other active participants after one becomes inactive", () => {
+		const env = new AgenticEnvironment()
+
+		const failing = new ErroringParticipant()
+		const active = new RecordingParticipant()
+
+		failing.join(env)
+		active.join(env)
+
+		env.deliverFunctionCall(failing, aFunctionCall())
+
+		const msg = ModelMessageItem.rehydrate({ text: "hello" })
+
+		env.deliverModelMessage(active, msg)
+
+		expect(active.find("onModelMessage")).toEqual([
+			{ m: "onModelMessage", args: [msg] },
+		])
+
+		expect(failing.find("onExternalModelMessage")).toEqual([])
+	})
+
+	it("handles AgenticError instances without wrapping them", () => {
+		const env = new AgenticEnvironment()
+
+		const source = new AgenticErroringParticipant()
+		const observer = new RecordingParticipant()
+
+		source.join(env)
+		observer.join(env)
+
+		env.deliverFunctionCall(source, aFunctionCall())
+
+		const errorCall = source.find("onError")[0]
+
+		expect(errorCall.args[0]).toBeInstanceOf(AgenticError)
+		expect((errorCall.args[0] as AgenticError).message).toBe(
+			"agentic failure",
+		)
 	})
 })

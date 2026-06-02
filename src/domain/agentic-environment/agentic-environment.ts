@@ -4,6 +4,7 @@ import { FunctionCallItem } from "@domain/model-context/context-item/model-item/
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { AgenticError } from "./errors/base-error"
 
 export class AgenticEnvironment {
 	protected subscribers: Participant[] = []
@@ -81,6 +82,28 @@ export class AgenticEnvironment {
 		})
 	}
 
+	deliverError(source: Participant, error: AgenticError) {
+		this.deliverToSubscribers(source, {
+			internal: (src) => {
+				try {
+					src.onError(error)
+				} catch (error) {
+					// TODO: Need to add some sort of stateful logger here
+				} finally {
+					src.markInactive(this)
+				}
+			},
+			external: (sub) => {
+				try {
+					sub.onParticipantError(source, error)
+				} catch (error) {
+					// Intentional to avoid recursion
+					// Need some stateful logger here
+				}
+			},
+		})
+	}
+
 	private getListeningParticipants(source: Participant) {
 		return this.subscribers.filter(
 			(sub) =>
@@ -96,15 +119,34 @@ export class AgenticEnvironment {
 		const authorizedListeners = this.getListeningParticipants(source)
 
 		for (const subscriber of this.subscribers) {
-			try {
-				if (subscriber === source) {
-					handlers?.internal?.(subscriber)
-				} else if (authorizedListeners.includes(subscriber)) {
-					handlers?.external?.(subscriber)
+			const isActive = subscriber.getEnvironmentState(this)
+
+			if (isActive) {
+				try {
+					if (subscriber === source) {
+						handlers?.internal?.(subscriber)
+					} else if (authorizedListeners.includes(subscriber)) {
+						handlers?.external?.(subscriber)
+					}
+				} catch (error) {
+					this.handleError(subscriber, error as Error)
 				}
-			} catch (error) {
-				console.error("Event delivery failed for subscriber", error)
 			}
 		}
+	}
+
+	private handleError(subscriber: Participant, error: Error) {
+		if (error instanceof AgenticError) {
+			return this.deliverError(subscriber, error)
+		}
+
+		const agenticError = new AgenticError({
+			message: error.message,
+			stack: error.stack,
+			enviornment: this,
+			source: subscriber,
+		})
+
+		return this.deliverError(subscriber, agenticError)
 	}
 }
