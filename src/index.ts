@@ -6,6 +6,7 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { GenerativeModel } from "@domain/generative-model/generative-model"
+import { StructuredOutputCapability, StructuredOutputFormat } from "@domain/generative-model/capabilities/structured-output"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { ModelContextRepository } from "@domain/model-context/model-context-repository"
 import { Gpt54Nano } from "@infra/providers/openai/models/gpt-5-4-nano"
@@ -60,6 +61,8 @@ export {
 	FunctionCallOutputItem,
 	ReasoningItem,
 	GenerativeModel,
+	StructuredOutputCapability,
+	StructuredOutputFormat,
 	Gpt54,
 	Gpt54Mini,
 	Gpt54Nano,

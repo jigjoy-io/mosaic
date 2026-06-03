@@ -85,6 +85,15 @@ export class GeminiGenerateContent implements ModelRuntime, StreamingRuntime {
 			config.thinkingConfig = { thinkingLevel, includeThoughts: true }
 		}
 
+		if (inferenceRequest.model.hasStructuredOutput()) {
+			if (!specification.supportStructuredOutput) {
+				throw new Error(`Structured output is not supported for model: ${specification.name}`)
+			}
+			const format = inferenceRequest.model.getStructuredOutput()!
+			config.responseMimeType = "application/json"
+			config.responseSchema = format.schema
+		}
+
 		return { model: specification.name, contents, config }
 	}
 
