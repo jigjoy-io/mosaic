@@ -1,5 +1,6 @@
 import { ReasoningEffort } from "./capabilities/reasoning-effort"
 import { StreamingCapability } from "./capabilities/streaming"
+import { StructuredOutputCapability } from "./capabilities/structured-output"
 import { ToolCallingCapability } from "./capabilities/tool-calling"
 
 export type ModelSpecification = {
@@ -10,8 +11,13 @@ export type ModelSpecification = {
 	contextWindowSize: number
 	maxOutputTokens: number
 	supportFunctionCalling: boolean
+	supportStructuredOutput: boolean
 }
 
-export interface GenerativeModel extends ReasoningEffort<string>, ToolCallingCapability, StreamingCapability {
+export interface GenerativeModel
+	extends ReasoningEffort<string>,
+		ToolCallingCapability,
+		StreamingCapability,
+		StructuredOutputCapability {
 	readonly specification: ModelSpecification
 }
