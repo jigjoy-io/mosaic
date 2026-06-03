@@ -6,12 +6,21 @@ import { ReasoningItem } from "@domain/model-context/context-item/model-item/rea
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { AgenticError } from "./errors/base-error"
 
+export interface AgenticEnvironmentOptions {
+	silent?: boolean
+}
+
 export class AgenticEnvironment {
 	protected subscribers: Participant[] = []
 	private name?: string
+	private options?: AgenticEnvironmentOptions
+	private showLogs?: boolean
 
-	constructor(name?: string) {
+	constructor(name?: string, opts?: AgenticEnvironmentOptions) {
 		this.name = name
+		this.options = opts
+
+		this.showLogs = this.options?.silent !== false
 	}
 
 	subscribe(participant: Participant) {
@@ -88,7 +97,9 @@ export class AgenticEnvironment {
 				try {
 					src.onError(error)
 				} catch (error) {
-					// TODO: Need to add some sort of stateful logger here
+					if (this.showLogs) {
+						console.warn(`[AgenticEnvironment] Participant.onError() failed. Reason: ${error as Error}\n ${JSON.stringify({ error }, null, 2)}`)
+					}
 				} finally {
 					src.markInactive(this)
 				}
@@ -97,8 +108,9 @@ export class AgenticEnvironment {
 				try {
 					sub.onParticipantError(source, error)
 				} catch (error) {
-					// Intentional to avoid recursion
-					// Need some stateful logger here
+					if (this.showLogs) {
+						console.warn(`[AgenticEnvironment] Participant.onError() failed. Reason: ${error as Error}\n ${JSON.stringify({ error }, null, 2)}`)
+					}
 				}
 			},
 		})
