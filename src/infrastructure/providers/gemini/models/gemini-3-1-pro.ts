@@ -6,6 +6,7 @@ import { GeminiReasoningEffort, GeminiReasoningEffortType } from "@infra/provide
 export class Gemini31Pro implements GenerativeModel {
 	readonly specification = {
 		name: "gemini-3.1-pro-preview",
+		provider: "google",
 		supportReasoningEffort: true,
 		defaultReasoningEffort: "high" as GeminiReasoningEffortType,
 		supportStreaming: true,

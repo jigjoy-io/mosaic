@@ -5,21 +5,23 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { ModelContext } from "@domain/model-context/model-context"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { InferenceRuntime, SequentialInferenceRuntime, StreamingInferenceRuntime } from "@domain/generative-model/runtime"
+import { ModelInfo } from "@app/use-cases/run-inference"
 
 type InferenceItem = ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent<unknown>
 
 export class InferenceRunner {
 
-	async *run(context: ModelContext, model: GenerativeModel, runtime: InferenceRuntime, signal?: AbortSignal): AsyncIterable<InferenceItem> {
+	async *run(context: ModelContext, modelInfo: ModelInfo, signal?: AbortSignal): AsyncIterable<InferenceItem> {
+		const { model, endpoint } = modelInfo
 		const request = new InferenceRequest(model, context)
 
-		if (model.getStreaming() && this.isStreamingRuntime(runtime)) {
-			yield* (runtime as StreamingInferenceRuntime).stream(request)
+
+		if (model.getStreaming()) {
+			yield* endpoint.stream(request)
 			return
 		}
 
-		const response = await (runtime as SequentialInferenceRuntime).infer(request)
+		const response = await endpoint.infer(request)
 		for (const item of response.contextItems) {
 			if (signal?.aborted) {
 				break
@@ -28,7 +30,5 @@ export class InferenceRunner {
 		}
 	}
 
-	private isStreamingRuntime(runtime: InferenceRuntime): runtime is StreamingInferenceRuntime {
-		return typeof (runtime as Partial<StreamingInferenceRuntime>).stream === "function"
-	}
+
 }

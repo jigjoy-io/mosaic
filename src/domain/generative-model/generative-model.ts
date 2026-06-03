@@ -5,6 +5,7 @@ import { ToolCallingCapability } from "./capability/tool-calling"
 
 export type ModelSpecification = {
 	name: string
+	provider: string
 	supportReasoningEffort: boolean
 	defaultReasoningEffort: string | undefined
 	supportStreaming: boolean

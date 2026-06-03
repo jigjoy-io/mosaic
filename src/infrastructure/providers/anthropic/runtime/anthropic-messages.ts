@@ -12,10 +12,10 @@ import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
-import { SequentialInferenceRuntime, StreamingInferenceRuntime } from "@domain/generative-model/runtime"
 import Anthropic from "@anthropic-ai/sdk"
+import { BufferingEndpoint, StreamingEndpoint } from "@domain/generative-model/runtime"
 
-export class AnthropicMessages implements SequentialInferenceRuntime, StreamingInferenceRuntime {
+export class AnthropicMessages implements StreamingEndpoint, BufferingEndpoint {
 	private readonly client: Anthropic
 
 	constructor() {

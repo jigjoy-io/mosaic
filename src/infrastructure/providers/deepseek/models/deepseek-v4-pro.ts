@@ -6,6 +6,7 @@ import { DeepSeekReasoningEffort, DeepSeekReasoningEffortType } from "@infra/pro
 export class DeepSeekV4Pro implements GenerativeModel {
 	readonly specification = {
 		name: "deepseek-v4-pro",
+		provider: "deepseek",
 		supportReasoningEffort: true,
 		defaultReasoningEffort: "high" as DeepSeekReasoningEffortType,
 		supportStreaming: true,

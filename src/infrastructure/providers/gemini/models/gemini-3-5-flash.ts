@@ -6,6 +6,7 @@ import { GeminiReasoningEffort, GeminiReasoningEffortType } from "@infra/provide
 export class Gemini35Flash implements GenerativeModel {
 	readonly specification = {
 		name: "gemini-3.5-flash",
+		provider: "google",
 		supportReasoningEffort: true,
 		defaultReasoningEffort: "medium" as GeminiReasoningEffortType,
 		supportStreaming: true,

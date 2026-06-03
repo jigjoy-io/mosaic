@@ -6,6 +6,7 @@ import { AnthropicReasoningEffort, AnthropicReasoningEffortType } from "@infra/p
 export class ClaudeSonnet46 implements GenerativeModel {
 	readonly specification = {
 		name: "claude-sonnet-4-6",
+		provider: "anthropic",
 		supportReasoningEffort: true,
 		defaultReasoningEffort: "none" as AnthropicReasoningEffortType,
 		supportStreaming: true,

@@ -10,9 +10,9 @@ import { FunctionCallItem } from "@domain/model-context/context-item/model-item/
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import { SequentialInferenceRuntime, StreamingInferenceRuntime } from "@domain/generative-model/runtime"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
+import { BufferingEndpoint, StreamingEndpoint } from "@domain/generative-model/runtime"
 import OpenAI from "openai"
 
 /**
@@ -53,7 +53,7 @@ export interface OpenAICompatibleConfig {
  * Was `DeepSeekChatCompletions`; generalized so consumers can point it
  * at any OpenAI-compatible endpoint.
  */
-export class OpenAIChatCompletions implements SequentialInferenceRuntime, StreamingInferenceRuntime {
+export class OpenAIChatCompletions implements BufferingEndpoint, StreamingEndpoint {
 	private readonly client: OpenAI
 	private readonly extraBody: Record<string, unknown>
 

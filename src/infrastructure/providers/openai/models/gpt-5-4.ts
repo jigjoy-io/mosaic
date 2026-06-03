@@ -6,6 +6,7 @@ import { OpenAIReasoningEffort, OpenAIReasoningEffortType } from "@infra/provide
 export class Gpt54 implements GenerativeModel {
 	readonly specification = {
 		name: "gpt-5.4",
+		provider: "openai",
 		supportReasoningEffort: true,
 		defaultReasoningEffort: "none" as OpenAIReasoningEffortType,
 		supportStreaming: true,
