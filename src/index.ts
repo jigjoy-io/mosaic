@@ -20,21 +20,16 @@ import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environm
 import { BaseAgent } from "@app/participants/agent"
 import { BaseHuman } from "@app/participants/human"
 import { FunctionCallRunner } from "@domain/agentic-environment/runners/function-call-runner"
-import { InferenceRunner } from "@domain/agentic-environment/runners/inference-runner"
-import { DefaultInferenceRunner } from "@app/runners/inference-runner"
-import { DefaultFunctionCallRunner } from "@app/runners/function-call-runner"
+import { DefaultFunctionCallRunner } from "@app/services/function-call-runner"
 import { Gpt55 } from "@infra/providers/openai/models/gpt-5-5"
 import { BaseObserver } from "@app/participants/observer"
 import { Human } from "@domain/agentic-environment/participants/human"
 import { Agent } from "@domain/agentic-environment/participants/agent"
 import { Observer } from "@domain/agentic-environment/participants/observer"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { ModelRuntime } from "@domain/generative-model/runtime/model-runtime"
-import { StreamingRuntime } from "@domain/generative-model/runtime/streaming-runtime"
-import { InferenceRequest } from "@domain/generative-model/inference-request"
-import { InferenceResponse } from "@domain/generative-model/inference-response"
+import { InferenceRequest } from "@domain/agentic-environment/inference/request"
+import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { OpenAIResponses } from "@infra/providers/openai/runtime/openai-responses"
-import { OpenAICompatibleChatCompletions } from "@infra/providers/openai/runtime/openai-compatible-chat-completions"
 import { AnthropicMessages } from "@infra/providers/anthropic/runtime/anthropic-messages"
 import { ClaudeOpus48 } from "@infra/providers/anthropic/models/claude-4-8-opus"
 import { ClaudeOpus47 } from "@infra/providers/anthropic/models/claude-4-7-opus"
@@ -45,6 +40,9 @@ import { DeepSeekV4Pro } from "@infra/providers/deepseek/models/deepseek-v4-pro"
 import { GeminiGenerateContent } from "@infra/providers/gemini/runtime/gemini-generate-content"
 import { Gemini35Flash } from "@infra/providers/gemini/models/gemini-3-5-flash"
 import { Gemini31Pro } from "@infra/providers/gemini/models/gemini-3-1-pro"
+import { OpenAIChatCompletions } from "@infra/providers/openai/runtime/openai-chat-completions"
+import { InferenceRunner } from "@app/services/inference-runner"
+import { SequentialInferenceRuntime, StreamingInferenceRuntime } from "@domain/generative-model/runtime"
 
 export {
 	ModelContext,
@@ -79,13 +77,12 @@ export {
 	BaseAgent,
 	BaseHuman,
 	BaseObserver,
-	ModelRuntime,
-	StreamingRuntime,
-	DefaultInferenceRunner,
+	SequentialInferenceRuntime,
+	StreamingInferenceRuntime,
 	InferenceRequest,
 	InferenceResponse,
 	OpenAIResponses,
-	OpenAICompatibleChatCompletions,
+	OpenAIChatCompletions,
 	AnthropicMessages,
 	ClaudeOpus48,
 	ClaudeOpus47,

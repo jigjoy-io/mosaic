@@ -7,6 +7,11 @@ export class DefaultFunctionCallRunner implements FunctionCallRunner {
 	constructor(private readonly tools: Tool[]) {}
 
 	async *run(call: FunctionCallItem, signal?: AbortSignal): AsyncIterable<FunctionCallOutputItem> {
+
+		if(signal?.aborted) {
+			return
+		}
+
 		const tool = this.tools.find((t) => t.name === call.name)
 		if (!tool) throw new Error(`Unknown tool: ${call.name}`)
 

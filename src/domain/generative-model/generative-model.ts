@@ -1,6 +1,6 @@
-import { ReasoningEffort } from "./capabilities/reasoning-effort"
-import { StreamingCapability } from "./capabilities/streaming"
-import { ToolCallingCapability } from "./capabilities/tool-calling"
+import { ReasoningEffort } from "./capability/reasoning-effort"
+import { StreamingCapability } from "./capability/streaming"
+import { ToolCallingCapability } from "./capability/tool-calling"
 
 export type ModelSpecification = {
 	name: string

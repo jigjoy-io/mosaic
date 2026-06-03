@@ -8,10 +8,9 @@ import { FunctionCallOutputItem } from "@domain/model-context/context-item/clien
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { InferenceRequest } from "@domain/generative-model/inference-request"
-import { InferenceResponse } from "@domain/generative-model/inference-response"
-import { ModelRuntime } from "@domain/generative-model/runtime/model-runtime"
-import { StreamingRuntime } from "@domain/generative-model/runtime/streaming-runtime"
+import { InferenceRequest } from "@domain/agentic-environment/inference/request"
+import { InferenceResponse } from "@domain/agentic-environment/inference/response"
+import { SequentialInferenceRuntime, StreamingInferenceRuntime } from "@domain/generative-model/runtime"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import OpenAI from "openai"
@@ -54,7 +53,7 @@ export interface OpenAICompatibleConfig {
  * Was `DeepSeekChatCompletions`; generalized so consumers can point it
  * at any OpenAI-compatible endpoint.
  */
-export class OpenAICompatibleChatCompletions implements ModelRuntime, StreamingRuntime {
+export class OpenAIChatCompletions implements SequentialInferenceRuntime, StreamingInferenceRuntime {
 	private readonly client: OpenAI
 	private readonly extraBody: Record<string, unknown>
 
@@ -79,7 +78,7 @@ export class OpenAICompatibleChatCompletions implements ModelRuntime, StreamingR
 	async *stream(
 		inferenceRequest: InferenceRequest,
 		signal?: AbortSignal,
-	): AsyncIterable<ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent<unknown>> {
+	): AsyncIterable<SemanticEvent<unknown>> {
 		const stream: any = await this.client.chat.completions.create({
 			...this.buildRequest(inferenceRequest),
 			stream: true,

@@ -97,10 +97,19 @@ export class AgenticEnvironment {
 		const authorizedListeners = this.getListeningParticipants(source)
 
 		for (const subscriber of this.subscribers) {
-			if (subscriber === source) {
-				handlers?.internal?.(subscriber)
-			} else if (authorizedListeners.includes(subscriber)) {
-				handlers?.external?.(subscriber)
+
+			const isActive = subscriber.isActive(this)
+
+			if (isActive) {
+				try {
+					if (subscriber === source) {
+						handlers?.internal?.(subscriber)
+					} else if (authorizedListeners.includes(subscriber)) {
+						handlers?.external?.(subscriber)
+					}
+				} catch (error) {
+					//this.handleError(subscriber, error as Error)
+				}
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-import { ReasoningEffort } from "@domain/generative-model/capabilities/reasoning-effort"
+import { ReasoningEffort } from "@domain/generative-model/capability/reasoning-effort"
 
 export type OpenAIReasoningEffortType = "xhigh" | "high" | "medium" | "low" | "none"
 

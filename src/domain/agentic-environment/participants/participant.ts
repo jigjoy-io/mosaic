@@ -10,6 +10,7 @@ type ParticipantClassConstructor = new (...args: any[]) => Participant;
 export abstract class Participant {
 	private environments: AgenticEnvironment[] = []
 	protected listens: ParticipantClassConstructor[] = []
+	private active: Map<AgenticEnvironment, boolean> = new Map()
 
 	join(environment: AgenticEnvironment) {
 		if (this.isJoinedTo(environment)) {
@@ -37,6 +38,22 @@ export abstract class Participant {
 
 	getListeners(): ParticipantClassConstructor[] {
 		return this.listens
+	}
+
+	isActive(environment: AgenticEnvironment): boolean {
+		return this.active.get(environment) === true
+	}
+
+	markInactive(environment: AgenticEnvironment) {
+		if (this.active.has(environment)) {
+			this.active.set(environment, false)
+		}
+	}
+
+	markActive(environment: AgenticEnvironment) {
+		if (this.active.has(environment)) {
+			this.active.set(environment, true)
+		}
 	}
 
 	abstract onParticipantJoined(participant: Participant): Promise<void> | void

@@ -1,9 +1,6 @@
 import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
 import { Participant } from "@domain/agentic-environment/participants/participant"
-import { GenerativeModel } from "@domain/generative-model/generative-model"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { ModelContext } from "@domain/model-context/model-context"
-import { InferenceRunner } from "@domain/agentic-environment/runners/inference-runner"
 import { FunctionCallRunner } from "@domain/agentic-environment/runners/function-call-runner"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
@@ -12,12 +9,10 @@ import { Agent } from "@domain/agentic-environment/participants/agent"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 
 export class BaseAgent extends Agent {
-	private inferenceRunner: InferenceRunner
 	private functionCallRunner: FunctionCallRunner
 
-	constructor(inferenceRunner: InferenceRunner, functionCallRunner: FunctionCallRunner) {
+	constructor(functionCallRunner: FunctionCallRunner) {
 		super()
-		this.inferenceRunner = inferenceRunner
 		this.functionCallRunner = functionCallRunner
 	}
 
@@ -65,26 +60,4 @@ export class BaseAgent extends Agent {
 		}
 	}
 
-	async runInference(
-		environment: AgenticEnvironment,
-		context: ModelContext,
-		model: GenerativeModel,
-		signal?: AbortSignal,
-	): Promise<void> {
-		if (!this.isJoinedTo(environment)) return
-
-		const stream = this.inferenceRunner.run(context, model, signal)
-
-		for await (const item of stream) {
-			if (item instanceof ReasoningItem) {
-				environment.deliverReasoning(this, item)
-			} else if (item instanceof FunctionCallItem) {
-				environment.deliverFunctionCall(this, item)
-			} else if (item instanceof ModelMessageItem) {
-				environment.deliverModelMessage(this, item)
-			} else if (item instanceof SemanticEvent) {
-				environment.deliverSemanticEvent(this, item)
-			}
-		}
-	}
 }

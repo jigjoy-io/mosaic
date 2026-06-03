@@ -8,13 +8,12 @@ import { FunctionCallOutputItem } from "@domain/model-context/context-item/clien
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { InferenceRequest } from "@domain/generative-model/inference-request"
-import { InferenceResponse } from "@domain/generative-model/inference-response"
-import { ModelRuntime } from "@domain/generative-model/runtime/model-runtime"
-import { StreamingRuntime } from "@domain/generative-model/runtime/streaming-runtime"
+import { InferenceRequest } from "@domain/agentic-environment/inference/request"
+import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import { GoogleGenAI } from "@google/genai"
+import { SequentialInferenceRuntime, StreamingInferenceRuntime } from "@domain/generative-model/runtime"
 
 /**
  * Native Gemini adapter on the `@google/genai` SDK (`generateContent` /
@@ -24,7 +23,7 @@ import { GoogleGenAI } from "@google/genai"
  * thought parts + native usage metadata back out. Another `ModelRuntime`
  * — no runner or port changes.
  */
-export class GeminiGenerateContent implements ModelRuntime, StreamingRuntime {
+export class GeminiGenerateContent implements SequentialInferenceRuntime, StreamingInferenceRuntime {
 	private readonly client: GoogleGenAI
 
 	constructor() {
@@ -42,7 +41,7 @@ export class GeminiGenerateContent implements ModelRuntime, StreamingRuntime {
 	async *stream(
 		inferenceRequest: InferenceRequest,
 		signal?: AbortSignal,
-	): AsyncIterable<ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent<unknown>> {
+	): AsyncIterable<SemanticEvent<unknown>> {
 		const stream = await this.client.models.generateContentStream(this.buildRequest(inferenceRequest))
 
 		for await (const chunk of stream) {
