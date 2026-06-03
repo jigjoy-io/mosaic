@@ -218,6 +218,53 @@ Enable streaming on the model before calling `runInference` as usual. `setStream
 
 ---
 
+## Structured output
+
+When you need the model to respond with a specific JSON shape instead of free-form text, use structured output. Set a JSON Schema on the model and the provider will enforce it:
+
+```ts
+import { Gpt54, ModelContext, UserMessageItem } from "@mozaik-ai/core"
+
+const model = new Gpt54()
+model.setStructuredOutput({
+	name: "weather",
+	schema: {
+		type: "object",
+		properties: {
+			city: { type: "string" },
+			temperature: { type: "number" },
+			condition: { type: "string" },
+		},
+		required: ["city", "temperature", "condition"],
+		additionalProperties: false,
+	},
+	strict: true,
+})
+```
+
+The response comes back as a `ModelMessageItem` with valid JSON in the text field — no new item type, consistent with OpenResponses.
+
+Structured output works alongside tools and streaming. When streaming is enabled, partial JSON chunks arrive as `SemanticEvent`s and the final event contains the complete response.
+
+To clear structured output and return to free-form text:
+
+```ts
+model.setStructuredOutput(undefined)
+```
+
+### Provider support
+
+| Provider | Models | Strict schema enforcement |
+| -------- | ------ | ------------------------- |
+| OpenAI | gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.5 | Yes |
+| Anthropic | claude-opus-4-7, claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5 | Yes |
+| Gemini | gemini-3.1-pro, gemini-3.5-flash | Yes |
+| DeepSeek | deepseek-v4-flash, deepseek-v4-pro | Not supported — use prompt-based JSON guidance instead |
+
+Setting structured output on a model that does not support it throws before the API call.
+
+---
+
 ## Lifecycle hooks
 
 Every participant receives lifecycle notifications when it or others join/leave an environment:

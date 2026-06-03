@@ -6,6 +6,7 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { GenerativeModel } from "@domain/generative-model/generative-model"
+import { StructuredOutputCapability, StructuredOutputFormat } from "@domain/generative-model/capability/structured-output"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { ModelContextRepository } from "@domain/model-context/model-context-repository"
 import { Gpt54Nano } from "@infra/providers/openai/models/gpt-5-4-nano"
@@ -17,6 +18,7 @@ import { InMemoryModelContextRepository } from "@infra/repository/in-memory-mode
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
 import { Participant } from "@domain/agentic-environment/participants/participant"
 import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { AgenticError } from "@domain/agentic-environment/errors/base-error"
 import { BaseAgent } from "@app/participants/agent"
 import { BaseHuman } from "@app/participants/human"
 import { FunctionCallRunner } from "@domain/agentic-environment/runners/function-call-runner"
@@ -58,6 +60,8 @@ export {
 	FunctionCallOutputItem,
 	ReasoningItem,
 	GenerativeModel,
+	StructuredOutputCapability,
+	StructuredOutputFormat,
 	Gpt54,
 	Gpt54Mini,
 	Gpt54Nano,
@@ -73,6 +77,7 @@ export {
 	Participant,
 	Human,
 	Agent,
+	AgenticError,
 	Observer,
 	BaseAgent,
 	BaseHuman,

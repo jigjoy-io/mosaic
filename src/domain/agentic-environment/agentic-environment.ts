@@ -4,14 +4,23 @@ import { FunctionCallItem } from "@domain/model-context/context-item/model-item/
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { AgenticError } from "./errors/base-error"
+
+export interface AgenticEnvironmentOptions {
+	silent?: boolean
+}
 
 export class AgenticEnvironment {
 	protected subscribers: Participant[] = []
 	private name?: string
-	private isActive = false
+	private options?: AgenticEnvironmentOptions
+	private showLogs?: boolean
 
-	constructor(name?: string) {
+	constructor(name?: string, opts?: AgenticEnvironmentOptions) {
 		this.name = name
+		this.options = opts
+
+		this.showLogs = this.options?.silent !== false
 	}
 
 	subscribe(participant: Participant) {
@@ -82,6 +91,31 @@ export class AgenticEnvironment {
 		})
 	}
 
+	deliverError(source: Participant, error: AgenticError) {
+		this.deliverToSubscribers(source, {
+			internal: (src) => {
+				try {
+					src.onError(error)
+				} catch (error) {
+					if (this.showLogs) {
+						console.warn(`[AgenticEnvironment] Participant.onError() failed. Reason: ${error as Error}\n ${JSON.stringify({ error }, null, 2)}`)
+					}
+				} finally {
+					src.markInactive(this)
+				}
+			},
+			external: (sub) => {
+				try {
+					sub.onParticipantError(source, error)
+				} catch (error) {
+					if (this.showLogs) {
+						console.warn(`[AgenticEnvironment] Participant.onError() failed. Reason: ${error as Error}\n ${JSON.stringify({ error }, null, 2)}`)
+					}
+				}
+			},
+		})
+	}
+
 	private getListeningParticipants(source: Participant) {
 		return this.subscribers.filter(
 			(sub) =>
@@ -108,20 +142,25 @@ export class AgenticEnvironment {
 						handlers?.external?.(subscriber)
 					}
 				} catch (error) {
-					//this.handleError(subscriber, error as Error)
+
+					this.handleError(subscriber, error as Error)
 				}
 			}
 		}
 	}
 
-	async start() {
-		this.isActive = true
-		while (this.isActive) {
-			await new Promise((resolve) => setTimeout(resolve, 100))
+	private handleError(subscriber: Participant, error: Error) {
+		if (error instanceof AgenticError) {
+			return this.deliverError(subscriber, error)
 		}
-	}
 
-	stop() {
-		this.isActive = false
+		const agenticError = new AgenticError({
+			message: error.message,
+			stack: error.stack,
+			enviornment: this,
+			source: subscriber,
+		})
+
+		return this.deliverError(subscriber, agenticError)
 	}
 }

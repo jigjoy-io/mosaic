@@ -84,6 +84,19 @@ export class AnthropicMessages implements SequentialInferenceRuntime, StreamingI
 			}
 		}
 
+		if (inferenceRequest.model.hasStructuredOutput()) {
+			if (!specification.supportStructuredOutput) {
+				throw new Error(`Structured output is not supported for model: ${specification.name}`)
+			}
+			const format = inferenceRequest.model.getStructuredOutput()!
+			request.output_config = {
+				format: {
+					type: "json_schema",
+					json_schema: format.schema,
+				},
+			}
+		}
+
 		return request
 	}
 

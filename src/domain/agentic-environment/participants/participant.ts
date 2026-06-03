@@ -4,8 +4,9 @@ import { ReasoningItem } from "@domain/model-context/context-item/model-item/rea
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { AgenticError } from "../errors/base-error"
 
-type ParticipantClassConstructor = new (...args: any[]) => Participant;
+type ParticipantClassConstructor = new (...args: any[]) => Participant
 
 export abstract class Participant {
 	private environments: AgenticEnvironment[] = []
@@ -18,6 +19,7 @@ export abstract class Participant {
 		}
 		environment.subscribe(this)
 		this.environments.push(environment)
+		this.active.set(environment, true)
 	}
 
 	leave(environment: AgenticEnvironment) {
@@ -26,6 +28,7 @@ export abstract class Participant {
 		}
 		environment.unsubscribe(this)
 		this.environments = this.environments.filter((e) => e !== environment)
+		this.active.delete(environment)
 	}
 
 	protected isJoinedTo(environment: AgenticEnvironment): boolean {
@@ -85,4 +88,8 @@ export abstract class Participant {
 	abstract onInternalEvent(item: SemanticEvent<unknown>): Promise<void> | void
 
 	abstract onExternalEvent(source: Participant, item: SemanticEvent<unknown>): Promise<void> | void
+
+	abstract onError(error: AgenticError): void
+
+	abstract onParticipantError(source: Participant, error: AgenticError): void
 }

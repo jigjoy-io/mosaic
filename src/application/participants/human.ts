@@ -1,3 +1,4 @@
+import { AgenticError } from "@domain/agentic-environment/errors/base-error"
 import { Human } from "@domain/agentic-environment/participants/human"
 import { Participant } from "@domain/agentic-environment/participants/participant"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
@@ -7,33 +8,37 @@ import { ReasoningItem } from "@domain/model-context/context-item/model-item/rea
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 
 export class BaseHuman extends Human {
-	onJoined() {}
+	onJoined() { }
 
-	onLeft() {}
+	onLeft() { }
 
-	onParticipantJoined(participant: Participant) {}
+	onParticipantJoined(participant: Participant) { }
 
-	onParticipantLeft(participant: Participant) {}
+	onParticipantLeft(participant: Participant) { }
 
-	onMessage(message: string) {}
+	onMessage(message: string) { }
 
-	onFunctionCall(item: FunctionCallItem) {}
+	onFunctionCall(item: FunctionCallItem) { }
 
-	onFunctionCallOutput(item: FunctionCallOutputItem) {}
+	onFunctionCallOutput(item: FunctionCallOutputItem) { }
 
-	onReasoning(item: ReasoningItem) {}
+	onReasoning(item: ReasoningItem) { }
 
-	onModelMessage(item: ModelMessageItem) {}
+	onModelMessage(item: ModelMessageItem) { }
 
-	onExternalFunctionCall(source: Participant, item: FunctionCallItem) {}
+	onExternalFunctionCall(source: Participant, item: FunctionCallItem) { }
 
-	onExternalFunctionCallOutput(source: Participant, item: FunctionCallOutputItem) {}
+	onExternalFunctionCallOutput(source: Participant, item: FunctionCallOutputItem) { }
 
-	onExternalReasoning(source: Participant, item: ReasoningItem) {}
+	onExternalReasoning(source: Participant, item: ReasoningItem) { }
 
-	onExternalModelMessage(source: Participant, item: ModelMessageItem) {}
+	onExternalModelMessage(source: Participant, item: ModelMessageItem) { }
 
-	onInternalEvent(item: SemanticEvent<unknown>) {}
+	onInternalEvent(item: SemanticEvent<unknown>) { }
 
-	onExternalEvent(source: Participant, item: SemanticEvent<unknown>) {}
+	onExternalEvent(source: Participant, item: SemanticEvent<unknown>) { }
+
+	onError(error: AgenticError): void { }
+
+	onParticipantError(source: Participant, error: AgenticError): void { }
 }

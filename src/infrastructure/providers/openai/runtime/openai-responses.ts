@@ -73,6 +73,21 @@ export class OpenAIResponses implements SequentialInferenceRuntime, StreamingInf
 			}
 		}
 
+		if (inferenceRequest.model.hasStructuredOutput()) {
+			if (!specification.supportStructuredOutput) {
+				throw new Error(`Structured output is not supported for model: ${specification.name}`)
+			}
+			const format = inferenceRequest.model.getStructuredOutput()!
+			request.text = {
+				format: {
+					type: "json_schema",
+					name: format.name ?? "response",
+					schema: format.schema,
+					strict: format.strict ?? true,
+				},
+			}
+		}
+
 		return request
 	}
 
