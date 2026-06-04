@@ -1,10 +1,10 @@
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
-import { AgenticEnvironment } from "../agentic-environment"
+import { AgenticEnvironment } from "./agentic-environment"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { AgenticError } from "../errors/base-error"
+import { AgenticError } from "./errors/base-error"
 
 type ParticipantClassConstructor = new (...args: any[]) => Participant
 
@@ -31,7 +31,7 @@ export abstract class Participant {
 		this.active.delete(environment)
 	}
 
-	protected isJoinedTo(environment: AgenticEnvironment): boolean {
+	isJoinedTo(environment: AgenticEnvironment): boolean {
 		return this.environments.includes(environment)
 	}
 
@@ -43,8 +43,8 @@ export abstract class Participant {
 		return this.listens
 	}
 
-	isActive(environment: AgenticEnvironment): boolean {
-		return this.active.get(environment) === true
+	getEnvironmentState(environment: AgenticEnvironment) {
+		return this.active.get(environment)
 	}
 
 	markInactive(environment: AgenticEnvironment) {

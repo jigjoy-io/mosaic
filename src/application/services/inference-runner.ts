@@ -5,7 +5,7 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { ModelContext } from "@domain/model-context/model-context"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { ModelInfo } from "@app/use-cases/run-inference"
+import { ModelInfo } from "@app/services/model-repository"
 
 type InferenceItem = ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent<unknown>
 

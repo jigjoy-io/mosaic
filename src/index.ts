@@ -16,18 +16,10 @@ import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/gener
 import { Tool } from "@domain/generative-model/tool"
 import { InMemoryModelContextRepository } from "@infra/repository/in-memory-model-context-repository"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
-import { Participant } from "@domain/agentic-environment/participants/participant"
+import { Participant } from "@domain/agentic-environment/participant"
 import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
 import { AgenticError } from "@domain/agentic-environment/errors/base-error"
-import { BaseAgent } from "@app/participants/agent"
-import { BaseHuman } from "@app/participants/human"
-import { FunctionCallRunner } from "@domain/agentic-environment/runners/function-call-runner"
-import { DefaultFunctionCallRunner } from "@app/services/function-call-runner"
 import { Gpt55 } from "@infra/providers/openai/models/gpt-5-5"
-import { BaseObserver } from "@app/participants/observer"
-import { Human } from "@domain/agentic-environment/participants/human"
-import { Agent } from "@domain/agentic-environment/participants/agent"
-import { Observer } from "@domain/agentic-environment/participants/observer"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
@@ -45,13 +37,28 @@ import { Gemini31Pro } from "@infra/providers/gemini/models/gemini-3-1-pro"
 import { OpenAIChatCompletions } from "@infra/providers/openai/runtime/openai-chat-completions"
 import { InferenceRunner } from "@app/services/inference-runner"
 import { Endpoint } from "@domain/generative-model/runtime"
-import { ModelRepository, RunInference } from "@app/use-cases/run-inference"
+import { RunInference } from "@app/use-cases/run-inference"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import { ExecuteFunctionCall } from "@app/use-cases/execute-function-call"
+import { ModelRepository } from "@app/services/model-repository"
+import { FunctionCallRunner } from "@app/services/function-call-runner"
+import { BaseParticipant } from "@app/participants/participant"
+import { SendMessage } from "@app/use-cases/send-message"
 
 const runInferenceUseCase = new RunInference(new ModelRepository(), new InferenceRunner())
+const executeFunctionCallUseCase = new ExecuteFunctionCall(new FunctionCallRunner())
+const sendMessageUseCase = new SendMessage()
 
 const runInference = (inferenceParams: InferenceParams): void => {
 	runInferenceUseCase.execute(inferenceParams)
+}
+
+const executeFunctionCall = (environment: AgenticEnvironment, functionCallItem: FunctionCallItem, tool: Tool, caller: Participant): void => {
+	executeFunctionCallUseCase.execute(environment, functionCallItem, tool, caller)
+}
+
+const sendMessage = (environment: AgenticEnvironment, message: string, caller: Participant): void => {
+	sendMessageUseCase.execute(environment, message, caller)
 }
 
 export {
@@ -78,19 +85,11 @@ export {
 	InputTokenDetails,
 	OutputTokenDetails,
 	Tool,
-	FunctionCallRunner,
-	InferenceRunner,
 	Endpoint,
-	DefaultFunctionCallRunner,
 	AgenticEnvironment,
 	Participant,
-	Human,
-	Agent,
+	BaseParticipant,
 	AgenticError,
-	Observer,
-	BaseAgent,
-	BaseHuman,
-	BaseObserver,
 	InferenceRequest,
 	InferenceResponse,
 	OpenAIResponses,
@@ -106,4 +105,6 @@ export {
 	Gemini35Flash,
 	Gemini31Pro,
 	runInference,
+	executeFunctionCall,
+	sendMessage,
 }
