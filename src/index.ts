@@ -50,8 +50,8 @@ import { InferenceParams } from "@domain/agentic-environment/inference/params"
 
 const runInferenceUseCase = new RunInference(new ModelRepository(), new InferenceRunner())
 
-const runInference = async (inferenceParams: InferenceParams): Promise<void> => {
-	return await runInferenceUseCase.execute(inferenceParams)
+const runInference = (inferenceParams: InferenceParams): void => {
+	runInferenceUseCase.execute(inferenceParams)
 }
 
 export {
