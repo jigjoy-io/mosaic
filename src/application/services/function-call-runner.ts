@@ -1,13 +1,15 @@
-import { FunctionCallRunner } from "@domain/agentic-environment/runners/function-call-runner"
 import { Tool } from "@domain/generative-model/tool"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 
-export class DefaultFunctionCallRunner implements FunctionCallRunner {
-	constructor(private readonly tools: Tool[]) {}
+export class FunctionCallRunner {
 
-	async *run(call: FunctionCallItem, signal?: AbortSignal): AsyncIterable<FunctionCallOutputItem> {
-		const tool = this.tools.find((t) => t.name === call.name)
+	async *run(call: FunctionCallItem, tool: Tool, signal?: AbortSignal): AsyncIterable<FunctionCallOutputItem> {
+
+		if(signal?.aborted) {
+			return
+		}
+
 		if (!tool) throw new Error(`Unknown tool: ${call.name}`)
 
 		const result = await tool.invoke(JSON.parse(call.args))

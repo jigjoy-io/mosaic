@@ -1,13 +1,13 @@
 import { describe, it, expect } from "@rstest/core"
-import { TokenUsage, InputTokenDetails, OutputTokenDetails } from "@domain/generative-model/token-usage"
-import { InferenceRequest } from "@domain/generative-model/inference-request"
-import { InferenceResponse } from "@domain/generative-model/inference-response"
-import { TokenDeliveryMode } from "@domain/generative-model/token-delivery-mode"
-import { GenerativeModel, ModelSpecification } from "@domain/generative-model/generative-model"
-import { ModelContext } from "@domain/model-context/model-context"
-import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
+import { GenerativeModel } from "@domain/generative-model/generative-model"
+import { ModelSpecification } from "@domain/generative-model/generative-model"
 import { Tool } from "@domain/generative-model/tool"
-
+import { TokenUsage } from "@domain/generative-model/token-usage"
+import { InputTokenDetails, OutputTokenDetails } from "@domain/generative-model/token-usage"
+import { ModelContext } from "@domain/model-context/model-context"
+import { InferenceRequest } from "@domain/agentic-environment/inference/request"
+import { InferenceResponse } from "@domain/agentic-environment/inference/response"
+import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
 /** Minimal in-memory model satisfying the GenerativeModel port for wiring tests. */
 function makeModel(): GenerativeModel {
 	const specification: ModelSpecification = {
@@ -79,12 +79,5 @@ describe("InferenceResponse", () => {
 
 		expect(response.contextItems).toEqual([])
 		expect(response.tokenUsage).toBeUndefined()
-	})
-})
-
-describe("TokenDeliveryMode", () => {
-	it("exposes buffering and streaming string values", () => {
-		expect(TokenDeliveryMode.BUFFERING).toBe("buffering")
-		expect(TokenDeliveryMode.STREAMING).toBe("streaming")
 	})
 })

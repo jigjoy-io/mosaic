@@ -1,11 +1,12 @@
 import { GenerativeModel } from "@domain/generative-model/generative-model"
-import { StructuredOutputFormat } from "@domain/generative-model/capabilities/structured-output"
+import { StructuredOutputFormat } from "@domain/generative-model/capability/structured-output"
 import { Tool } from "@domain/generative-model/tool"
 import { AnthropicReasoningEffort, AnthropicReasoningEffortType } from "@infra/providers/anthropic/reasoning-effort"
 
 export class ClaudeOpus48 implements GenerativeModel {
 	readonly specification = {
 		name: "claude-opus-4-8",
+		provider: "anthropic",
 		supportReasoningEffort: true,
 		defaultReasoningEffort: "none" as AnthropicReasoningEffortType,
 		supportStreaming: true,

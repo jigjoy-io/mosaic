@@ -1,4 +1,4 @@
-import { ReasoningEffort } from "@domain/generative-model/capabilities/reasoning-effort"
+import { ReasoningEffort } from "@domain/generative-model/capability/reasoning-effort"
 
 /**
  * Gemini reasoning levels, forwarded as the `reasoning_effort` request

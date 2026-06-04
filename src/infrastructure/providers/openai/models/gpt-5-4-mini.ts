@@ -1,11 +1,12 @@
 import { GenerativeModel } from "@domain/generative-model/generative-model"
-import { StructuredOutputFormat } from "@domain/generative-model/capabilities/structured-output"
+import { StructuredOutputFormat } from "@domain/generative-model/capability/structured-output"
 import { Tool } from "@domain/generative-model/tool"
 import { OpenAIReasoningEffort, OpenAIReasoningEffortType } from "@infra/providers/openai/reasoning-effort"
 
 export class Gpt54Mini implements GenerativeModel {
 	readonly specification = {
 		name: "gpt-5.4-mini",
+		provider: "openai",
 		supportReasoningEffort: true,
 		defaultReasoningEffort: "none" as OpenAIReasoningEffortType,
 		supportStreaming: true,

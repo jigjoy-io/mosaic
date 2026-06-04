@@ -1,4 +1,4 @@
-import { Participant } from "@domain/agentic-environment/participants/participant"
+import { Participant } from "@domain/agentic-environment/participant"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
@@ -131,6 +131,7 @@ export class AgenticEnvironment {
 		const authorizedListeners = this.getListeningParticipants(source)
 
 		for (const subscriber of this.subscribers) {
+
 			const isActive = subscriber.getEnvironmentState(this)
 
 			if (isActive) {
@@ -141,6 +142,7 @@ export class AgenticEnvironment {
 						handlers?.external?.(subscriber)
 					}
 				} catch (error) {
+
 					this.handleError(subscriber, error as Error)
 				}
 			}

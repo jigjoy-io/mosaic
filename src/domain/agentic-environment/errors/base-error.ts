@@ -1,5 +1,5 @@
 import type { AgenticEnvironment } from "../agentic-environment"
-import type { Participant } from "../participants/participant"
+import type { Participant } from "../participant"
 
 interface AgenticErrorOpts {
 	message: string

@@ -4,14 +4,13 @@ import { FunctionCallItem } from "@domain/model-context/context-item/model-item/
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { InferenceRequest } from "@domain/generative-model/inference-request"
-import { InferenceResponse } from "@domain/generative-model/inference-response"
-import { ModelRuntime } from "@domain/generative-model/runtime/model-runtime"
-import { StreamingRuntime } from "@domain/generative-model/runtime/streaming-runtime"
+import { InferenceRequest } from "@domain/agentic-environment/inference/request"
+import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
+import { Endpoint } from "@domain/generative-model/runtime"
 import OpenAI from "openai"
 
-export class OpenAIResponses implements ModelRuntime, StreamingRuntime {
+export class OpenAIResponses implements Endpoint {
 	private readonly client: OpenAI
 
 	constructor() {
@@ -31,7 +30,7 @@ export class OpenAIResponses implements ModelRuntime, StreamingRuntime {
 	async *stream(
 		inferenceRequest: InferenceRequest,
 		signal?: AbortSignal,
-	): AsyncIterable<ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent<unknown>> {
+	): AsyncIterable<SemanticEvent<unknown>> {
 		const specification = inferenceRequest.model.specification
 		if (!specification.supportStreaming) {
 			throw new Error("Streaming is not supported for this model")

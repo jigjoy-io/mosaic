@@ -1,11 +1,12 @@
 import { GenerativeModel } from "@domain/generative-model/generative-model"
-import { StructuredOutputFormat } from "@domain/generative-model/capabilities/structured-output"
+import { StructuredOutputFormat } from "@domain/generative-model/capability/structured-output"
 import { Tool } from "@domain/generative-model/tool"
 import { GeminiReasoningEffort, GeminiReasoningEffortType } from "@infra/providers/gemini/reasoning-effort"
 
 export class Gemini31Pro implements GenerativeModel {
 	readonly specification = {
 		name: "gemini-3.1-pro-preview",
+		provider: "google",
 		supportReasoningEffort: true,
 		defaultReasoningEffort: "high" as GeminiReasoningEffortType,
 		supportStreaming: true,

@@ -1,10 +1,11 @@
-import { ReasoningEffort } from "./capabilities/reasoning-effort"
-import { StreamingCapability } from "./capabilities/streaming"
-import { StructuredOutputCapability } from "./capabilities/structured-output"
-import { ToolCallingCapability } from "./capabilities/tool-calling"
+import { ReasoningEffort } from "./capability/reasoning-effort"
+import { StreamingCapability } from "./capability/streaming"
+import { StructuredOutputCapability } from "./capability/structured-output"
+import { ToolCallingCapability } from "./capability/tool-calling"
 
 export type ModelSpecification = {
 	name: string
+	provider: string
 	supportReasoningEffort: boolean
 	defaultReasoningEffort: string | undefined
 	supportStreaming: boolean

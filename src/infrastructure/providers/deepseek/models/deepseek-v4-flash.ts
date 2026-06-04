@@ -1,11 +1,12 @@
 import { GenerativeModel } from "@domain/generative-model/generative-model"
-import { StructuredOutputFormat } from "@domain/generative-model/capabilities/structured-output"
+import { StructuredOutputFormat } from "@domain/generative-model/capability/structured-output"
 import { Tool } from "@domain/generative-model/tool"
 import { DeepSeekReasoningEffort, DeepSeekReasoningEffortType } from "@infra/providers/deepseek/reasoning-effort"
 
 export class DeepSeekV4Flash implements GenerativeModel {
 	readonly specification = {
 		name: "deepseek-v4-flash",
+		provider: "deepseek",
 		supportReasoningEffort: true,
 		defaultReasoningEffort: "high" as DeepSeekReasoningEffortType,
 		supportStreaming: true,

@@ -5,10 +5,7 @@ export class InferenceRequest {
 	readonly model: GenerativeModel
 	readonly context: ModelContext
 
-	constructor(
-		model: GenerativeModel,
-		context: ModelContext,
-	) {
+	constructor(model: GenerativeModel, context: ModelContext) {
 		this.model = model
 		this.context = context
 	}
