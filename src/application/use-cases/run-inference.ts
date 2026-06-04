@@ -1,5 +1,5 @@
 import { AnthropicMessages } from "@infra/providers/anthropic/runtime/anthropic-messages";
-import { OpenAIResponses, OpenAIResponsesEndpoint } from "@infra/providers/openai/runtime/openai-responses";
+import { OpenAIResponses } from "@infra/providers/openai/runtime/openai-responses";
 import { GeminiGenerateContent } from "@infra/providers/gemini/runtime/gemini-generate-content";
 import { OpenAIChatCompletions } from "@infra/providers/openai/runtime/openai-chat-completions";
 import { GenerativeModel } from "@domain/generative-model/generative-model";
@@ -35,29 +35,29 @@ export class ModelRepository {
     getModelInfo(model: string): ModelInfo {
         switch (model) {
             case "gpt-5-4":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new Gpt54() };
+                return { endpoint: new OpenAIResponses(), model: new Gpt54() };
             case "gpt-5-4-mini":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new Gpt54Mini() };
+                return { endpoint: new OpenAIResponses(), model: new Gpt54Mini() };
             case "gpt-5-4-nano":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new Gpt54Nano() };
+                return { endpoint: new OpenAIResponses(), model: new Gpt54Nano() };
             case "gpt-5-5":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new Gpt55() };
+                return { endpoint: new OpenAIResponses(), model: new Gpt55() };
             case "claude-4-5-haiku":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new ClaudeHaiku45() };
+                return { endpoint: new AnthropicMessages(), model: new ClaudeHaiku45() };
             case "claude-4-6-sonnet":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new ClaudeSonnet46() };
+                return { endpoint: new AnthropicMessages(), model: new ClaudeSonnet46() };
             case "claude-4-7-opus":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new ClaudeOpus47() };
+                return { endpoint: new AnthropicMessages(), model: new ClaudeOpus47() };
             case "claude-4-8-opus":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new ClaudeOpus48() };
+                return { endpoint: new AnthropicMessages(), model: new ClaudeOpus48() };
             case "gemini-3-5-flash":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new Gemini35Flash() };
+                return { endpoint: new GeminiGenerateContent(), model: new Gemini35Flash() };
             case "gemini-3-1-pro":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new Gemini31Pro() };
+                return { endpoint: new GeminiGenerateContent(), model: new Gemini31Pro() };
             case "deepseek-v4-flash":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new DeepSeekV4Flash() };
+                return { endpoint: new OpenAIChatCompletions(), model: new DeepSeekV4Flash() };
             case "deepseek-v4-pro":
-                return { endpoint: new OpenAIResponsesEndpoint(new OpenAIResponses(), new OpenAIResponses()), model: new DeepSeekV4Pro() };
+                return { endpoint: new OpenAIChatCompletions(), model: new DeepSeekV4Pro() };
             default:
                 throw new Error(`Unsupported model: ${model}`);
         }
@@ -72,7 +72,20 @@ export class RunInference implements RunInferenceUseCase {
     async execute(inferenceParams: InferenceParams): Promise<void> {
         const { model, reasoningEffort, tools, streaming, context, caller, environment, signal } = inferenceParams;
 
+        
         const modelInfo = this.modelRepository.getModelInfo(model);
+
+        if (streaming) {
+            modelInfo.model.setStreaming(true)
+        }
+
+        if (tools) {
+            modelInfo.model.setTools(tools)
+        }
+
+        if (reasoningEffort) {
+            modelInfo.model.setReasoningEffort(reasoningEffort)
+        }
 
         const result = this.inferenceRunner.run(context, modelInfo, signal)
     

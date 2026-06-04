@@ -7,10 +7,10 @@ import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-eve
 import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
-import { BufferingEndpoint, Endpoint, StreamingEndpoint } from "@domain/generative-model/runtime"
+import { Endpoint } from "@domain/generative-model/runtime"
 import OpenAI from "openai"
 
-export class OpenAIResponses implements BufferingEndpoint, StreamingEndpoint {
+export class OpenAIResponses implements Endpoint {
 	private readonly client: OpenAI
 
 	constructor() {
@@ -124,12 +124,5 @@ export class OpenAIResponses implements BufferingEndpoint, StreamingEndpoint {
 				return ReasoningItem.rehydrate(item)
 			}
 		})
-	}
-}
-
-export class OpenAIResponsesEndpoint extends Endpoint {
-
-	constructor(bufferingEndpoint: OpenAIResponses, streamingEndpoint: OpenAIResponses) {
-		super(bufferingEndpoint, streamingEndpoint)
 	}
 }

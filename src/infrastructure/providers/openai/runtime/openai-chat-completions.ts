@@ -12,7 +12,7 @@ import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
-import { BufferingEndpoint, StreamingEndpoint } from "@domain/generative-model/runtime"
+import { Endpoint } from "@domain/generative-model/runtime"
 import OpenAI from "openai"
 
 /**
@@ -53,7 +53,7 @@ export interface OpenAICompatibleConfig {
  * Was `DeepSeekChatCompletions`; generalized so consumers can point it
  * at any OpenAI-compatible endpoint.
  */
-export class OpenAIChatCompletions implements BufferingEndpoint, StreamingEndpoint {
+export class OpenAIChatCompletions implements Endpoint {
 	private readonly client: OpenAI
 	private readonly extraBody: Record<string, unknown>
 

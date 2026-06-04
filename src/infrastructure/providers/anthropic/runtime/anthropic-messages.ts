@@ -13,9 +13,9 @@ import { InferenceResponse } from "@domain/agentic-environment/inference/respons
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import Anthropic from "@anthropic-ai/sdk"
-import { BufferingEndpoint, StreamingEndpoint } from "@domain/generative-model/runtime"
+import { Endpoint } from "@domain/generative-model/runtime"
 
-export class AnthropicMessages implements StreamingEndpoint, BufferingEndpoint {
+export class AnthropicMessages implements Endpoint {
 	private readonly client: Anthropic
 
 	constructor() {

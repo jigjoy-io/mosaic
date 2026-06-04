@@ -13,7 +13,7 @@ import { InferenceResponse } from "@domain/agentic-environment/inference/respons
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import { GoogleGenAI } from "@google/genai"
-import { BufferingEndpoint, StreamingEndpoint } from "@domain/generative-model/runtime"
+import { Endpoint } from "@domain/generative-model/runtime"
 
 /**
  * Native Gemini adapter on the `@google/genai` SDK (`generateContent` /
@@ -23,7 +23,7 @@ import { BufferingEndpoint, StreamingEndpoint } from "@domain/generative-model/r
  * thought parts + native usage metadata back out. Another `ModelRuntime`
  * — no runner or port changes.
  */
-export class GeminiGenerateContent implements BufferingEndpoint, StreamingEndpoint {
+export class GeminiGenerateContent implements Endpoint {
 	private readonly client: GoogleGenAI
 
 	constructor() {

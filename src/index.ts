@@ -44,7 +44,15 @@ import { Gemini35Flash } from "@infra/providers/gemini/models/gemini-3-5-flash"
 import { Gemini31Pro } from "@infra/providers/gemini/models/gemini-3-1-pro"
 import { OpenAIChatCompletions } from "@infra/providers/openai/runtime/openai-chat-completions"
 import { InferenceRunner } from "@app/services/inference-runner"
-import { SequentialInferenceRuntime, StreamingInferenceRuntime } from "@domain/generative-model/runtime"
+import { Endpoint } from "@domain/generative-model/runtime"
+import { ModelRepository, RunInference } from "@app/use-cases/run-inference"
+import { InferenceParams } from "@domain/agentic-environment/inference/params"
+
+const runInferenceUseCase = new RunInference(new ModelRepository(), new InferenceRunner())
+
+const runInference = async (inferenceParams: InferenceParams): Promise<void> => {
+	return await runInferenceUseCase.execute(inferenceParams)
+}
 
 export {
 	ModelContext,
@@ -72,6 +80,7 @@ export {
 	Tool,
 	FunctionCallRunner,
 	InferenceRunner,
+	Endpoint,
 	DefaultFunctionCallRunner,
 	AgenticEnvironment,
 	Participant,
@@ -82,8 +91,6 @@ export {
 	BaseAgent,
 	BaseHuman,
 	BaseObserver,
-	SequentialInferenceRuntime,
-	StreamingInferenceRuntime,
 	InferenceRequest,
 	InferenceResponse,
 	OpenAIResponses,
@@ -98,4 +105,5 @@ export {
 	GeminiGenerateContent,
 	Gemini35Flash,
 	Gemini31Pro,
+	runInference,
 }
