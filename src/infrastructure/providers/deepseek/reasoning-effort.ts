@@ -1,4 +1,4 @@
-import { ReasoningEffort } from "@domain/generative-model/capabilities/reasoning-effort"
+import { ReasoningEffort } from "@domain/generative-model/capability/reasoning-effort"
 
 /**
  * DeepSeek V4 reasoning levels. `"none"` selects non-thinking mode
