@@ -40,7 +40,7 @@ import { Endpoint } from "@domain/generative-model/runtime"
 import { RunInference } from "@app/use-cases/run-inference"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { ExecuteFunctionCall } from "@app/use-cases/execute-function-call"
-import { ModelRepository } from "@app/services/model-repository"
+import { ModelName, ModelRepository } from "@app/services/model-repository"
 import { FunctionCallRunner } from "@app/services/function-call-runner"
 import { BaseParticipant } from "@app/participants/participant"
 import { SendMessage } from "@app/use-cases/send-message"
@@ -49,7 +49,7 @@ const runInferenceUseCase = new RunInference(new ModelRepository(), new Inferenc
 const executeFunctionCallUseCase = new ExecuteFunctionCall(new FunctionCallRunner())
 const sendMessageUseCase = new SendMessage()
 
-const runInference = (inferenceParams: InferenceParams): void => {
+const runInference = (inferenceParams: InferenceParams<ModelName>): void => {
 	runInferenceUseCase.execute(inferenceParams)
 }
 
@@ -107,4 +107,5 @@ export {
 	runInference,
 	executeFunctionCall,
 	sendMessage,
+	ModelName
 }
