@@ -1,25 +1,27 @@
-import { AnthropicMessages } from "@infra/providers/anthropic/runtime/anthropic-messages";
-import { OpenAIResponses } from "@infra/providers/openai/runtime/openai-responses";
-import { GeminiGenerateContent } from "@infra/providers/gemini/runtime/gemini-generate-content";
-import { OpenAIChatCompletions } from "@infra/providers/openai/runtime/openai-chat-completions";
-import { GenerativeModel } from "@domain/generative-model/generative-model";
-import { ClaudeHaiku45 } from "@infra/providers/anthropic/models/claude-4-5-haiku";
-import { ClaudeSonnet46 } from "@infra/providers/anthropic/models/claude-4-6-sonnet";
-import { ClaudeOpus48 } from "@infra/providers/anthropic/models/claude-4-8-opus";
-import { ClaudeOpus47 } from "@infra/providers/anthropic/models/claude-4-7-opus";
-import { Gemini35Flash } from "@infra/providers/gemini/models/gemini-3-5-flash";
-import { Gemini31Pro } from "@infra/providers/gemini/models/gemini-3-1-pro";
-import { DeepSeekV4Flash } from "@infra/providers/deepseek/models/deepseek-v4-flash";
-import { DeepSeekV4Pro } from "@infra/providers/deepseek/models/deepseek-v4-pro";
-import { Gpt54 } from "@infra/providers/openai/models/gpt-5-4";
-import { Gpt54Mini } from "@infra/providers/openai/models/gpt-5-4-mini";
-import { Gpt54Nano } from "@infra/providers/openai/models/gpt-5-4-nano";
-import { Gpt55 } from "@infra/providers/openai/models/gpt-5-5";
-import { Endpoint } from "@domain/generative-model/runtime";
+import { AnthropicMessages } from "@infra/providers/anthropic/endpoints/anthropic-messages";
+import { OpenAIResponses } from "@infra/providers/openai/endpoints/openai-responses";
+import { GeminiGenerateContent } from "@infra/providers/gemini/endpoints/gemini-generate-content";
+import { OpenAIChatCompletions } from "@infra/providers/openai/endpoints/openai-chat-completions";
+import { ModelSpecification } from "@domain/generative-model/model-specification";
+import { claudeSonnet46Specification } from "@infra/providers/anthropic/models/claude-4-6-sonnet";
+import { claudeOpus48Specification } from "@infra/providers/anthropic/models/claude-4-8-opus";
+import { claudeOpus47Specification } from "@infra/providers/anthropic/models/claude-4-7-opus";
+import { gemini35FlashSpecification } from "@infra/providers/gemini/models/gemini-3-5-flash";
+import { gemini31ProSpecification } from "@infra/providers/gemini/models/gemini-3-1-pro";
+import { deepSeekV4FlashSpecification } from "@infra/providers/deepseek/models/deepseek-v4-flash";
+import { deepSeekV4ProSpecification } from "@infra/providers/deepseek/models/deepseek-v4-pro";
+import { gpt54Specification } from "@infra/providers/openai/models/gpt-5-4";
+import { gpt54MiniSpecification } from "@infra/providers/openai/models/gpt-5-4-mini";
+import { gpt54NanoSpecification } from "@infra/providers/openai/models/gpt-5-4-nano";
+import { gpt55Specification } from "@infra/providers/openai/models/gpt-5-5";
+import { Endpoint } from "@domain/generative-model/endpoint";
+import { AnthropicMessagesMapper, EndpointRequestMapper } from "@infra/providers/anthropic/endpoints/anthropic-messages-mapper";
+import { claudeHaiku45Specification } from "@infra/providers/anthropic/models/claude-4-5-haiku";
 
 export type ModelInfo = {
-	endpoint: Endpoint
-	model: GenerativeModel
+    endpoint: Endpoint;
+    mapper: EndpointRequestMapper;
+    specification: ModelSpecification;
 }
 
 export type ModelProviders = "openai" | "anthropic" | "gemini" | "deepseek"
@@ -39,34 +41,84 @@ export type ModelName =
 
 export class ModelRepository {
     
-    getModelInfo(model: string): ModelInfo {
-		switch (model) {
-			case "gpt-5-4":
-                return { endpoint: new OpenAIResponses(), model: new Gpt54() };
-			case "gpt-5-4-mini":
-                return { endpoint: new OpenAIResponses(), model: new Gpt54Mini() };
-			case "gpt-5-4-nano":
-                return { endpoint: new OpenAIResponses(), model: new Gpt54Nano() };
-			case "gpt-5-5":
-                return { endpoint: new OpenAIResponses(), model: new Gpt55() };
-			case "claude-4-5-haiku":
-                return { endpoint: new AnthropicMessages(), model: new ClaudeHaiku45() };
-			case "claude-4-6-sonnet":
-                return { endpoint: new AnthropicMessages(), model: new ClaudeSonnet46() };
-			case "claude-4-7-opus":
-                return { endpoint: new AnthropicMessages(), model: new ClaudeOpus47() };
-			case "claude-4-8-opus":
-                return { endpoint: new AnthropicMessages(), model: new ClaudeOpus48() };
-			case "gemini-3-5-flash":
-                return { endpoint: new GeminiGenerateContent(), model: new Gemini35Flash() };
-			case "gemini-3-1-pro":
-                return { endpoint: new GeminiGenerateContent(), model: new Gemini31Pro() };
-			case "deepseek-v4-flash":
-                return { endpoint: new OpenAIChatCompletions(), model: new DeepSeekV4Flash() };
-			case "deepseek-v4-pro":
-				return { endpoint: new OpenAIChatCompletions(), model: new DeepSeekV4Pro() }
-			default:
-				throw new Error(`Unsupported model: ${model}`)
-		}
-	}
+    getModelInfo(model: ModelName): ModelInfo {
+
+        switch (model) {
+            case "gpt-5-4":
+                return { 
+                    endpoint: new OpenAIResponses(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: gpt54Specification 
+                };
+            case "gpt-5-4-mini":
+                return { 
+                    endpoint: new OpenAIResponses(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: gpt54MiniSpecification 
+                };
+            case "gpt-5-4-nano":
+                return { 
+                    endpoint: new OpenAIResponses(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: gpt54NanoSpecification 
+                };
+            case "gpt-5-5":
+                return { 
+                    endpoint: new OpenAIResponses(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: gpt55Specification 
+                };
+            case "claude-4-5-haiku":
+                return { 
+                    endpoint: new AnthropicMessages(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: claudeHaiku45Specification 
+                };
+            case "claude-4-6-sonnet":
+                return { 
+                    endpoint: new AnthropicMessages(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: claudeSonnet46Specification 
+                };
+            case "claude-4-7-opus":
+                return { 
+                    endpoint: new AnthropicMessages(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: claudeOpus47Specification 
+                };
+            case "claude-4-8-opus":
+                return { 
+                    endpoint: new AnthropicMessages(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: claudeOpus48Specification 
+                };
+            case "gemini-3-5-flash":
+                return { 
+                    endpoint: new GeminiGenerateContent(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: gemini35FlashSpecification 
+                };
+            case "gemini-3-1-pro":
+                return { 
+                    endpoint: new GeminiGenerateContent(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: gemini31ProSpecification 
+                };
+            case "deepseek-v4-flash":
+                return { 
+                    endpoint: new OpenAIChatCompletions(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: deepSeekV4FlashSpecification 
+                };
+            case "deepseek-v4-pro":
+                return { 
+                    endpoint: new OpenAIChatCompletions(), 
+                    mapper: new AnthropicMessagesMapper(), 
+                    specification: deepSeekV4ProSpecification 
+                };
+            default:
+                throw new Error(`Unsupported model: ${model}`);
+        }
+    }
+
 }

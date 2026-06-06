@@ -8,12 +8,11 @@ import { FunctionCallOutputItem } from "@domain/model-context/context-item/clien
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import Anthropic from "@anthropic-ai/sdk"
-import { Endpoint } from "@domain/generative-model/runtime"
+import { Endpoint } from "@domain/generative-model/endpoint"
 
 export class AnthropicMessages implements Endpoint {
 	private readonly client: Anthropic
@@ -22,7 +21,7 @@ export class AnthropicMessages implements Endpoint {
 		this.client = new Anthropic()
 	}
 
-	async infer(inferenceRequest: InferenceRequest): Promise<InferenceResponse> {
+	async infer(inferenceRequest: unknown): Promise<InferenceResponse> {
 		const response = await this.client.messages.create(this.buildRequest(inferenceRequest))
 
 		const contextItems = this.extractContextItems(response)
@@ -31,7 +30,7 @@ export class AnthropicMessages implements Endpoint {
 	}
 
 	async *stream(
-		inferenceRequest: InferenceRequest,
+		inferenceRequest: unknown,
 		signal?: AbortSignal,
 	): AsyncIterable<SemanticEvent<unknown>> {
 		const stream: any = await this.client.messages.create({
@@ -47,10 +46,9 @@ export class AnthropicMessages implements Endpoint {
 		}
 	}
 
-	private buildRequest(inferenceRequest: InferenceRequest): any {
+	private buildRequest(inferenceRequest: unknown): any {
 		const { messages, system } = this.mapContextToRequest(inferenceRequest.context)
 
-		const specification = inferenceRequest.model.specification
 
 		const request: any = {
 			model: specification.name,
@@ -62,40 +60,8 @@ export class AnthropicMessages implements Endpoint {
 			request.system = system
 		}
 
-		if (specification.supportFunctionCalling && inferenceRequest.model.getTools().length > 0) {
-			request.tools = inferenceRequest.model.getTools().map((tool) => {
-				return {
-					name: tool.name,
-					description: tool.description,
-					input_schema: tool.parameters,
-				}
-			})
-		}
 
-		if (specification.supportReasoningEffort) {
-			const effort = inferenceRequest.model.getReasoningEffort()
-			const budgets: Record<string, number> = { low: 1_024, medium: 4_096, high: 8_192 }
-			const budget = budgets[effort]
-			if (budget !== undefined) {
-				request.thinking = {
-					type: "enabled",
-					budget_tokens: Math.min(budget, specification.maxOutputTokens - 1),
-				}
-			}
-		}
 
-		if (inferenceRequest.model.hasStructuredOutput()) {
-			if (!specification.supportStructuredOutput) {
-				throw new Error(`Structured output is not supported for model: ${specification.name}`)
-			}
-			const format = inferenceRequest.model.getStructuredOutput()!
-			request.output_config = {
-				format: {
-					type: "json_schema",
-					json_schema: format.schema,
-				},
-			}
-		}
 
 		return request
 	}

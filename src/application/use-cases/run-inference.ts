@@ -1,56 +1,52 @@
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { RunInferenceUseCase } from "@domain/agentic-environment/use-cases/run-inference"
-import { InferenceRunner } from "@app/services/inference-runner"
-import { ModelName, ModelRepository } from "@app/services/model-repository"
-import { GenerativeModel } from "@domain/generative-model/generative-model"
+
+import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning";
+import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call";
+import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message";
+import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event";
+import { InferenceParams } from "@domain/agentic-environment/inference/params";
+import { RunInferenceUseCase } from "@domain/agentic-environment/use-cases/run-inference";
+import { ModelRepository } from "@app/services/model-repository";
+import { StructuredOutputSpecification } from "@domain/generative-model/capability/structured-output";
+import { ToolCallingSpecification } from "@domain/generative-model/capability/tool-calling";
+import { ReasoningEffortSpecification } from "@domain/generative-model/capability/reasoning-effort";
+import { StreamingSpecification } from "@domain/generative-model/capability/streaming";
+import { NonStreamingInference, StreamingInference } from "@app/services/inference-runner";
+import { ModelName } from "@app/services/model-repository";
 
 export class RunInference implements RunInferenceUseCase<ModelName> {
-	constructor(
-		private readonly modelRepository: ModelRepository,
-		private readonly inferenceRunner: InferenceRunner,
-	) {}
 
-	private setModelCapabilities(model: GenerativeModel, inferenceParams: InferenceParams<ModelName>) {
-		const { streaming, tools, reasoningEffort, structuredOutput } = inferenceParams
+    constructor(private readonly modelRepository: ModelRepository) {}
 
-		if (streaming) {
-			model.setStreaming(true)
-		}
+    async execute(inferenceParams: InferenceParams<ModelName>): Promise<void> {
 
-		if (tools) {
-			model.setTools(tools)
-		}
+        const { context, caller, environment } = inferenceParams
 
-		if (reasoningEffort) {
-			model.setReasoningEffort(reasoningEffort)
-		}
+        const modelInfo = this.modelRepository.getModelInfo(inferenceParams.model)
+        
+        const capabilites = [
+            new ReasoningEffortSpecification(modelInfo.mapper),
+            new ToolCallingSpecification(modelInfo.mapper),
+            new StreamingSpecification(modelInfo.mapper),
+            new StructuredOutputSpecification(modelInfo.mapper),
+        ]
 
-		if (structuredOutput) {
-			model.setStructuredOutput(structuredOutput)
-		}
+        let request = {}
+        for (const capability of capabilites) {
+            if (capability.isSatisfiedBy(inferenceParams, modelInfo.specification)) {
+                request = { ...request, ...capability.mapToEndpointRequest(inferenceParams) }
+            }
+        }
 
-		return model
-	}
-
-	async execute(inferenceParams: InferenceParams<ModelName>): Promise<void> {
-		const { model, context, caller, environment, signal } = inferenceParams
-
-		const modelInfo = this.modelRepository.getModelInfo(model)
-
-		const generativeModel = this.setModelCapabilities(modelInfo.model, inferenceParams)
-		modelInfo.model = generativeModel
-
-		const result = this.inferenceRunner.run(context, modelInfo, signal)
-
-		for await (const item of result) {
-			if (signal?.aborted) {
-				break
-			}
-
+        let result: AsyncIterable<any> | undefined
+        if (inferenceParams.streaming) {
+            const inferenceRunner = new StreamingInference()
+            result = inferenceRunner.run(request, modelInfo.endpoint)
+        } else {
+            const inferenceRunner = new NonStreamingInference()
+            result = inferenceRunner.run(request, modelInfo.endpoint)
+        }
+    
+        for await (const item of result) {
 			if (item instanceof ReasoningItem) {
 				environment.deliverReasoning(caller, item)
 			} else if (item instanceof FunctionCallItem) {

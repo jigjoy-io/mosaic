@@ -1,34 +1,24 @@
-import { GenerativeModel } from "@domain/generative-model/generative-model"
-import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { ModelContext } from "@domain/model-context/model-context"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { ModelInfo } from "@app/services/model-repository"
+import { Endpoint } from "@domain/generative-model/endpoint"
 
 type InferenceItem = ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent<unknown>
 
-export class InferenceRunner {
+export class StreamingInference {
 
-	async *run(context: ModelContext, modelInfo: ModelInfo, signal?: AbortSignal): AsyncIterable<InferenceItem> {
-		const { model, endpoint } = modelInfo
-		const request = new InferenceRequest(model, context)
+	async *run(request: any, endpoint: Endpoint): AsyncIterable<InferenceItem> {
+		yield* endpoint.stream(request)
+	}
+}
 
+export class NonStreamingInference {
 
-		if (model.getStreaming()) {
-			yield* endpoint.stream(request)
-			return
-		}
-
+	async *run(request: any, endpoint: Endpoint): AsyncIterable<InferenceItem> {
 		const response = await endpoint.infer(request)
 		for (const item of response.contextItems) {
-			if (signal?.aborted) {
-				break
-			}
 			yield item as InferenceItem
 		}
 	}
-
-
 }

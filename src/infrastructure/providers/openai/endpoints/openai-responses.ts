@@ -7,7 +7,7 @@ import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-eve
 import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
-import { Endpoint } from "@domain/generative-model/runtime"
+import { Endpoint } from "@domain/generative-model/endpoint"
 import OpenAI from "openai"
 
 export class OpenAIResponses implements Endpoint {

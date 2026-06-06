@@ -8,11 +8,10 @@ import { FunctionCallOutputItem } from "@domain/model-context/context-item/clien
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
-import { Endpoint } from "@domain/generative-model/runtime"
+import { Endpoint } from "@domain/generative-model/endpoint"
 import OpenAI from "openai"
 
 /**
@@ -67,7 +66,7 @@ export class OpenAIChatCompletions implements Endpoint {
 		this.extraBody = config.extraBody ?? {}
 	}
 
-	async infer(inferenceRequest: InferenceRequest): Promise<InferenceResponse> {
+	async infer(inferenceRequest: unknown): Promise<InferenceResponse> {
 		const response = await this.client.chat.completions.create(this.buildRequest(inferenceRequest))
 
 		const contextItems = this.extractContextItems(response)
@@ -76,7 +75,7 @@ export class OpenAIChatCompletions implements Endpoint {
 	}
 
 	async *stream(
-		inferenceRequest: InferenceRequest,
+		inferenceRequest: unknown,
 		signal?: AbortSignal,
 	): AsyncIterable<SemanticEvent<unknown>> {
 		const stream: any = await this.client.chat.completions.create({
@@ -92,7 +91,7 @@ export class OpenAIChatCompletions implements Endpoint {
 		}
 	}
 
-	buildRequest(inferenceRequest: InferenceRequest): any {
+	buildRequest(inferenceRequest: unknown): any {
 		const specification = inferenceRequest.model.specification
 
 		// Consumer-supplied vendor quirks first, so the standard fields

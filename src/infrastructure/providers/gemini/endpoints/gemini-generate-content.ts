@@ -8,12 +8,11 @@ import { FunctionCallOutputItem } from "@domain/model-context/context-item/clien
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import { GoogleGenAI } from "@google/genai"
-import { Endpoint } from "@domain/generative-model/runtime"
+import { Endpoint } from "@domain/generative-model/endpoint"
 
 /**
  * Native Gemini adapter on the `@google/genai` SDK (`generateContent` /
@@ -30,7 +29,7 @@ export class GeminiGenerateContent implements Endpoint {
 		this.client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 	}
 
-	async infer(inferenceRequest: InferenceRequest): Promise<InferenceResponse> {
+	async infer(inferenceRequest: unknown): Promise<InferenceResponse> {
 		const response = await this.client.models.generateContent(this.buildRequest(inferenceRequest))
 
 		const contextItems = this.extractContextItems(response)
@@ -39,7 +38,7 @@ export class GeminiGenerateContent implements Endpoint {
 	}
 
 	async *stream(
-		inferenceRequest: InferenceRequest,
+		inferenceRequest: unknown,
 		signal?: AbortSignal,
 	): AsyncIterable<SemanticEvent<unknown>> {
 		const stream = await this.client.models.generateContentStream(this.buildRequest(inferenceRequest))
@@ -52,7 +51,7 @@ export class GeminiGenerateContent implements Endpoint {
 		}
 	}
 
-	private buildRequest(inferenceRequest: InferenceRequest): any {
+	private buildRequest(inferenceRequest: unknown): any {
 		const specification = inferenceRequest.model.specification
 		const { contents, systemInstruction } = this.mapContextToRequest(inferenceRequest.context)
 
