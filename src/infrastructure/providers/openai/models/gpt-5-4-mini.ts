@@ -5,6 +5,7 @@ export const gpt54MiniSpecification: ModelSpecification = {
     provider: "openai",
     supportsReasoningEffort: true,
     supportedReasoningEfforts: ["xhigh", "high", "medium", "low", "none"],
+    supportedContextItemTypes: ["user_message", "system_message", "developer_message", "reasoning", "function_call", "function_call_output", "model_message"],
     supportsStreaming: true,
     contextWindowSize: 400_000,
     maxOutputTokens: 128_000,

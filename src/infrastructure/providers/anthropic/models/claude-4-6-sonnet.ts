@@ -5,6 +5,7 @@ export const claudeSonnet46Specification: ModelSpecification = {
     provider: "anthropic",
     supportsReasoningEffort: true,
     supportedReasoningEfforts: ["max", "high", "medium", "low"],
+    supportedContextItemTypes: ["user_message", "system_message", "developer_message", "reasoning", "function_call", "function_call_output", "model_message"],
     supportsStreaming: true,
     contextWindowSize: 200_000,
     maxOutputTokens: 64_000,

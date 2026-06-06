@@ -1,9 +1,10 @@
-import { Participant } from "@domain/agentic-environment/participants/participant"
+import { Participant } from "@domain/agentic-environment/participant"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { AgenticError } from "src"
 
 export interface RecordedCall {
 	m: string
@@ -17,6 +18,7 @@ export interface RecordedCall {
  * as a suite.)
  */
 export class RecordingParticipant extends Participant {
+
 	readonly calls: RecordedCall[] = []
 	private rec(m: string, ...args: unknown[]) {
 		this.calls.push({ m, args })
@@ -40,4 +42,6 @@ export class RecordingParticipant extends Participant {
 	onMessage(m: string) { this.rec("onMessage", m) }
 	onInternalEvent(i: SemanticEvent<unknown>) { this.rec("onInternalEvent", i) }
 	onExternalEvent(s: Participant, i: SemanticEvent<unknown>) { this.rec("onExternalEvent", s, i) }
+	onError(error: AgenticError): void { this.rec("onError", error) }
+	onParticipantError(source: Participant, error: AgenticError): void { this.rec("onParticipantError", source, error) }
 }

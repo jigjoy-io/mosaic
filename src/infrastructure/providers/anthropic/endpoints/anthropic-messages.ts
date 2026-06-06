@@ -1,10 +1,5 @@
-import { ModelContext } from "@domain/model-context/model-context"
 import { ContextItem } from "@domain/model-context/context-item/context-item"
 import { InputText } from "@domain/model-context/context-item/item-content/input-text"
-import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
-import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
-import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
-import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
@@ -21,8 +16,8 @@ export class AnthropicMessages implements Endpoint {
 		this.client = new Anthropic()
 	}
 
-	async infer(inferenceRequest: unknown): Promise<InferenceResponse> {
-		const response = await this.client.messages.create(this.buildRequest(inferenceRequest))
+	async infer(inferenceRequest: any): Promise<InferenceResponse> {
+		const response = await this.client.messages.create(inferenceRequest)
 
 		const contextItems = this.extractContextItems(response)
 		const tokenUsage = this.extractTokenUsage(response)
@@ -30,11 +25,11 @@ export class AnthropicMessages implements Endpoint {
 	}
 
 	async *stream(
-		inferenceRequest: unknown,
+		inferenceRequest: any,
 		signal?: AbortSignal,
 	): AsyncIterable<SemanticEvent<unknown>> {
 		const stream: any = await this.client.messages.create({
-			...this.buildRequest(inferenceRequest),
+			...inferenceRequest,
 			stream: true,
 		})
 
@@ -44,26 +39,6 @@ export class AnthropicMessages implements Endpoint {
 			}
 			yield new SemanticEvent(event.type, event)
 		}
-	}
-
-	private buildRequest(inferenceRequest: unknown): any {
-		const { messages, system } = this.mapContextToRequest(inferenceRequest.context)
-
-
-		const request: any = {
-			model: specification.name,
-			max_tokens: specification.maxOutputTokens,
-			messages: messages,
-		}
-
-		if (system) {
-			request.system = system
-		}
-
-
-
-
-		return request
 	}
 
 	extractTokenUsage(response: Anthropic.Messages.Message): TokenUsage | undefined {
@@ -79,57 +54,6 @@ export class AnthropicMessages implements Endpoint {
 			),
 			new OutputTokenDetails(0),
 		)
-	}
-
-	mapContextToRequest(context: ModelContext): { messages: any[]; system?: string } {
-		const messages: any[] = []
-		const system: string[] = []
-
-		for (const item of context.getItems()) {
-			if (item instanceof DeveloperMessageItem || item instanceof SystemMessageItem) {
-				system.push(item.content.text)
-				continue
-			}
-
-			if (item instanceof UserMessageItem) {
-				this.addContentBlock(messages, "user", { type: "text", text: item.content.text })
-				continue
-			}
-
-			if (item instanceof ModelMessageItem) {
-				this.addContentBlock(messages, "assistant", { type: "text", text: item.content.text })
-				continue
-			}
-
-			if (item instanceof FunctionCallItem) {
-				let input: any
-				try {
-					input = JSON.parse(item.args)
-				} catch {
-					input = item.args
-				}
-				this.addContentBlock(messages, "assistant", {
-					type: "tool_use",
-					id: item.callId,
-					name: item.name,
-					input: input,
-				})
-				continue
-			}
-
-			if (item instanceof FunctionCallOutputItem) {
-				this.addContentBlock(messages, "user", {
-					type: "tool_result",
-					tool_use_id: item.callId,
-					content: item.output.text,
-				})
-			}
-		}
-
-		return {
-			messages: messages,
-			system: system.length > 0 ? system.join("\n\n") : undefined,
-		}
 	}
 
 	extractContextItems(response: Anthropic.Messages.Message): ContextItem[] {
@@ -164,16 +88,4 @@ export class AnthropicMessages implements Endpoint {
 		return items
 	}
 
-	private addContentBlock(messages: any[], role: "user" | "assistant", block: any): void {
-		const lastMessage = messages[messages.length - 1]
-		if (lastMessage?.role === role) {
-			lastMessage.content.push(block)
-			return
-		}
-
-		messages.push({
-			role: role,
-			content: [block],
-		})
-	}
 }

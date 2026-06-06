@@ -1,16 +1,17 @@
 import { ModelSpecification } from "@domain/generative-model/model-specification"
 import { CapabilitySpecification } from "../capability/specification";
 import { InferenceParams } from "@domain/agentic-environment/inference/params";
+import { ModelName } from "@app/services/model-repository";
 
 export interface StreamingEndpointMapper {
-    mapStreaming(inferenceParams: InferenceParams): unknown
+    mapStreaming(inferenceParams: InferenceParams<ModelName>): unknown
 }
 
 export class StreamingSpecification implements CapabilitySpecification {
     
     constructor(private mapper: StreamingEndpointMapper) {}
 
-    isSatisfiedBy(inferenceParams: InferenceParams, model: ModelSpecification): boolean {
+    isSatisfiedBy(inferenceParams: InferenceParams<ModelName>, model: ModelSpecification): boolean {
         if(inferenceParams.streaming === undefined || inferenceParams.streaming === false) {
             return false
         }
@@ -22,7 +23,7 @@ export class StreamingSpecification implements CapabilitySpecification {
         return true
     }
 
-    mapToEndpointRequest(inferenceParams: InferenceParams): unknown {
+    mapToEndpointRequest(inferenceParams: InferenceParams<ModelName>): unknown {
         return this.mapper.mapStreaming(inferenceParams)
     }
 
