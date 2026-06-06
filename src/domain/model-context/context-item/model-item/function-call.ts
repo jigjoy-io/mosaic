@@ -17,12 +17,4 @@ export class FunctionCallItem extends ContextItem {
 		return new FunctionCallItem(data.callId, data.name, data.args)
 	}
 
-	toJSON(): any {
-		return {
-			type: this.type,
-			call_id: this.callId,
-			name: this.name,
-			arguments: this.args,
-		}
-	}
 }

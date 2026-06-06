@@ -21,11 +21,4 @@ export class UserMessageItem extends ContextItem {
 		return new UserMessageItem(content)
 	}
 
-	toJSON(): any {
-		return {
-			type: this.type,
-			role: this.role,
-			content: this.content.toJSON(),
-		}
-	}
 }

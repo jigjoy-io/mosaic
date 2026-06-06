@@ -27,12 +27,4 @@ export class ReasoningItem extends ContextItem {
 		return new ReasoningItem(data.content, data.encryptedContent, data.summary)
 	}
 
-	toJSON(): any {
-		return {
-			type: this.type,
-			content: this.content?.toJSON(),
-			encryptedContent: this.encryptedContent,
-			summary: this.summary.map((s) => s.toJSON()),
-		}
-	}
 }

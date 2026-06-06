@@ -4,6 +4,4 @@ export abstract class ContextItem {
 	getType(): string {
 		return this.type
 	}
-
-	abstract toJSON(): any
 }

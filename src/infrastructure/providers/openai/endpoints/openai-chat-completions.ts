@@ -1,10 +1,5 @@
-import { ModelContext } from "@domain/model-context/model-context"
 import { ContextItem } from "@domain/model-context/context-item/context-item"
 import { InputText } from "@domain/model-context/context-item/item-content/input-text"
-import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
-import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
-import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
-import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
@@ -92,36 +87,14 @@ export class OpenAIChatCompletions implements Endpoint {
 	}
 
 	buildRequest(inferenceRequest: unknown): any {
-		const specification = inferenceRequest.model.specification
+
 
 		// Consumer-supplied vendor quirks first, so the standard fields
 		// below win on key collisions.
 		const request: any = {
 			...this.extraBody,
-			model: specification.name,
-			messages: this.mapContextToRequest(inferenceRequest.context),
 		}
 
-		if (specification.supportFunctionCalling && inferenceRequest.model.getTools().length > 0) {
-			request.tools = inferenceRequest.model.getTools().map((tool) => {
-				return {
-					type: "function",
-					function: {
-						name: tool.name,
-						description: tool.description,
-						parameters: tool.parameters,
-					},
-				}
-			})
-		}
-
-		// `reasoning_effort` is a standard OpenAI Chat Completions field;
-		// emit it when the model declares reasoning support. Anything
-		// non-standard (e.g. DeepSeek's `thinking` wrapper) is the
-		// consumer's job via `extraBody`.
-		if (specification.supportReasoningEffort) {
-			request.reasoning_effort = inferenceRequest.model.getReasoningEffort()
-		}
 
 		return request
 	}
@@ -137,49 +110,6 @@ export class OpenAIChatCompletions implements Endpoint {
 			new InputTokenDetails(response.usage.prompt_tokens_details?.cached_tokens ?? 0),
 			new OutputTokenDetails(response.usage.completion_tokens_details?.reasoning_tokens ?? 0),
 		)
-	}
-
-	mapContextToRequest(context: ModelContext): any[] {
-		const messages: any[] = []
-
-		for (const item of context.getItems()) {
-			if (item instanceof DeveloperMessageItem || item instanceof SystemMessageItem) {
-				messages.push({ role: "system", content: item.content.text })
-				continue
-			}
-
-			if (item instanceof UserMessageItem) {
-				messages.push({ role: "user", content: item.content.text })
-				continue
-			}
-
-			if (item instanceof ModelMessageItem) {
-				messages.push({ role: "assistant", content: item.content.text })
-				continue
-			}
-
-			if (item instanceof FunctionCallItem) {
-				const toolCall = {
-					id: item.callId,
-					type: "function",
-					function: { name: item.name, arguments: item.args },
-				}
-				const last = messages[messages.length - 1]
-				if (last?.role === "assistant") {
-					last.tool_calls = last.tool_calls ?? []
-					last.tool_calls.push(toolCall)
-				} else {
-					messages.push({ role: "assistant", content: null, tool_calls: [toolCall] })
-				}
-				continue
-			}
-
-			if (item instanceof FunctionCallOutputItem) {
-				messages.push({ role: "tool", tool_call_id: item.callId, content: item.output.text })
-			}
-		}
-
-		return messages
 	}
 
 	extractContextItems(response: any): ContextItem[] {

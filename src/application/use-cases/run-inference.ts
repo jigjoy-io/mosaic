@@ -20,7 +20,7 @@ export class RunInference implements RunInferenceUseCase<ModelName> {
 
     async execute(inferenceParams: InferenceParams<ModelName>): Promise<void> {
 
-        const { context, caller, environment } = inferenceParams
+        const { caller, environment } = inferenceParams
 
         const modelInfo = this.modelRepository.getModelInfo(inferenceParams.model)
         

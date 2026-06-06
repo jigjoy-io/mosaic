@@ -15,7 +15,8 @@ import { gpt54MiniSpecification } from "@infra/providers/openai/models/gpt-5-4-m
 import { gpt54NanoSpecification } from "@infra/providers/openai/models/gpt-5-4-nano";
 import { gpt55Specification } from "@infra/providers/openai/models/gpt-5-5";
 import { Endpoint } from "@domain/generative-model/endpoint";
-import { AnthropicMessagesMapper, EndpointRequestMapper } from "@infra/providers/anthropic/endpoints/anthropic-messages-mapper";
+import { AnthropicMessagesMapper } from "@infra/providers/anthropic/endpoints/anthropic-messages-mapper";
+import { EndpointRequestMapper } from "@domain/generative-model/endpoint-request-mapper";
 import { claudeHaiku45Specification } from "@infra/providers/anthropic/models/claude-4-5-haiku";
 
 export type ModelInfo = {
