@@ -1,25 +1,12 @@
 import { ModelName } from "@app/services/model-repository";
 import { InferenceParams } from "@domain/agentic-environment/inference/params";
-import { ContextEndpointMapper } from "@domain/generative-model/capability/context";
-import { ReasoningEffortEndpointMapper } from "@domain/generative-model/capability/reasoning-effort";
-import { StreamingEndpointMapper } from "@domain/generative-model/capability/streaming";
-import { StructuredOutputEndpointMapper } from "@domain/generative-model/capability/structured-output";
-import { ToolCallingEndpointMapper } from "@domain/generative-model/capability/tool-calling";
+import { EndpointRequestMapper } from "@domain/generative-model/endpoint-request-mapper";
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message";
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output";
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message";
 import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message";
-import { ContextItem } from "@domain/model-context/context-item/context-item";
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call";
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message";
-
-
-export type EndpointRequestMapper = ToolCallingEndpointMapper &
-                                    ReasoningEffortEndpointMapper &
-                                    StreamingEndpointMapper &
-                                    StructuredOutputEndpointMapper &
-                                    ReasoningEffortEndpointMapper &
-                                    ContextEndpointMapper;
 
 export class AnthropicMessagesMapper implements EndpointRequestMapper {
 

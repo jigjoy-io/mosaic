@@ -12,6 +12,7 @@ import { ReasoningEffortSpecification } from "@domain/generative-model/capabilit
 import { StreamingSpecification } from "@domain/generative-model/capability/streaming";
 import { NonStreamingInference, StreamingInference } from "@app/services/inference-runner";
 import { ModelName } from "@app/services/model-repository";
+import { ContextSpecification } from "@domain/generative-model/capability/context";
 
 export class RunInference implements RunInferenceUseCase<ModelName> {
 
@@ -28,6 +29,7 @@ export class RunInference implements RunInferenceUseCase<ModelName> {
             new ToolCallingSpecification(modelInfo.mapper),
             new StreamingSpecification(modelInfo.mapper),
             new StructuredOutputSpecification(modelInfo.mapper),
+            new ContextSpecification(modelInfo.mapper),
         ]
 
         let request = {}
