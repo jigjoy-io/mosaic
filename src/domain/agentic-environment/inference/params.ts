@@ -4,8 +4,8 @@ import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environm
 import { Participant } from "../participant";
 import { StructuredOutputFormat } from "@domain/generative-model/capability/structured-output";
 
-export type InferenceParams = {
-    model: string;
+export type InferenceParams<TModel extends string> = {
+    model: TModel;
     reasoningEffort?: string;
     tools?: Tool[];
     streaming?: boolean;

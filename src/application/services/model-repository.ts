@@ -18,41 +18,55 @@ import { Gpt55 } from "@infra/providers/openai/models/gpt-5-5";
 import { Endpoint } from "@domain/generative-model/runtime";
 
 export type ModelInfo = {
-    endpoint: Endpoint;
-    model: GenerativeModel;
+	endpoint: Endpoint
+	model: GenerativeModel
 }
+
+export type ModelProviders = "openai" | "anthropic" | "gemini" | "deepseek"
+export type ModelName =
+	| "gpt-5-4"
+	| "gpt-5-4-mini"
+	| "gpt-5-4-nano"
+	| "gpt-5-5"
+	| "claude-4-5-haiku"
+	| "claude-4-6-sonnet"
+	| "claude-4-7-opus"
+	| "claude-4-8-opus"
+    | "gemini-3-5-flash"
+    | "gemini-3-1-pro"
+    | "deepseek-v4-flash"
+    | "deepseek-v4-pro"
 
 export class ModelRepository {
     
     getModelInfo(model: string): ModelInfo {
-        switch (model) {
-            case "gpt-5-4":
+		switch (model) {
+			case "gpt-5-4":
                 return { endpoint: new OpenAIResponses(), model: new Gpt54() };
-            case "gpt-5-4-mini":
+			case "gpt-5-4-mini":
                 return { endpoint: new OpenAIResponses(), model: new Gpt54Mini() };
-            case "gpt-5-4-nano":
+			case "gpt-5-4-nano":
                 return { endpoint: new OpenAIResponses(), model: new Gpt54Nano() };
-            case "gpt-5-5":
+			case "gpt-5-5":
                 return { endpoint: new OpenAIResponses(), model: new Gpt55() };
-            case "claude-4-5-haiku":
+			case "claude-4-5-haiku":
                 return { endpoint: new AnthropicMessages(), model: new ClaudeHaiku45() };
-            case "claude-4-6-sonnet":
+			case "claude-4-6-sonnet":
                 return { endpoint: new AnthropicMessages(), model: new ClaudeSonnet46() };
-            case "claude-4-7-opus":
+			case "claude-4-7-opus":
                 return { endpoint: new AnthropicMessages(), model: new ClaudeOpus47() };
-            case "claude-4-8-opus":
+			case "claude-4-8-opus":
                 return { endpoint: new AnthropicMessages(), model: new ClaudeOpus48() };
-            case "gemini-3-5-flash":
+			case "gemini-3-5-flash":
                 return { endpoint: new GeminiGenerateContent(), model: new Gemini35Flash() };
-            case "gemini-3-1-pro":
+			case "gemini-3-1-pro":
                 return { endpoint: new GeminiGenerateContent(), model: new Gemini31Pro() };
-            case "deepseek-v4-flash":
+			case "deepseek-v4-flash":
                 return { endpoint: new OpenAIChatCompletions(), model: new DeepSeekV4Flash() };
-            case "deepseek-v4-pro":
-                return { endpoint: new OpenAIChatCompletions(), model: new DeepSeekV4Pro() };
-            default:
-                throw new Error(`Unsupported model: ${model}`);
-        }
-    }
-
+			case "deepseek-v4-pro":
+				return { endpoint: new OpenAIChatCompletions(), model: new DeepSeekV4Pro() }
+			default:
+				throw new Error(`Unsupported model: ${model}`)
+		}
+	}
 }
