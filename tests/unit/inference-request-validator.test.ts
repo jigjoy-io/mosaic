@@ -9,6 +9,7 @@ import { StreamingValidation } from "@domain/generative-model/request-validation
 import { StructuredOutputValidation } from "@domain/generative-model/request-validation/structured-output"
 import { ContextValidation } from "@domain/generative-model/request-validation/context"
 import { ModelContext } from "@domain/model-context/model-context"
+import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { InputText } from "@domain/model-context/context-item/item-content/input-text"
 import { gpt54Specification } from "@infra/providers/openai/models/gpt-5-4"
@@ -159,6 +160,13 @@ describe("ContextValidation", () => {
 		expect(rule.isValid(makeParams(), makeSpecification())).toBe(true)
 	})
 
+	it("passes when context includes supported message items", () => {
+		const context = ModelContext.create("test")
+		context.addContextItem(UserMessageItem.create("hello"))
+
+		expect(rule.isValid(makeParams({ context }), makeSpecification())).toBe(true)
+	})
+
 	it("fails when a context item type is unsupported", () => {
 		const context = ModelContext.create("test")
 		context.addContextItem({
@@ -166,5 +174,19 @@ describe("ContextValidation", () => {
 		} as never)
 
 		expect(rule.isValid(makeParams({ context }), makeSpecification())).toBe(false)
+	})
+
+	it("fails when a message role is unsupported by the model", () => {
+		const context = ModelContext.create("test")
+		context.addContextItem(UserMessageItem.create("hello"))
+
+		expect(
+			rule.isValid(
+				makeParams({ context }),
+				makeSpecification({
+					supportedContextItemTypes: ["reasoning", "function_call", "function_call_output"],
+				}),
+			),
+		).toBe(false)
 	})
 })
