@@ -98,7 +98,9 @@ export class AgenticEnvironment {
 					src.onError(error)
 				} catch (error) {
 					if (this.showLogs) {
-						console.warn(`[AgenticEnvironment] Participant.onError() failed. Reason: ${error as Error}\n ${JSON.stringify({ error }, null, 2)}`)
+						console.warn(
+							`[AgenticEnvironment] Participant.onError() failed. Reason: ${error as Error}\n ${JSON.stringify({ error }, null, 2)}`,
+						)
 					}
 				} finally {
 					src.markInactive(this)
@@ -109,7 +111,9 @@ export class AgenticEnvironment {
 					sub.onParticipantError(source, error)
 				} catch (error) {
 					if (this.showLogs) {
-						console.warn(`[AgenticEnvironment] Participant.onError() failed. Reason: ${error as Error}\n ${JSON.stringify({ error }, null, 2)}`)
+						console.warn(
+							`[AgenticEnvironment] Participant.onError() failed. Reason: ${error as Error}\n ${JSON.stringify({ error }, null, 2)}`,
+						)
 					}
 				}
 			},
@@ -131,7 +135,6 @@ export class AgenticEnvironment {
 		const authorizedListeners = this.getListeningParticipants(source)
 
 		for (const subscriber of this.subscribers) {
-
 			const isActive = subscriber.getEnvironmentState(this)
 
 			if (isActive) {
@@ -142,7 +145,6 @@ export class AgenticEnvironment {
 						handlers?.external?.(subscriber)
 					}
 				} catch (error) {
-
 					this.handleError(subscriber, error as Error)
 				}
 			}

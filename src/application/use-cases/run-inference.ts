@@ -4,53 +4,39 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { RunInferenceUseCase } from "@domain/agentic-environment/use-cases/run-inference"
-import { InferenceRunner } from "@app/services/inference-runner"
-import { ModelName, ModelRepository } from "@app/services/model-repository"
-import { GenerativeModel } from "@domain/generative-model/generative-model"
+import { InferenceRunner, NonStreamingInference, StreamingInference } from "@app/services/inference-runner"
+import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
+import { ModelName } from "@domain/generative-model/generative-model"
+import { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
 
 export class RunInference implements RunInferenceUseCase<ModelName> {
 	constructor(
-		private readonly modelRepository: ModelRepository,
-		private readonly inferenceRunner: InferenceRunner,
+		private readonly generativeModelRepository: GenerativeModelRepository,
+		private readonly requestValidator: InferenceRequestValidator,
 	) {}
 
-	private setModelCapabilities(model: GenerativeModel, inferenceParams: InferenceParams<ModelName>) {
-		const { streaming, tools, reasoningEffort, structuredOutput } = inferenceParams
-
-		if (streaming) {
-			model.setStreaming(true)
-		}
-
-		if (tools) {
-			model.setTools(tools)
-		}
-
-		if (reasoningEffort) {
-			model.setReasoningEffort(reasoningEffort)
-		}
-
-		if (structuredOutput) {
-			model.setStructuredOutput(structuredOutput)
-		}
-
-		return model
-	}
-
 	async execute(inferenceParams: InferenceParams<ModelName>): Promise<void> {
-		const { model, context, caller, environment, signal } = inferenceParams
+		const { caller, environment, signal } = inferenceParams
 
-		const modelInfo = this.modelRepository.getModelInfo(model)
+		const generativeModel = await this.generativeModelRepository.getByModelName(inferenceParams.model)
 
-		const generativeModel = this.setModelCapabilities(modelInfo.model, inferenceParams)
-		modelInfo.model = generativeModel
+		this.requestValidator.validate(inferenceParams, generativeModel.specification)
 
-		const result = this.inferenceRunner.run(context, modelInfo, signal)
+		const resolvedParams: InferenceParams<ModelName> = {
+			...inferenceParams,
+			maxOutputTokens: inferenceParams.maxOutputTokens ?? generativeModel.specification.maxOutputTokens,
+		}
+
+		const inferenceRunner: InferenceRunner = inferenceParams.streaming
+			? new StreamingInference()
+			: new NonStreamingInference()
+
+		const result = inferenceRunner.run(resolvedParams, generativeModel.endpoint)
 
 		for await (const item of result) {
 			if (signal?.aborted) {
 				break
 			}
-
 			if (item instanceof ReasoningItem) {
 				environment.deliverReasoning(caller, item)
 			} else if (item instanceof FunctionCallItem) {

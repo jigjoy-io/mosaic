@@ -11,14 +11,6 @@ export class SystemMessageItem extends ContextItem {
 		this.content = content
 	}
 
-	toJSON(): any {
-		return {
-			type: this.type,
-			role: this.role,
-			content: this.content.toJSON(),
-		}
-	}
-
 	static create(text: string): SystemMessageItem {
 		const content = InputText.create(text)
 		return new SystemMessageItem(content)

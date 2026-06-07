@@ -3,10 +3,8 @@ import { FunctionCallOutputItem } from "@domain/model-context/context-item/clien
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 
 export class FunctionCallRunner {
-
 	async *run(call: FunctionCallItem, tool: Tool, signal?: AbortSignal): AsyncIterable<FunctionCallOutputItem> {
-
-		if(signal?.aborted) {
+		if (signal?.aborted) {
 			return
 		}
 
