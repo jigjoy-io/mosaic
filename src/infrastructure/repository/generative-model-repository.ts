@@ -77,6 +77,7 @@ export class InMemoryGenerativeModelRepository implements GenerativeModelReposit
 					endpoint: new AnthropicMessages(anthropicMessagesMapper),
 					specification: claudeOpus48Specification,
 				}
+				break
 			case "gemini-3-5-flash":
 				generativeModel = {
 					endpoint: new GeminiGenerateContent(geminiGenerateContentMapper),

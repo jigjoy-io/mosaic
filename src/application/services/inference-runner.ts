@@ -14,12 +14,18 @@ export interface InferenceRunner {
 
 export class StreamingInference implements InferenceRunner {
 	async *run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem> {
+		if (request.signal?.aborted) {
+			return
+		}
 		yield* endpoint.stream(request)
 	}
 }
 
 export class NonStreamingInference implements InferenceRunner {
 	async *run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem> {
+		if (request.signal?.aborted) {
+			return
+		}
 		const response = await endpoint.infer(request)
 		for (const item of response.contextItems) {
 			yield item as InferenceItem
