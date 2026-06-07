@@ -22,11 +22,16 @@ export class RunInference implements RunInferenceUseCase<ModelName> {
 
 		this.requestValidator.validate(inferenceParams, generativeModel.specification)
 
+		const resolvedParams: InferenceParams<ModelName> = {
+			...inferenceParams,
+			maxOutputTokens: inferenceParams.maxOutputTokens ?? generativeModel.specification.maxOutputTokens,
+		}
+
 		const inferenceRunner: InferenceRunner = inferenceParams.streaming
 			? new StreamingInference()
 			: new NonStreamingInference()
 
-		const result = inferenceRunner.run(inferenceParams, generativeModel.endpoint)
+		const result = inferenceRunner.run(resolvedParams, generativeModel.endpoint)
 
 		for await (const item of result) {
 			if (item instanceof ReasoningItem) {

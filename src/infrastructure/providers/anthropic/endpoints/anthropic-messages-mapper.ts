@@ -24,7 +24,7 @@ export class AnthropicMessagesMapper implements InferenceEndpointMapper {
 			messages,
 		}
 
-		request.max_tokens = inferenceParams.maxOutputTokens ?? 8192
+		request.max_tokens = inferenceParams.maxOutputTokens!
 
 		if (system) {
 			request.system = system
@@ -101,6 +101,18 @@ export class AnthropicMessagesMapper implements InferenceEndpointMapper {
 				continue
 			}
 
+			if (item instanceof ReasoningItem) {
+				const block: { type: "thinking"; thinking?: string; signature?: string } = { type: "thinking" }
+				if (item.content) {
+					block.thinking = item.content.text
+				}
+				if (item.encryptedContent) {
+					block.signature = item.encryptedContent
+				}
+				this.addContentBlock(messages, "assistant", block)
+				continue
+			}
+
 			if (item instanceof FunctionCallItem) {
 				let input: any
 				try {
@@ -169,7 +181,7 @@ export class AnthropicMessagesMapper implements InferenceEndpointMapper {
 				items.push(
 					ReasoningItem.rehydrate({
 						content: block.thinking ? InputText.rehydrate({ text: block.thinking }) : undefined,
-						encryptedContent: undefined,
+						encryptedContent: block.signature,
 						summary: [],
 					}),
 				)
