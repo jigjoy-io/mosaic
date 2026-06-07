@@ -24,9 +24,7 @@ export class AnthropicMessagesMapper implements InferenceEndpointMapper {
 			messages,
 		}
 
-		if (inferenceParams.maxOutputTokens !== undefined) {
-			request.max_tokens = inferenceParams.maxOutputTokens
-		}
+		request.max_tokens = inferenceParams.maxOutputTokens ?? 8192
 
 		if (system) {
 			request.system = system
