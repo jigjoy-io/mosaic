@@ -45,25 +45,25 @@ export class InMemoryGenerativeModelRepository implements GenerativeModelReposit
 					specification: gpt55Specification,
 				}
 				break
-			case "claude-4.5-haiku":
+			case "claude-haiku-4-5":
 				generativeModel = {
 					endpoint: new AnthropicMessages(),
 					specification: claudeHaiku45Specification,
 				}
 				break
-			case "claude-4.6-sonnet":
+			case "claude-sonnet-4-6":
 				generativeModel = {
 					endpoint: new AnthropicMessages(),
 					specification: claudeSonnet46Specification,
 				}
 				break
-			case "claude-4.7-opus":
+			case "claude-opus-4-7":
 				generativeModel = {
 					endpoint: new AnthropicMessages(),
 					specification: claudeOpus47Specification,
 				}
 				break
-			case "claude-4.8-opus":
+			case "claude-opus-4-8":
 				generativeModel = {
 					endpoint: new AnthropicMessages(),
 					specification: claudeOpus48Specification,
