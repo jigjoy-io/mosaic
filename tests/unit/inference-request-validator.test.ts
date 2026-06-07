@@ -25,7 +25,7 @@ function makeParams(overrides: Partial<InferenceParams<ModelName>> = {}): Infere
 	)
 
 	return {
-		model: "gpt-5-4",
+		model: "gpt-5.4",
 		context,
 		caller: {} as InferenceParams<ModelName>["caller"],
 		environment: {} as InferenceParams<ModelName>["environment"],
@@ -97,7 +97,10 @@ describe("ReasoningEffortValidation", () => {
 
 	it("fails when reasoning effort is requested but unsupported", () => {
 		expect(
-			rule.isValid(makeParams({ reasoningEffort: "high" }), makeSpecification({ supportsReasoningEffort: false })),
+			rule.isValid(
+				makeParams({ reasoningEffort: "high" }),
+				makeSpecification({ supportsReasoningEffort: false }),
+			),
 		).toBe(false)
 	})
 
@@ -118,7 +121,9 @@ describe("ToolCallingValidation", () => {
 	})
 
 	it("fails when tools are passed, even empty, and function calling is unsupported", () => {
-		expect(rule.isValid(makeParams({ tools: [] }), makeSpecification({ supportsFunctionCalling: false }))).toBe(false)
+		expect(rule.isValid(makeParams({ tools: [] }), makeSpecification({ supportsFunctionCalling: false }))).toBe(
+			false,
+		)
 	})
 })
 
