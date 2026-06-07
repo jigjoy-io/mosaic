@@ -132,7 +132,10 @@ export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 
 		for (const item of response.output ?? []) {
 			if (item.type === "message" && item.role === "assistant") {
-				items.push(ModelMessageItem.rehydrate(item.content[0] as { text: string }))
+				const firstContent = item.content?.[0]
+				if (firstContent) {
+					items.push(ModelMessageItem.rehydrate(firstContent as { text: string }))
+				}
 				continue
 			}
 			if (item.type === "function_call") {

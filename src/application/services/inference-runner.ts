@@ -17,7 +17,7 @@ export class StreamingInference implements InferenceRunner {
 		if (request.signal?.aborted) {
 			return
 		}
-		yield* endpoint.stream(request)
+		yield* endpoint.stream(request, request.signal)
 	}
 }
 

@@ -7,5 +7,5 @@ import { InferenceEndpointMapper } from "./inference-endpoint-mapper"
 export interface Endpoint {
 	endpointMapper: InferenceEndpointMapper
 	infer(requestParams: InferenceParams<ModelName>): Promise<InferenceResponse>
-	stream(requestParams: InferenceParams<ModelName>): AsyncIterable<SemanticEvent<unknown>>
+	stream(requestParams: InferenceParams<ModelName>, signal?: AbortSignal): AsyncIterable<SemanticEvent<unknown>>
 }
