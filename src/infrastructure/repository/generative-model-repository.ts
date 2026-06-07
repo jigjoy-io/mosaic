@@ -75,7 +75,7 @@ export class InMemoryGenerativeModelRepository implements GenerativeModelReposit
 					specification: gemini35FlashSpecification,
 				}
 				break
-			case "gemini-3.1-pro":
+			case "gemini-3.1-pro-preview":
 				generativeModel = {
 					endpoint: new GeminiGenerateContent(),
 					specification: gemini31ProSpecification,
