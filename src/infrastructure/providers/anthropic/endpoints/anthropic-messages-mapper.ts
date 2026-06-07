@@ -102,14 +102,11 @@ export class AnthropicMessagesMapper implements InferenceEndpointMapper {
 			}
 
 			if (item instanceof ReasoningItem) {
-				const block: { type: "thinking"; thinking?: string; signature?: string } = { type: "thinking" }
-				if (item.content) {
-					block.thinking = item.content.text
-				}
-				if (item.encryptedContent) {
-					block.signature = item.encryptedContent
-				}
-				this.addContentBlock(messages, "assistant", block)
+				this.addContentBlock(messages, "assistant", {
+					type: "thinking",
+					thinking: item.content?.text ?? "",
+					signature: item.encryptedContent ?? "",
+				})
 				continue
 			}
 

@@ -28,6 +28,9 @@ export class NonStreamingInference implements InferenceRunner {
 		}
 		const response = await endpoint.infer(request)
 		for (const item of response.contextItems) {
+			if (request.signal?.aborted) {
+				break
+			}
 			yield item as InferenceItem
 		}
 	}

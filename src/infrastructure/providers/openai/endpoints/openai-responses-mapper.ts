@@ -8,6 +8,7 @@ import { UserMessageItem } from "@domain/model-context/context-item/client-item/
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
+import { SummaryText } from "@domain/model-context/context-item/item-content/summary-text"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { ContextItem } from "@domain/model-context/context-item/context-item"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
@@ -64,7 +65,11 @@ export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 		const input: any[] = []
 
 		for (const item of inferenceParams.context.getItems()) {
-			if (item instanceof DeveloperMessageItem || item instanceof SystemMessageItem || item instanceof UserMessageItem) {
+			if (
+				item instanceof DeveloperMessageItem ||
+				item instanceof SystemMessageItem ||
+				item instanceof UserMessageItem
+			) {
 				input.push({
 					type: item.type,
 					role: item.role,
@@ -102,12 +107,14 @@ export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 			}
 
 			if (item instanceof ReasoningItem) {
-				input.push({
+				const reasoningInput: Record<string, unknown> = {
 					type: item.type,
-					content: item.content ? [{ type: "input_text", text: item.content.text }] : undefined,
-					encryptedContent: item.encryptedContent,
 					summary: item.summary.map((summary) => ({ type: "summary_text", text: summary.text })),
-				})
+				}
+				if (item.encryptedContent !== undefined) {
+					reasoningInput.encrypted_content = item.encryptedContent
+				}
+				input.push(reasoningInput)
 			}
 		}
 
@@ -149,7 +156,15 @@ export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 				continue
 			}
 			if (item.type === "reasoning") {
-				items.push(ReasoningItem.rehydrate(item))
+				items.push(
+					ReasoningItem.rehydrate({
+						content: undefined,
+						encryptedContent: item.encrypted_content,
+						summary: (item.summary ?? []).map((summary: { text: string }) =>
+							SummaryText.rehydrate({ text: summary.text }),
+						),
+					}),
+				)
 			}
 		}
 

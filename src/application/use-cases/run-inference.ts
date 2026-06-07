@@ -16,7 +16,7 @@ export class RunInference implements RunInferenceUseCase<ModelName> {
 	) {}
 
 	async execute(inferenceParams: InferenceParams<ModelName>): Promise<void> {
-		const { caller, environment } = inferenceParams
+		const { caller, environment, signal } = inferenceParams
 
 		const generativeModel = await this.generativeModelRepository.getByModelName(inferenceParams.model)
 
@@ -34,6 +34,9 @@ export class RunInference implements RunInferenceUseCase<ModelName> {
 		const result = inferenceRunner.run(resolvedParams, generativeModel.endpoint)
 
 		for await (const item of result) {
+			if (signal?.aborted) {
+				break
+			}
 			if (item instanceof ReasoningItem) {
 				environment.deliverReasoning(caller, item)
 			} else if (item instanceof FunctionCallItem) {
