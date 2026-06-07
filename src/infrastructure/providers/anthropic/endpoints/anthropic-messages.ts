@@ -1,37 +1,39 @@
-import { ContextItem } from "@domain/model-context/context-item/context-item"
-import { InputText } from "@domain/model-context/context-item/item-content/input-text"
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
-import Anthropic from "@anthropic-ai/sdk"
 import { Endpoint } from "@domain/generative-model/endpoint"
+import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import { ModelName } from "@domain/generative-model/generative-model"
+import { AnthropicMessagesMapper } from "./anthropic-messages-mapper"
+import Anthropic from "@anthropic-ai/sdk"
+import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
+/**
+ * Native Anthropic adapter on the `@anthropic-ai/sdk` (`messages.create`).
+ * Maps domain context to Anthropic's `messages`/`content` blocks shape,
+ * system prompt, tools, adaptive thinking, and structured output config.
+ */
 export class AnthropicMessages implements Endpoint {
+	endpointMapper: InferenceEndpointMapper
 	private readonly client: Anthropic
 
-	constructor() {
+	constructor(endpointMapper: AnthropicMessagesMapper) {
+		this.endpointMapper = endpointMapper
 		this.client = new Anthropic()
 	}
 
-	async infer(inferenceRequest: any): Promise<InferenceResponse> {
+	async infer(inferenceParams: InferenceParams<ModelName>): Promise<InferenceResponse> {
+		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
 		const response = await this.client.messages.create(inferenceRequest)
 
-		const contextItems = this.extractContextItems(response)
-		const tokenUsage = this.extractTokenUsage(response)
-		return new InferenceResponse(contextItems, tokenUsage)
+		return this.endpointMapper.toResponse(response)
 	}
 
 	async *stream(
-		inferenceRequest: any,
+		inferenceParams: InferenceParams<ModelName>,
 		signal?: AbortSignal,
 	): AsyncIterable<SemanticEvent<unknown>> {
-		const stream: any = await this.client.messages.create({
-			...inferenceRequest,
-			stream: true,
-		})
+		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
+		const stream: any = await this.client.messages.create(inferenceRequest)
 
 		for await (const event of stream) {
 			if (signal?.aborted) {
@@ -40,52 +42,4 @@ export class AnthropicMessages implements Endpoint {
 			yield new SemanticEvent(event.type, event)
 		}
 	}
-
-	extractTokenUsage(response: Anthropic.Messages.Message): TokenUsage | undefined {
-		if (!response.usage) {
-			return undefined
-		}
-		return new TokenUsage(
-			response.usage.input_tokens,
-			response.usage.output_tokens,
-			response.usage.input_tokens + response.usage.output_tokens,
-			new InputTokenDetails(
-				(response.usage.cache_creation_input_tokens ?? 0) + (response.usage.cache_read_input_tokens ?? 0),
-			),
-			new OutputTokenDetails(0),
-		)
-	}
-
-	extractContextItems(response: Anthropic.Messages.Message): ContextItem[] {
-		const items: ContextItem[] = []
-
-		for (const block of response.content as any[]) {
-			if (block.type === "text") {
-				items.push(ModelMessageItem.rehydrate({ text: block.text }))
-				continue
-			}
-			if (block.type === "tool_use") {
-				items.push(
-					FunctionCallItem.rehydrate({
-						callId: block.id,
-						name: block.name,
-						args: JSON.stringify(block.input ?? {}),
-					}),
-				)
-				continue
-			}
-			if (block.type === "thinking") {
-				items.push(
-					ReasoningItem.rehydrate({
-						content: block.thinking ? InputText.rehydrate({ text: block.thinking }) : undefined,
-						encryptedContent: undefined,
-						summary: [],
-					}),
-				)
-			}
-		}
-
-		return items
-	}
-
 }

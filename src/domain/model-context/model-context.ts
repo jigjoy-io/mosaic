@@ -46,8 +46,4 @@ export class ModelContext {
 	static rehydrate(data: { id: string; projectId: string; items: ContextItem[] }): ModelContext {
 		return new ModelContext(data.id, data.projectId, data.items)
 	}
-
-	toJSON(): any {
-		return this.items.map((item) => item.toJSON())
-	}
 }

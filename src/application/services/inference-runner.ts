@@ -3,19 +3,23 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { Endpoint } from "@domain/generative-model/endpoint"
+import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import { ModelName } from "@domain/generative-model/generative-model"
 
 type InferenceItem = ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent<unknown>
 
-export class StreamingInference {
+export interface InferenceRunner {
+	run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem>
+}
 
-	async *run(request: any, endpoint: Endpoint): AsyncIterable<InferenceItem> {
+export class StreamingInference implements InferenceRunner {
+	async *run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem> {
 		yield* endpoint.stream(request)
 	}
 }
 
-export class NonStreamingInference {
-
-	async *run(request: any, endpoint: Endpoint): AsyncIterable<InferenceItem> {
+export class NonStreamingInference implements InferenceRunner {
+	async *run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem> {
 		const response = await endpoint.infer(request)
 		for (const item of response.contextItems) {
 			yield item as InferenceItem

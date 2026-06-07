@@ -20,5 +20,4 @@ export class FunctionCallOutputItem extends ContextItem {
 	static rehydrate(data: { callId: string; output: InputText }): FunctionCallOutputItem {
 		return new FunctionCallOutputItem(data.callId, data.output)
 	}
-
 }

@@ -15,5 +15,4 @@ export class ModelMessageItem extends ContextItem {
 		const content = OutputText.rehydrate(data)
 		return new ModelMessageItem(content)
 	}
-
 }

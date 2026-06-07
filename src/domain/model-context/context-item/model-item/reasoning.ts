@@ -26,5 +26,4 @@ export class ReasoningItem extends ContextItem {
 	}): ReasoningItem {
 		return new ReasoningItem(data.content, data.encryptedContent, data.summary)
 	}
-
 }

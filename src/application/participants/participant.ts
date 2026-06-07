@@ -7,21 +7,21 @@ import { ReasoningItem } from "@domain/model-context/context-item/model-item/rea
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 
 export class BaseParticipant extends Participant {
-	onFunctionCall(item: FunctionCallItem) { }
-	onExternalFunctionCall(source: Participant, item: FunctionCallItem) { }
-	onFunctionCallOutput(item: FunctionCallOutputItem) { }
-	onExternalFunctionCallOutput(source: Participant, item: FunctionCallOutputItem) { }
-	onReasoning(item: ReasoningItem) { }
-	onExternalReasoning(source: Participant, item: ReasoningItem) { }
-	onModelMessage(item: ModelMessageItem) { }
-	onExternalModelMessage(source: Participant, item: ModelMessageItem) { }
-	onMessage(message: string) { }
-	onJoined() { }
-	onLeft() { }
-	onParticipantJoined(participant: Participant) { }
-	onParticipantLeft(participant: Participant) { }
-	onInternalEvent(item: SemanticEvent<unknown>) { }
-	onExternalEvent(source: Participant, item: SemanticEvent<unknown>) { }
-	onError(error: AgenticError): void { }
-	onParticipantError(source: Participant, error: AgenticError): void { }
+	onFunctionCall(item: FunctionCallItem) {}
+	onExternalFunctionCall(source: Participant, item: FunctionCallItem) {}
+	onFunctionCallOutput(item: FunctionCallOutputItem) {}
+	onExternalFunctionCallOutput(source: Participant, item: FunctionCallOutputItem) {}
+	onReasoning(item: ReasoningItem) {}
+	onExternalReasoning(source: Participant, item: ReasoningItem) {}
+	onModelMessage(item: ModelMessageItem) {}
+	onExternalModelMessage(source: Participant, item: ModelMessageItem) {}
+	onMessage(message: string) {}
+	onJoined() {}
+	onLeft() {}
+	onParticipantJoined(participant: Participant) {}
+	onParticipantLeft(participant: Participant) {}
+	onInternalEvent(item: SemanticEvent<unknown>) {}
+	onExternalEvent(source: Participant, item: SemanticEvent<unknown>) {}
+	onError(error: AgenticError): void {}
+	onParticipantError(source: Participant, error: AgenticError): void {}
 }

@@ -14,13 +14,4 @@ export class InputText extends ItemContent {
 	static rehydrate(data: { text: string }): InputText {
 		return new InputText(data.text)
 	}
-
-	toJSON(): any[] {
-		return [
-			{
-				type: this.type,
-				text: this.text,
-			},
-		]
-	}
 }

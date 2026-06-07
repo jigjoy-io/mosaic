@@ -20,5 +20,4 @@ export class UserMessageItem extends ContextItem {
 		const content = InputText.rehydrate(data)
 		return new UserMessageItem(content)
 	}
-
 }

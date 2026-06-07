@@ -1,13 +1,11 @@
-import { ContextItem } from "@domain/model-context/context-item/context-item"
-import { InputText } from "@domain/model-context/context-item/item-content/input-text"
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import { Endpoint } from "@domain/generative-model/endpoint"
+import { OpenAIChatCompletionsMapper } from "./openai-chat-completions-mapper"
+import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import { ModelName } from "@domain/generative-model/generative-model"
 import OpenAI from "openai"
+import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
 /**
  * Optional connection config. When omitted, the `openai` SDK reads
@@ -48,10 +46,12 @@ export interface OpenAICompatibleConfig {
  * at any OpenAI-compatible endpoint.
  */
 export class OpenAIChatCompletions implements Endpoint {
+	endpointMapper: InferenceEndpointMapper
 	private readonly client: OpenAI
 	private readonly extraBody: Record<string, unknown>
 
-	constructor(config: OpenAICompatibleConfig = {}) {
+	constructor(endpointMapper: OpenAIChatCompletionsMapper, config: OpenAICompatibleConfig = {}) {
+		this.endpointMapper = endpointMapper
 		// Passing `undefined` for baseURL/apiKey lets the SDK fall back
 		// to OPENAI_BASE_URL / OPENAI_API_KEY from the environment.
 		this.client = new OpenAI({
@@ -61,22 +61,24 @@ export class OpenAIChatCompletions implements Endpoint {
 		this.extraBody = config.extraBody ?? {}
 	}
 
-	async infer(inferenceRequest: unknown): Promise<InferenceResponse> {
-		const response = await this.client.chat.completions.create(this.buildRequest(inferenceRequest))
+	private buildRequest(inferenceParams: InferenceParams<ModelName>): any {
+		return {
+			...this.extraBody,
+			...this.endpointMapper.toRequest(inferenceParams),
+		}
+	}
 
-		const contextItems = this.extractContextItems(response)
-		const tokenUsage = this.extractTokenUsage(response)
-		return new InferenceResponse(contextItems, tokenUsage)
+	async infer(inferenceParams: InferenceParams<ModelName>): Promise<InferenceResponse> {
+		const response = await this.client.chat.completions.create(this.buildRequest(inferenceParams))
+
+		return this.endpointMapper.toResponse(response)
 	}
 
 	async *stream(
-		inferenceRequest: unknown,
+		inferenceParams: InferenceParams<ModelName>,
 		signal?: AbortSignal,
 	): AsyncIterable<SemanticEvent<unknown>> {
-		const stream: any = await this.client.chat.completions.create({
-			...this.buildRequest(inferenceRequest),
-			stream: true,
-		})
+		const stream: any = await this.client.chat.completions.create(this.buildRequest(inferenceParams))
 
 		for await (const event of stream) {
 			if (signal?.aborted) {
@@ -84,65 +86,5 @@ export class OpenAIChatCompletions implements Endpoint {
 			}
 			yield new SemanticEvent(event.object ?? "chat.completion.chunk", event)
 		}
-	}
-
-	buildRequest(inferenceRequest: unknown): any {
-
-
-		// Consumer-supplied vendor quirks first, so the standard fields
-		// below win on key collisions.
-		const request: any = {
-			...this.extraBody,
-		}
-
-
-		return request
-	}
-
-	extractTokenUsage(response: any): TokenUsage | undefined {
-		if (!response.usage) {
-			return undefined
-		}
-		return new TokenUsage(
-			response.usage.prompt_tokens,
-			response.usage.completion_tokens,
-			response.usage.total_tokens,
-			new InputTokenDetails(response.usage.prompt_tokens_details?.cached_tokens ?? 0),
-			new OutputTokenDetails(response.usage.completion_tokens_details?.reasoning_tokens ?? 0),
-		)
-	}
-
-	extractContextItems(response: any): ContextItem[] {
-		const items: ContextItem[] = []
-		const message = response.choices?.[0]?.message
-		if (!message) {
-			return items
-		}
-
-		if (message.reasoning_content) {
-			items.push(
-				ReasoningItem.rehydrate({
-					content: InputText.rehydrate({ text: message.reasoning_content }),
-					encryptedContent: undefined,
-					summary: [],
-				}),
-			)
-		}
-
-		if (message.content) {
-			items.push(ModelMessageItem.rehydrate({ text: message.content }))
-		}
-
-		for (const toolCall of message.tool_calls ?? []) {
-			items.push(
-				FunctionCallItem.rehydrate({
-					callId: toolCall.id,
-					name: toolCall.function.name,
-					args: toolCall.function.arguments,
-				}),
-			)
-		}
-
-		return items
 	}
 }

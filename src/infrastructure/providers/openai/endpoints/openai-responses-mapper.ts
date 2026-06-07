@@ -1,121 +1,155 @@
-import { ModelName } from "@app/services/model-repository";
-import { InferenceParams } from "@domain/agentic-environment/inference/params";
-import { EndpointRequestMapper } from "@domain/generative-model/endpoint-request-mapper";
-import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message";
-import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output";
-import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message";
-import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message";
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call";
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message";
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning";
+import { ModelName } from "@domain/generative-model/generative-model"
+import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
+import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
+import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
+import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
+import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
+import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
+import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
+import { InferenceResponse } from "@domain/agentic-environment/inference/response"
+import { ContextItem } from "@domain/model-context/context-item/context-item"
+import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
+import OpenAI from "openai"
 
-export class OpenAIResponsesMapper implements EndpointRequestMapper {
-
-    mapContextItems(inferenceParams: InferenceParams<ModelName>): unknown {
-
-        const context = inferenceParams.context
-        const messages: any[] = []
-        for (const item of context.getItems()) {
-            if (item instanceof DeveloperMessageItem) {
-                messages.push({
-                    type: item.type,
-                    role: item.role,
-                    content: item.content.text,
-                })
-            }
-            if (item instanceof SystemMessageItem) {
-                messages.push({
-                    type: item.type,
-                    role: item.role,
-                    content: item.content.text,
-                })
-            }
-            if (item instanceof UserMessageItem) {
-                messages.push({
-                    type: item.type,
-                    role: item.role,
-                    content: item.content.text,
-                })
-            }
-            if (item instanceof ModelMessageItem) {
-                messages.push({
-                    type: item.type,
-                    role: item.role,
-                    content: item.content.text,
-                })
-            }
-            if (item instanceof FunctionCallItem) {
-                messages.push({
-                    type: item.type,
-                    name: item.name,
-                    arguments: item.args,
-                    call_id: item.callId
-                })
-            }
-
-            if (item instanceof FunctionCallOutputItem) {
-                messages.push({
-                    type: item.type,
-                    call_id: item.callId,
-                    output: item.output.text,
-                })
-            }
-
-            if (item instanceof ReasoningItem) {
-                messages.push({
-                    type: item.type,
-                    content: item.content?.toJSON(),
-                    encryptedContent: item.encryptedContent,
-                    summary: item.summary.map((s) => s.toJSON()),
-                })
-            }
-        }
-
-        return messages
-    }
-
-    mapToolCalling(inferenceParams: InferenceParams<ModelName>): unknown {
-        if (inferenceParams.tools && inferenceParams.tools.length > 0) {
-			return {
-                tools: inferenceParams.tools?.map((tool) => {
-                    return {
-                        type: tool.type,
-                        name: tool.name,
-                        description: tool.description,
-                        parameters: tool.parameters,
-                    }
-                })
-            }
+export class OpenAIResponsesMapper implements InferenceEndpointMapper {
+	toRequest(inferenceParams: InferenceParams<ModelName>): any {
+		const request: any = {
+			model: inferenceParams.model,
+			input: this.mapContextItems(inferenceParams),
 		}
-    }
 
-    mapStructuredOutput(inferenceParams: InferenceParams<ModelName>): unknown {
-        if (inferenceParams.structuredOutput) {
+		if (inferenceParams.tools && inferenceParams.tools.length > 0) {
+			request.tools = inferenceParams.tools.map((tool) => ({
+				type: tool.type,
+				name: tool.name,
+				description: tool.description,
+				parameters: tool.parameters,
+			}))
+		}
+
+		if (inferenceParams.reasoningEffort) {
+			request.reasoning = {
+				effort: inferenceParams.reasoningEffort,
+			}
+		}
+
+		if (inferenceParams.structuredOutput) {
 			const format = inferenceParams.structuredOutput
-			return {
-				text: {
-                    format: {
-                        type: "json_schema",
-                        name: format.name ?? "response",
-                        schema: format.schema,
-                        strict: format.strict ?? true,
-                    },
-                }
-            }
-        }
-    }
-
-    mapReasoningEffort(inferenceParams: InferenceParams<ModelName>): unknown {
-        if (inferenceParams.reasoningEffort) {
-			return {
-                reasoning : {
-                    effort: inferenceParams.reasoningEffort,
-                }
-            }
+			request.text = {
+				format: {
+					type: "json_schema",
+					name: format.name ?? "response",
+					schema: format.schema,
+					strict: format.strict ?? true,
+				},
+			}
 		}
-    }
 
-    mapStreaming(inferenceParams: InferenceParams<ModelName>): unknown {
-        return
-    }
+		if (inferenceParams.streaming) {
+			request.stream = inferenceParams.streaming
+		}
+
+		return request
+	}
+
+	toResponse(response: any): InferenceResponse {
+		const contextItems = this.extractContextItems(response)
+		const tokenUsage = this.extractTokenUsage(response)
+		return new InferenceResponse(contextItems, tokenUsage)
+	}
+
+	mapContextItems(inferenceParams: InferenceParams<ModelName>): any[] {
+		const input: any[] = []
+
+		for (const item of inferenceParams.context.getItems()) {
+			if (item instanceof DeveloperMessageItem || item instanceof SystemMessageItem || item instanceof UserMessageItem) {
+				input.push({
+					type: item.type,
+					role: item.role,
+					content: [{ type: "input_text", text: item.content.text }],
+				})
+				continue
+			}
+
+			if (item instanceof ModelMessageItem) {
+				input.push({
+					type: item.type,
+					role: item.role,
+					content: [{ type: "output_text", text: item.content.text }],
+				})
+				continue
+			}
+
+			if (item instanceof FunctionCallItem) {
+				input.push({
+					type: item.type,
+					call_id: item.callId,
+					name: item.name,
+					arguments: item.args,
+				})
+				continue
+			}
+
+			if (item instanceof FunctionCallOutputItem) {
+				input.push({
+					type: item.type,
+					call_id: item.callId,
+					output: [{ type: "input_text", text: item.output.text }],
+				})
+				continue
+			}
+
+			if (item instanceof ReasoningItem) {
+				input.push({
+					type: item.type,
+					content: item.content ? [{ type: "input_text", text: item.content.text }] : undefined,
+					encryptedContent: item.encryptedContent,
+					summary: item.summary.map((summary) => ({ type: "summary_text", text: summary.text })),
+				})
+			}
+		}
+
+		return input
+	}
+
+	extractTokenUsage(response: OpenAI.Responses.Response): TokenUsage | undefined {
+		if (!response.usage) {
+			return undefined
+		}
+		return new TokenUsage(
+			response.usage.input_tokens,
+			response.usage.output_tokens,
+			response.usage.total_tokens,
+			new InputTokenDetails(response.usage.input_tokens_details.cached_tokens),
+			new OutputTokenDetails(response.usage.output_tokens_details.reasoning_tokens),
+		)
+	}
+
+	extractContextItems(response: any): ContextItem[] {
+		const items: ContextItem[] = []
+
+		for (const item of response.output ?? []) {
+			if (item.type === "message" && item.role === "assistant") {
+				items.push(ModelMessageItem.rehydrate(item.content[0] as { text: string }))
+				continue
+			}
+			if (item.type === "function_call") {
+				items.push(
+					FunctionCallItem.rehydrate({
+						callId: item.call_id,
+						name: item.name,
+						args: item.arguments,
+					}),
+				)
+				continue
+			}
+			if (item.type === "reasoning") {
+				items.push(ReasoningItem.rehydrate(item))
+			}
+		}
+
+		return items
+	}
 }
