@@ -122,8 +122,8 @@ export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 			response.usage.input_tokens,
 			response.usage.output_tokens,
 			response.usage.total_tokens,
-			new InputTokenDetails(response.usage.input_tokens_details.cached_tokens),
-			new OutputTokenDetails(response.usage.output_tokens_details.reasoning_tokens),
+			new InputTokenDetails(response.usage.input_tokens_details?.cached_tokens ?? 0),
+			new OutputTokenDetails(response.usage.output_tokens_details?.reasoning_tokens ?? 0),
 		)
 	}
 
