@@ -7,7 +7,7 @@ export class StreamingValidation implements RequestValidationRule {
 	readonly name = "streaming"
 
 	isValid(inferenceParams: InferenceParams<ModelName>, model: ModelSpecification): boolean {
-		if (inferenceParams.streaming === undefined) {
+		if (!inferenceParams.streaming) {
 			return true
 		}
 
