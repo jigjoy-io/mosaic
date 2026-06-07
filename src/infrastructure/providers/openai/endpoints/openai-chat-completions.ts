@@ -50,7 +50,10 @@ export class OpenAIChatCompletions implements Endpoint {
 	private readonly client: OpenAI
 	private readonly extraBody: Record<string, unknown>
 
-	constructor(endpointMapper: OpenAIChatCompletionsMapper, config: OpenAICompatibleConfig = {}) {
+	constructor(
+		endpointMapper: InferenceEndpointMapper = new OpenAIChatCompletionsMapper(),
+		config: OpenAICompatibleConfig = {},
+	) {
 		this.endpointMapper = endpointMapper
 		// Passing `undefined` for baseURL/apiKey lets the SDK fall back
 		// to OPENAI_BASE_URL / OPENAI_API_KEY from the environment.

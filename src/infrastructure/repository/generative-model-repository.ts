@@ -13,92 +13,83 @@ import { gpt54Specification } from "@infra/providers/openai/models/gpt-5-4"
 import { gpt54MiniSpecification } from "@infra/providers/openai/models/gpt-5-4-mini"
 import { gpt54NanoSpecification } from "@infra/providers/openai/models/gpt-5-4-nano"
 import { gpt55Specification } from "@infra/providers/openai/models/gpt-5-5"
-import { AnthropicMessagesMapper } from "@infra/providers/anthropic/endpoints/anthropic-messages-mapper"
 import { claudeHaiku45Specification } from "@infra/providers/anthropic/models/claude-4-5-haiku"
 import { GenerativeModel, ModelName } from "@domain/generative-model/generative-model"
-import { OpenAIResponsesMapper } from "@infra/providers/openai/endpoints/openai-responses-mapper"
-import { OpenAIChatCompletionsMapper } from "@infra/providers/openai/endpoints/openai-chat-completions-mapper"
-import { GeminiGenerateContentMapper } from "@infra/providers/gemini/endpoints/gemini-generate-content-mapper"
 import { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
 
 export class InMemoryGenerativeModelRepository implements GenerativeModelRepository {
 	getByModelName(modelName: ModelName): Promise<GenerativeModel> {
-		const anthropicMessagesMapper = new AnthropicMessagesMapper()
-		const openaiResponsesMapper = new OpenAIResponsesMapper()
-		const openaiChatCompletionsMapper = new OpenAIChatCompletionsMapper()
-		const geminiGenerateContentMapper = new GeminiGenerateContentMapper()
-
 		let generativeModel = undefined
 		switch (modelName) {
 			case "gpt-5.4":
 				generativeModel = {
-					endpoint: new OpenAIResponses(openaiResponsesMapper),
+					endpoint: new OpenAIResponses(),
 					specification: gpt54Specification,
 				}
 				break
 			case "gpt-5.4-mini":
 				generativeModel = {
-					endpoint: new OpenAIResponses(openaiResponsesMapper),
+					endpoint: new OpenAIResponses(),
 					specification: gpt54MiniSpecification,
 				}
 				break
 			case "gpt-5.4-nano":
 				generativeModel = {
-					endpoint: new OpenAIResponses(openaiResponsesMapper),
+					endpoint: new OpenAIResponses(),
 					specification: gpt54NanoSpecification,
 				}
 				break
 			case "gpt-5.5":
 				generativeModel = {
-					endpoint: new OpenAIResponses(openaiResponsesMapper),
+					endpoint: new OpenAIResponses(),
 					specification: gpt55Specification,
 				}
 				break
 			case "claude-4.5-haiku":
 				generativeModel = {
-					endpoint: new AnthropicMessages(anthropicMessagesMapper),
+					endpoint: new AnthropicMessages(),
 					specification: claudeHaiku45Specification,
 				}
 				break
 			case "claude-4.6-sonnet":
 				generativeModel = {
-					endpoint: new AnthropicMessages(anthropicMessagesMapper),
+					endpoint: new AnthropicMessages(),
 					specification: claudeSonnet46Specification,
 				}
 				break
 			case "claude-4.7-opus":
 				generativeModel = {
-					endpoint: new AnthropicMessages(anthropicMessagesMapper),
+					endpoint: new AnthropicMessages(),
 					specification: claudeOpus47Specification,
 				}
 				break
 			case "claude-4.8-opus":
 				generativeModel = {
-					endpoint: new AnthropicMessages(anthropicMessagesMapper),
+					endpoint: new AnthropicMessages(),
 					specification: claudeOpus48Specification,
 				}
 				break
 			case "gemini-3.5-flash":
 				generativeModel = {
-					endpoint: new GeminiGenerateContent(geminiGenerateContentMapper),
+					endpoint: new GeminiGenerateContent(),
 					specification: gemini35FlashSpecification,
 				}
 				break
 			case "gemini-3.1-pro":
 				generativeModel = {
-					endpoint: new GeminiGenerateContent(geminiGenerateContentMapper),
+					endpoint: new GeminiGenerateContent(),
 					specification: gemini31ProSpecification,
 				}
 				break
 			case "deepseek-v4-flash":
 				generativeModel = {
-					endpoint: new OpenAIChatCompletions(openaiChatCompletionsMapper),
+					endpoint: new OpenAIChatCompletions(),
 					specification: deepSeekV4FlashSpecification,
 				}
 				break
 			case "deepseek-v4-pro":
 				generativeModel = {
-					endpoint: new OpenAIChatCompletions(openaiChatCompletionsMapper),
+					endpoint: new OpenAIChatCompletions(),
 					specification: deepSeekV4ProSpecification,
 				}
 		}

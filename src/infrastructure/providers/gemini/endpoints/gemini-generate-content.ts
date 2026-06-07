@@ -19,7 +19,7 @@ export class GeminiGenerateContent implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
 	private readonly client: GoogleGenAI
 
-	constructor(endpointMapper: GeminiGenerateContentMapper) {
+	constructor(endpointMapper: InferenceEndpointMapper = new GeminiGenerateContentMapper()) {
 		this.endpointMapper = endpointMapper
 		this.client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 	}

@@ -11,7 +11,7 @@ export class OpenAIResponses implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
 	private readonly client: OpenAI
 
-	constructor(endpointMapper: OpenAIResponsesMapper) {
+	constructor(endpointMapper: InferenceEndpointMapper = new OpenAIResponsesMapper()) {
 		this.endpointMapper = endpointMapper
 		this.client = new OpenAI()
 	}

@@ -16,7 +16,7 @@ export class AnthropicMessages implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
 	private readonly client: Anthropic
 
-	constructor(endpointMapper: AnthropicMessagesMapper) {
+	constructor(endpointMapper: InferenceEndpointMapper = new AnthropicMessagesMapper()) {
 		this.endpointMapper = endpointMapper
 		this.client = new Anthropic()
 	}
