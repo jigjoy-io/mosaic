@@ -4,7 +4,7 @@
 
 ![npm downloads](https://img.shields.io/npm/dt/@mozaik-ai/core) ![npm downloads weekly](https://img.shields.io/npm/dw/@mozaik-ai/core) ![npm version](https://img.shields.io/npm/v/@mozaik-ai/core)
 
-Mozaik is built for **truly parallel, non-blocking agents**. Humans, agents, and observers all join the same `AgenticEnvironment` as `Participant`s. Capabilities are exposed as **non-blocking** functions — `runInference`, `sendMessage`, and `executeFunctionCall` — so a participant fires one and immediately keeps going; there is nothing to `await`. As work progresses it surfaces as events into the environment: plain-text **messages** for conversational input/output, and typed `ContextItem`s for model internals. Participants react to those events by overriding handlers like `onMessage`, `onFunctionCall`, `onReasoning`, and `onModelMessage`, and **every** participant is notified at the same time. Because nothing blocks and everyone observes the same stream, participants run **concurrently** — reacting, collaborating, and producing in parallel.
+Mozaik is built for **truly parallel, non-blocking agents**. It enables agents to communicate through semantic events, react to each other’s outputs, run asynchronously, and collaborate without being locked into a single sequential workflow.
 
 ---
 
@@ -64,8 +64,8 @@ DeepSeek models run through the OpenAI-compatible chat-completions endpoint, so 
 | `onExternalModelMessage`       | another agent's inference returns an assistant message |
 | `onInternalEvent`              | its own inference emits a semantic stream event        |
 | `onExternalEvent`              | another participant emits a semantic stream event      |
-| `onError`                      | one of its own handlers throws                          |
-| `onParticipantError`           | another participant's handler throws                    |
+| `onError`                      | one of its own handlers throws                         |
+| `onParticipantError`           | another participant's handler throws                   |
 
 Every handler defaults to a no-op on `BaseParticipant` — override only the ones you care about.
 
@@ -84,13 +84,13 @@ flowchart LR
 
 ## Non-blocking participants
 
-A participant is any subclass of `Participant`. Use `BaseParticipant` as a base when you only want to override a few handlers — every handler it defines is a no-op. The *role* (human, agent, observer) is just which capability functions a participant calls and which handlers it overrides:
+A participant is any subclass of `Participant`. Use `BaseParticipant` as a base when you only want to override a few handlers — every handler it defines is a no-op. The _role_ (human, agent, observer) is just which capability functions a participant calls and which handlers it overrides:
 
-| Role     | How to build it                                                                      |
-| -------- | ----------------------------------------------------------------------------------- |
-| Human    | A participant that calls `sendMessage(environment, text, caller)`                    |
-| Agent    | A participant that calls `runInference(...)` and `executeFunctionCall(...)`          |
-| Observer | A participant that only overrides handlers and never runs inference                  |
+| Role     | How to build it                                                             |
+| -------- | --------------------------------------------------------------------------- |
+| Human    | A participant that calls `sendMessage(environment, text, caller)`           |
+| Agent    | A participant that calls `runInference(...)` and `executeFunctionCall(...)` |
+| Observer | A participant that only overrides handlers and never runs inference         |
 
 ```ts
 import {
@@ -285,12 +285,12 @@ To return to free-form text, simply omit `structuredOutput` on the next `runInfe
 
 ### Provider support
 
-| Provider | Models | Strict schema enforcement |
-| -------- | ------ | ------------------------- |
-| OpenAI | gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.5 | Yes |
-| Anthropic | claude-opus-4-7, claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5 | Yes |
-| Gemini | gemini-3.1-pro-preview, gemini-3.5-flash | Yes |
-| DeepSeek | deepseek-v4-flash, deepseek-v4-pro | Not supported — use prompt-based JSON guidance instead |
+| Provider  | Models                                                                | Strict schema enforcement                              |
+| --------- | --------------------------------------------------------------------- | ------------------------------------------------------ |
+| OpenAI    | gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.5                          | Yes                                                    |
+| Anthropic | claude-opus-4-7, claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5 | Yes                                                    |
+| Gemini    | gemini-3.1-pro-preview, gemini-3.5-flash                              | Yes                                                    |
+| DeepSeek  | deepseek-v4-flash, deepseek-v4-pro                                    | Not supported — use prompt-based JSON guidance instead |
 
 Requesting structured output for a model whose specification has `supportsStructuredOutput: false` fails request validation before the API call.
 
@@ -334,7 +334,7 @@ Participants can listen to external events and react by overriding methods like 
 
 ### Selective listening
 
-By default a participant reacts to events from every other participant. To scope a participant so it only reacts to specific participant *types*, populate its `listens` list with those classes. When `listens` is non-empty, the environment only delivers external events whose source is an instance of one of the listed classes:
+By default a participant reacts to events from every other participant. To scope a participant so it only reacts to specific participant _types_, populate its `listens` list with those classes. When `listens` is non-empty, the environment only delivers external events whose source is an instance of one of the listed classes:
 
 ```ts
 import { BaseParticipant } from "@mozaik-ai/core"
@@ -374,7 +374,14 @@ export class ResilientAgent extends BaseParticipant {
 You can create observers that don't run inference themselves but watch what's happening in the conversation and take side actions (logging, metrics, persistence, etc.). Subclass `BaseParticipant` and override only the handlers you care about — everything else stays a no-op:
 
 ```ts
-import { BaseParticipant, Participant, FunctionCallItem, FunctionCallOutputItem, ReasoningItem, ModelMessageItem } from "@mozaik-ai/core"
+import {
+	BaseParticipant,
+	Participant,
+	FunctionCallItem,
+	FunctionCallOutputItem,
+	ReasoningItem,
+	ModelMessageItem,
+} from "@mozaik-ai/core"
 
 export class TranscriptLogger extends BaseParticipant {
 	async onMessage(message: string): Promise<void> {
@@ -420,12 +427,12 @@ Implement `ModelContextRepository` to plug in any storage backend.
 
 A model is selected by its `ModelName` string. Mozaik resolves the name to a provider `Endpoint` and a `ModelSpecification` internally, maps the `ModelContext` to that provider's API, and returns typed `ContextItem`s (and `SemanticEvent`s when streaming). Bundled model names:
 
-| Provider  | `ModelName` values                                                            |
-| --------- | ----------------------------------------------------------------------------- |
-| OpenAI    | `"gpt-5.4"`, `"gpt-5.4-mini"`, `"gpt-5.4-nano"`, `"gpt-5.5"`                   |
+| Provider  | `ModelName` values                                                                    |
+| --------- | ------------------------------------------------------------------------------------- |
+| OpenAI    | `"gpt-5.4"`, `"gpt-5.4-mini"`, `"gpt-5.4-nano"`, `"gpt-5.5"`                          |
 | Anthropic | `"claude-haiku-4-5"`, `"claude-sonnet-4-6"`, `"claude-opus-4-7"`, `"claude-opus-4-8"` |
-| Gemini    | `"gemini-3.5-flash"`, `"gemini-3.1-pro-preview"`                               |
-| DeepSeek  | `"deepseek-v4-flash"`, `"deepseek-v4-pro"`                                     |
+| Gemini    | `"gemini-3.5-flash"`, `"gemini-3.1-pro-preview"`                                      |
+| DeepSeek  | `"deepseek-v4-flash"`, `"deepseek-v4-pro"`                                            |
 
 You drive inference with the `runInference` capability; it streams the resulting items into the environment for participants to react to:
 
