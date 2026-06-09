@@ -10,11 +10,4 @@ export class SummaryText extends ItemContent {
 	static rehydrate(data: { text: string }): SummaryText {
 		return new SummaryText(data.text)
 	}
-
-	toJSON(): Record<string, any> {
-		return {
-			type: this.type,
-			text: this.text,
-		}
-	}
 }

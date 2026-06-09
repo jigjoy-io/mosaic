@@ -15,12 +15,4 @@ export class ModelMessageItem extends ContextItem {
 		const content = OutputText.rehydrate(data)
 		return new ModelMessageItem(content)
 	}
-
-	toJSON(): any {
-		return {
-			type: this.type,
-			role: this.role,
-			content: this.content.toJSON(),
-		}
-	}
 }

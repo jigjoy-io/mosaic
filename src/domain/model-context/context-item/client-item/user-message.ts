@@ -20,12 +20,4 @@ export class UserMessageItem extends ContextItem {
 		const content = InputText.rehydrate(data)
 		return new UserMessageItem(content)
 	}
-
-	toJSON(): any {
-		return {
-			type: this.type,
-			role: this.role,
-			content: this.content.toJSON(),
-		}
-	}
 }

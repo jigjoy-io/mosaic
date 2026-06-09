@@ -10,13 +10,4 @@ export class OutputText extends ItemContent {
 	static rehydrate(data: { text: string }): OutputText {
 		return new OutputText(data.text)
 	}
-
-	toJSON(): any[] {
-		return [
-			{
-				type: this.type,
-				text: this.text,
-			},
-		]
-	}
 }

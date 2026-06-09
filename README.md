@@ -4,7 +4,7 @@
 
 ![npm downloads](https://img.shields.io/npm/dt/@mozaik-ai/core) ![npm downloads weekly](https://img.shields.io/npm/dw/@mozaik-ai/core) ![npm version](https://img.shields.io/npm/v/@mozaik-ai/core)
 
-In Mozaik, humans, agents, observers, and tools are all `Participant`s of the same `AgenticEnvironment`. Each participant runs **non-blocking** and produces events into the environment: plain-text **messages** for conversational input/output, and typed `ContextItem`s for model internals (function calls, function call outputs, reasoning, model messages). Every other participant sees those events in real time and can react, intercept, or stay silent — without any central scheduler.
+Mozaik is built for **truly parallel, non-blocking agents**. It enables agents to communicate through semantic events, react to each other’s outputs, run asynchronously, and collaborate without being locked into a single sequential workflow.
 
 ---
 
@@ -30,10 +30,16 @@ pnpm add @mozaik-ai/core
 
 ## API Key Configuration
 
+Mozaik picks a provider from the model name you pass to `runInference`, and each provider's SDK reads its credential from the environment. Set the keys for the providers you use:
+
 ```env
 # .env
 OPENAI_API_KEY=your-openai-key-here
+ANTHROPIC_API_KEY=your-anthropic-key-here
+GEMINI_API_KEY=your-gemini-key-here
 ```
+
+DeepSeek models run through the OpenAI-compatible chat-completions endpoint, so they use an OpenAI-style credential and base URL (`OPENAI_API_KEY` / `OPENAI_BASE_URL`) pointed at DeepSeek.
 
 ---
 
@@ -58,14 +64,16 @@ OPENAI_API_KEY=your-openai-key-here
 | `onExternalModelMessage`       | another agent's inference returns an assistant message |
 | `onInternalEvent`              | its own inference emits a semantic stream event        |
 | `onExternalEvent`              | another participant emits a semantic stream event      |
+| `onError`                      | one of its own handlers throws                         |
+| `onParticipantError`           | another participant's handler throws                   |
 
-Every handler defaults to a no-op — override only the ones you care about.
+Every handler defaults to a no-op on `BaseParticipant` — override only the ones you care about.
 
 ```mermaid
 flowchart LR
-    Human[BaseHuman] -->|sendMessage| Env(("AgenticEnvironment"))
-    Agent[BaseAgent] -->|"runInference / executeFunctionCall"| Env
-    Observer[Custom Participant] -->|join| Env
+    Human[Participant] -->|"sendMessage(env, text, caller)"| Env(("AgenticEnvironment"))
+    Agent[Participant] -->|"runInference / executeFunctionCall"| Env
+    Observer[Participant] -->|join| Env
     Env -->|"onMessage / onExternal*"| Human
     Env -->|"onFunctionCall / onReasoning / …"| Agent
     Env -->|"onExternal*"| Observer
@@ -76,52 +84,58 @@ flowchart LR
 
 ## Non-blocking participants
 
-Mozaik ships three ready-to-use participants:
+A participant is any subclass of `Participant`. Use `BaseParticipant` as a base when you only want to override a few handlers — every handler it defines is a no-op. The _role_ (human, agent, observer) is just which capability functions a participant calls and which handlers it overrides:
 
-| Participant    | Role                                                                             |
-| -------------- | -------------------------------------------------------------------------------- |
-| `BaseHuman`    | Sends messages with `sendMessage(environment, text)`                             |
-| `BaseAgent`    | Runs inference and function calls via `InferenceRunner` and `FunctionCallRunner` |
-| `BaseObserver` | Listens only; no inference                                                       |
+| Role     | How to build it                                                             |
+| -------- | --------------------------------------------------------------------------- |
+| Human    | A participant that calls `sendMessage(environment, text, caller)`           |
+| Agent    | A participant that calls `runInference(...)` and `executeFunctionCall(...)` |
+| Observer | A participant that only overrides handlers and never runs inference         |
 
 ```ts
 import {
 	AgenticEnvironment,
-	BaseAgent,
-	BaseHuman,
-	OpenAIInferenceRunner,
-	DefaultFunctionCallRunner,
-	Gpt54Mini,
+	BaseParticipant,
 	ModelContext,
+	UserMessageItem,
+	runInference,
+	sendMessage,
 } from "@mozaik-ai/core"
 
 const environment = new AgenticEnvironment()
 
-const human = new BaseHuman()
-const agent = new BaseAgent(new OpenAIInferenceRunner(), new DefaultFunctionCallRunner())
-const observer = new BaseObserver()
+const human = new BaseParticipant()
+
+class Agent extends BaseParticipant {
+	private readonly context = ModelContext.create("demo")
+
+	async onMessage(message: string): Promise<void> {
+		this.context.addContextItem(UserMessageItem.create(message))
+		runInference({ model: "gpt-5.4", context: this.context, caller: this, environment })
+	}
+}
+
+const agent = new Agent()
+const observer = new BaseParticipant()
 
 human.join(environment)
 agent.join(environment)
 observer.join(environment)
 
-environment.start()
-
-human.sendMessage(environment, "Hello")
+sendMessage(environment, "Hello", human)
 ```
 
-The environment fans every item out to every subscriber synchronously and without awaiting them, so a slow listener never blocks producers or other listeners.
+Participants react as soon as they `join()` agentic environment. The environment fans every item out to every subscriber synchronously and without awaiting them, so a slow listener never blocks producers or other listeners.
 
 ---
 
 ## Reactive agent
 
-A reactive agent extends `BaseAgent` and overrides the handlers it wants to react on. Each handler is already a no-op in the base class, so only the relevant ones need bodies:
+A reactive agent extends `BaseParticipant` and overrides the handlers it wants to react on. Each handler is already a no-op in the base class, so only the relevant ones need bodies. Capabilities are the free functions `runInference` and `executeFunctionCall` — the participant passes itself as `caller`:
 
 ```ts
 import {
-	BaseAgent,
-	Participant,
+	BaseParticipant,
 	UserMessageItem,
 	FunctionCallItem,
 	FunctionCallOutputItem,
@@ -129,38 +143,50 @@ import {
 	ModelMessageItem,
 	AgenticEnvironment,
 	ModelContext,
-	GenerativeModel,
-	InferenceRunner,
-	FunctionCallRunner,
+	ModelName,
+	Tool,
+	runInference,
+	executeFunctionCall,
 } from "@mozaik-ai/core"
 
-export class ReactiveAgent extends BaseAgent {
+export class ReactiveAgent extends BaseParticipant {
 	constructor(
-		inferenceRunner: InferenceRunner,
-		functionCallRunner: FunctionCallRunner,
 		private readonly environment: AgenticEnvironment,
 		private readonly context: ModelContext,
-		private readonly model: GenerativeModel,
+		private readonly tools: Tool[] = [],
 	) {
-		super(inferenceRunner, functionCallRunner)
+		super()
 	}
 
 	// A message from a human (or any other participant) → record it and think.
 	async onMessage(message: string): Promise<void> {
 		this.context.addContextItem(UserMessageItem.create(message))
-		this.runInference(this.environment, this.context, this.model)
+		runInference({
+			model: 'gpt-5.5',
+			context: this.context,
+			tools: this.tools,
+			caller: this,
+			environment: this.environment,
+		})
 	}
 
 	// The agent just produced a function call → execute it.
 	async onFunctionCall(item: FunctionCallItem): Promise<void> {
 		this.context.addContextItem(item)
-		this.executeFunctionCall(this.environment, item)
+		const tool = this.tools.find((t) => t.name === item.name)
+		if (tool) executeFunctionCall(this.environment, item, tool, this)
 	}
 
 	// The tool just produced an output → feed it back and run inference again.
 	async onFunctionCallOutput(item: FunctionCallOutputItem): Promise<void> {
 		this.context.addContextItem(item)
-		this.runInference(this.environment, this.context, this.model)
+		runInference({
+			model: 'gpt-5.5',
+			context: this.context,
+			tools: this.tools,
+			caller: this,
+			environment: this.environment,
+		})
 	}
 
 	// Keep the local context in sync with model-emitted reasoning and replies.
@@ -177,22 +203,22 @@ export class ReactiveAgent extends BaseAgent {
 Three things to note:
 
 1. The split between self handlers and `onExternal*` handlers means a participant can encode "act on my own outputs" separately from "observe others", without inspecting `source` by hand.
-2. The agent never `await`s its own capability calls inside the handlers — those methods are non-blocking, so the environment keeps delivering events while inference and tool execution run in the background.
+2. The agent never `await`s its capability calls inside the handlers — `runInference` and `executeFunctionCall` are fire-and-forget (they return `void`), so the environment keeps delivering events while inference and tool execution run in the background.
 3. Behaviors compose by **reaction**, not orchestration. Add a second agent that overrides `onExternalModelMessage` and you get a critique loop. Add a `TranscriptLogger` and you get a UI stream. Neither change touches the existing participants.
 
 ---
 
 ## Streaming and semantic events
 
-When inference runs with streaming enabled (`model.setStreaming(true)` on a model that supports it), the runner does not wait for the full response. As the provider emits chunks, `OpenAIInferenceRunner` yields **`SemanticEvent`** items (`type` + `data`) and the environment delivers each one to **every** joined participant immediately — the same fan-out as messages and context items. Participants react in real time by overriding the stream handlers; no participant needs to poll or share a callback.
+When inference runs with streaming enabled (`streaming: true` on the `runInference` params, for a model that supports it), the runner does not wait for the full response. As the provider emits chunks, the endpoint yields **`SemanticEvent`** items (`type` + `data`) and the environment delivers each one to **every** joined participant immediately — the same fan-out as messages and context items. Participants react in real time by overriding the stream handlers; no participant needs to poll or share a callback.
 
 The producing participant receives `onInternalEvent`; everyone else receives `onExternalEvent(source, event)`:
 
 ```ts
-import { BaseAgent, Participant, SemanticEvent } from "@mozaik-ai/core"
+import { BaseParticipant, Participant, SemanticEvent } from "@mozaik-ai/core"
 
 // Agent that runs streaming inference — can observe its own stream chunks.
-export class StreamingAgent extends BaseAgent {
+export class StreamingAgent extends BaseParticipant {
 	async onInternalEvent(event: SemanticEvent<unknown>): Promise<void> {
 		if (event.type === "response.output_text.delta") {
 			// e.g. keep a local buffer of partial output
@@ -201,44 +227,52 @@ export class StreamingAgent extends BaseAgent {
 }
 
 // Any other participant — UI, logger, second agent — reacts to another's stream.
-export class LiveTranscript extends Participant {
+export class LiveTranscript extends BaseParticipant {
 	async onExternalEvent(source: Participant, event: SemanticEvent<unknown>): Promise<void> {
 		if (event.type === "response.output_text.delta") {
 			const { delta } = event.data as { delta: string }
 			process.stdout.write(delta)
 		}
 	}
-
-	// Self-emitted stream events are unused for a pure observer.
-	async onInternalEvent(): Promise<void> {}
 }
 ```
 
-Enable streaming on the model before calling `runInference` as usual. `setStreaming(true)` on a model without `supportStreaming` throws before the API is called.
+Enable streaming by passing `streaming: true` to `runInference`:
+
+```ts
+runInference({ model: "gpt-5.4", context, caller: this, environment, streaming: true })
+```
+
+Requesting streaming for a model whose specification has `supportsStreaming: false` fails request validation before the API is called.
 
 ---
 
 ## Structured output
 
-When you need the model to respond with a specific JSON shape instead of free-form text, use structured output. Set a JSON Schema on the model and the provider will enforce it:
+When you need the model to respond with a specific JSON shape instead of free-form text, use structured output. Pass a `structuredOutput` (a `StructuredOutputFormat`) on the `runInference` params and the provider will enforce the JSON Schema:
 
 ```ts
-import { Gpt54, ModelContext, UserMessageItem } from "@mozaik-ai/core"
+import { runInference } from "@mozaik-ai/core"
 
-const model = new Gpt54()
-model.setStructuredOutput({
-	name: "weather",
-	schema: {
-		type: "object",
-		properties: {
-			city: { type: "string" },
-			temperature: { type: "number" },
-			condition: { type: "string" },
+runInference({
+	model: "gpt-5.4",
+	context,
+	caller: this,
+	environment,
+	structuredOutput: {
+		name: "weather",
+		schema: {
+			type: "object",
+			properties: {
+				city: { type: "string" },
+				temperature: { type: "number" },
+				condition: { type: "string" },
+			},
+			required: ["city", "temperature", "condition"],
+			additionalProperties: false,
 		},
-		required: ["city", "temperature", "condition"],
-		additionalProperties: false,
+		strict: true,
 	},
-	strict: true,
 })
 ```
 
@@ -246,22 +280,18 @@ The response comes back as a `ModelMessageItem` with valid JSON in the text fiel
 
 Structured output works alongside tools and streaming. When streaming is enabled, partial JSON chunks arrive as `SemanticEvent`s and the final event contains the complete response.
 
-To clear structured output and return to free-form text:
-
-```ts
-model.setStructuredOutput(undefined)
-```
+To return to free-form text, simply omit `structuredOutput` on the next `runInference` call.
 
 ### Provider support
 
-| Provider | Models | Strict schema enforcement |
-| -------- | ------ | ------------------------- |
-| OpenAI | gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.5 | Yes |
-| Anthropic | claude-opus-4-7, claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5 | Yes |
-| Gemini | gemini-3.1-pro, gemini-3.5-flash | Yes |
-| DeepSeek | deepseek-v4-flash, deepseek-v4-pro | Not supported — use prompt-based JSON guidance instead |
+| Provider  | Models                                                                | Strict schema enforcement                              |
+| --------- | --------------------------------------------------------------------- | ------------------------------------------------------ |
+| OpenAI    | gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.5                          | Yes                                                    |
+| Anthropic | claude-opus-4-7, claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5 | Yes                                                    |
+| Gemini    | gemini-3.1-pro-preview, gemini-3.5-flash                              | Yes                                                    |
+| DeepSeek  | deepseek-v4-flash, deepseek-v4-pro                                    | Not supported — use prompt-based JSON guidance instead |
 
-Setting structured output on a model that does not support it throws before the API call.
+Requesting structured output for a model whose specification has `supportsStructuredOutput: false` fails request validation before the API call.
 
 ---
 
@@ -270,24 +300,24 @@ Setting structured output on a model that does not support it throws before the 
 Every participant receives lifecycle notifications when it or others join/leave an environment:
 
 ```ts
-export class TeamAgent extends BaseAgent {
+export class TeamAgent extends BaseParticipant {
 	// Called when this participant joins an environment.
-	onJoined(environment: AgenticEnvironment): void {
+	onJoined(): void {
 		console.log("I joined the environment")
 	}
 
 	// Called when this participant leaves an environment.
-	onLeft(environment: AgenticEnvironment): void {
+	onLeft(): void {
 		console.log("I left the environment")
 	}
 
 	// Called when another participant joins the same environment.
-	onParticipantJoined(participant: Participant, environment: AgenticEnvironment): void {
+	onParticipantJoined(participant: Participant): void {
 		console.log(`${participant.constructor.name} joined`)
 	}
 
 	// Called when another participant leaves the same environment.
-	onParticipantLeft(participant: Participant, environment: AgenticEnvironment): void {
+	onParticipantLeft(participant: Participant): void {
 		console.log(`${participant.constructor.name} left`)
 	}
 }
@@ -301,39 +331,77 @@ This lets participants react to membership changes — for example, an agent cou
 
 Participants can listen to external events and react by overriding methods like `onMessage`, `onExternalFunctionCall`, `onExternalFunctionCallOutput`, `onExternalReasoning`, and `onExternalModelMessage`.
 
-## Passive observer
+### Selective listening
 
-You can create observers that don't run inference themselves but watch what's happening in the conversation and take side actions (logging, metrics, persistence, etc.). Subclass `Participant` and override only the handlers you care about:
+By default a participant reacts to events from every other participant. To scope a participant so it only reacts to specific participant _types_, populate its `listens` list with those classes. When `listens` is non-empty, the environment only delivers external events whose source is an instance of one of the listed classes:
 
 ```ts
-import { Participant, FunctionCallItem, FunctionCallOutputItem, ReasoningItem, ModelMessageItem } from "@mozaik-ai/core"
+import { BaseParticipant } from "@mozaik-ai/core"
 
-export class TranscriptLogger extends Participant {
+export class Critic extends BaseParticipant {
+	// Only react to events produced by Writer participants.
+	protected listens = [Writer]
+}
+```
+
+---
+
+## Error handling
+
+When any handler throws, the environment catches it and routes it as an `AgenticError` instead of crashing the run. The participant whose handler threw receives `onError(error)`; every other participant receives `onParticipantError(source, error)`. After its own `onError`, the failing participant is marked inactive in that environment so it stops receiving further events.
+
+```ts
+import { BaseParticipant, Participant, AgenticError } from "@mozaik-ai/core"
+
+export class ResilientAgent extends BaseParticipant {
+	onError(error: AgenticError): void {
+		console.error("my handler threw:", error.message)
+	}
+
+	onParticipantError(source: Participant, error: AgenticError): void {
+		console.warn(`${source.constructor.name} failed:`, error.message)
+	}
+}
+```
+
+`AgenticError` carries the originating participant (`getSource()`) and environment (`getEnvironment()`).
+
+---
+
+## Passive observer
+
+You can create observers that don't run inference themselves but watch what's happening in the conversation and take side actions (logging, metrics, persistence, etc.). Subclass `BaseParticipant` and override only the handlers you care about — everything else stays a no-op:
+
+```ts
+import {
+	BaseParticipant,
+	Participant,
+	FunctionCallItem,
+	FunctionCallOutputItem,
+	ReasoningItem,
+	ModelMessageItem,
+} from "@mozaik-ai/core"
+
+export class TranscriptLogger extends BaseParticipant {
 	async onMessage(message: string): Promise<void> {
 		console.log("[message]", message)
 	}
 
 	async onExternalFunctionCall(source: Participant, item: FunctionCallItem): Promise<void> {
-		console.log(`[${source.constructor.name}] function_call`, item.toJSON())
+		console.log(`[${source.constructor.name}] function_call`, item)
 	}
 
 	async onExternalFunctionCallOutput(source: Participant, item: FunctionCallOutputItem): Promise<void> {
-		console.log(`[${source.constructor.name}] function_call_output`, item.toJSON())
+		console.log(`[${source.constructor.name}] function_call_output`, item)
 	}
 
 	async onExternalReasoning(source: Participant, item: ReasoningItem): Promise<void> {
-		console.log(`[${source.constructor.name}] reasoning`, item.toJSON())
+		console.log(`[${source.constructor.name}] reasoning`, item)
 	}
 
 	async onExternalModelMessage(source: Participant, item: ModelMessageItem): Promise<void> {
-		console.log(`[${source.constructor.name}] model_message`, item.toJSON())
+		console.log(`[${source.constructor.name}] model_message`, item)
 	}
-
-	// Self-emitted handlers (onFunctionCall, onReasoning, …) can be no-ops for a pure observer.
-	async onFunctionCall(): Promise<void> {}
-	async onFunctionCallOutput(): Promise<void> {}
-	async onReasoning(): Promise<void> {}
-	async onModelMessage(): Promise<void> {}
 }
 ```
 
@@ -341,7 +409,7 @@ export class TranscriptLogger extends Participant {
 
 ## Context and models (reference)
 
-`ModelContext` is the ordered list of `ContextItem`s a `GenerativeModel` is asked to reason over. It is constructed and mutated explicitly — typically inside a participant in response to delivered items.
+`ModelContext` is the ordered list of `ContextItem`s a model is asked to reason over. It is constructed and mutated explicitly — typically inside a participant in response to delivered items.
 
 ```ts
 import { ModelContext, DeveloperMessageItem, UserMessageItem, InMemoryModelContextRepository } from "@mozaik-ai/core"
@@ -356,55 +424,47 @@ await repo.save(context)
 
 Implement `ModelContextRepository` to plug in any storage backend.
 
-The default inference path is `OpenAIInferenceRunner`, which maps `ModelContext` to the OpenAI Responses API and back into typed `ContextItem`s (and `SemanticEvent`s when streaming). Bundled models: `Gpt54`, `Gpt54Mini`, `Gpt54Nano`, `Gpt55`.
+A model is selected by its `ModelName` string. Mozaik resolves the name to a provider `Endpoint` and a `ModelSpecification` internally, maps the `ModelContext` to that provider's API, and returns typed `ContextItem`s (and `SemanticEvent`s when streaming). Bundled model names:
+
+| Provider  | `ModelName` values                                                                    |
+| --------- | ------------------------------------------------------------------------------------- |
+| OpenAI    | `"gpt-5.4"`, `"gpt-5.4-mini"`, `"gpt-5.4-nano"`, `"gpt-5.5"`                          |
+| Anthropic | `"claude-haiku-4-5"`, `"claude-sonnet-4-6"`, `"claude-opus-4-7"`, `"claude-opus-4-8"` |
+| Gemini    | `"gemini-3.5-flash"`, `"gemini-3.1-pro-preview"`                                      |
+| DeepSeek  | `"deepseek-v4-flash"`, `"deepseek-v4-pro"`                                            |
+
+You drive inference with the `runInference` capability; it streams the resulting items into the environment for participants to react to:
 
 ```ts
-import { OpenAIInferenceRunner, DefaultFunctionCallRunner, Gpt54, ModelContext } from "@mozaik-ai/core"
+import { runInference, ModelContext } from "@mozaik-ai/core"
 
-const runner = new OpenAIInferenceRunner()
 const context = ModelContext.create("demo")
 
-for await (const item of runner.run(context, new Gpt54())) {
-	// ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent
-}
+runInference({ model: "gpt-5.4", context, caller: this, environment })
+// → environment delivers ReasoningItem | FunctionCallItem | ModelMessageItem (and SemanticEvent when streaming)
 ```
 
 ---
 
-## Overriding Generators
+### Tools
 
-Mozaik uses async generators for inference and function calls — that's what lets the system emit events incrementally so participants can react to them as they arrive. Swap any runner to change _how_ events are produced.
-
-Humans send text with `sendMessage(environment, message)`; other participants receive it via `onMessage`.
-
-### Custom `InferenceRunner`
-
-An `InferenceRunner` can yield `ReasoningItem`, `FunctionCallItem`, `ModelMessageItem`, and `SemanticEvent` (when streaming).
+A `Tool` is a function declaration with its own executor: `name`, `description`, JSON Schema `parameters`, `strict`, and an `invoke(args)` that runs the call. Pass tools on the `runInference` params; when the model emits a `FunctionCallItem`, run it with `executeFunctionCall`, which calls the matching tool's `invoke` and emits a `FunctionCallOutputItem`.
 
 ```ts
-import { InferenceRunner, ModelContext, GenerativeModel, OpenAIInferenceRunner } from "@mozaik-ai/core"
+import { Tool } from "@mozaik-ai/core"
 
-// Use the bundled runner, or implement InferenceRunner for another provider.
-const runner: InferenceRunner = new OpenAIInferenceRunner()
-```
-
-### Custom `FunctionCallRunner`
-
-A `FunctionCallRunner` can only produce `FunctionCallOutputItem`.
-
-```ts
-import { FunctionCallRunner, FunctionCallItem, FunctionCallOutputItem, Tool } from "@mozaik-ai/core"
-
-export class ToolRegistryFunctionCallRunner implements FunctionCallRunner {
-	constructor(private readonly tools: Tool[]) {}
-
-	async *run(call: FunctionCallItem, signal?: AbortSignal): AsyncIterable<FunctionCallOutputItem> {
-		const tool = this.tools.find((t) => t.name === call.name)
-		if (!tool) throw new Error(`Unknown tool: ${call.name}`)
-
-		const result = await tool.invoke(JSON.parse(call.args))
-		yield FunctionCallOutputItem.create(call.callId, JSON.stringify(result))
-	}
+const getWeather: Tool = {
+	type: "function",
+	name: "get_weather",
+	description: "Get the current weather for a city",
+	parameters: {
+		type: "object",
+		properties: { city: { type: "string" } },
+		required: ["city"],
+		additionalProperties: false,
+	},
+	strict: true,
+	invoke: async ({ city }: { city: string }) => ({ city, temperature: 21, condition: "sunny" }),
 }
 ```
 

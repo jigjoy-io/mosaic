@@ -1,66 +1,51 @@
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning";
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call";
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message";
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event";
-import { InferenceParams } from "@domain/agentic-environment/inference/params";
-import { RunInferenceUseCase } from "@domain/agentic-environment/use-cases/run-inference";
-import { InferenceRunner } from "@app/services/inference-runner";
-import { ModelRepository } from "@app/services/model-repository";
-import { GenerativeModel } from "@domain/generative-model/generative-model";
+import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
+import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
+import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
+import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import { RunInferenceUseCase } from "@domain/agentic-environment/use-cases/run-inference"
+import { InferenceRunner, NonStreamingInference, StreamingInference } from "@app/services/inference-runner"
+import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
+import { ModelName } from "@domain/generative-model/generative-model"
+import { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
 
+export class RunInference implements RunInferenceUseCase<ModelName> {
+	constructor(
+		private readonly generativeModelRepository: GenerativeModelRepository,
+		private readonly requestValidator: InferenceRequestValidator,
+	) {}
 
-export class RunInference implements RunInferenceUseCase {
+	async execute(inferenceParams: InferenceParams<ModelName>): Promise<void> {
+		const { caller, environment, signal } = inferenceParams
 
-    constructor(private readonly modelRepository: ModelRepository, private readonly inferenceRunner: InferenceRunner) {}
+		const generativeModel = await this.generativeModelRepository.getByModelName(inferenceParams.model)
 
-    private setModelCapabilities(model: GenerativeModel, inferenceParams: InferenceParams) {
-        const { streaming, tools, reasoningEffort, structuredOutput } = inferenceParams;
+		this.requestValidator.validate(inferenceParams, generativeModel.specification)
 
-        if (streaming) {
-            model.setStreaming(true)
-        }
+		const resolvedParams: InferenceParams<ModelName> = {
+			...inferenceParams,
+			maxOutputTokens: inferenceParams.maxOutputTokens ?? generativeModel.specification.maxOutputTokens,
+		}
 
-        if (tools) {
-            model.setTools(tools)
-        }
+		const inferenceRunner: InferenceRunner = inferenceParams.streaming
+			? new StreamingInference()
+			: new NonStreamingInference()
 
-        if (reasoningEffort) {
-            model.setReasoningEffort(reasoningEffort)
-        }
+		const result = inferenceRunner.run(resolvedParams, generativeModel.endpoint)
 
-        if (structuredOutput) {
-            model.setStructuredOutput(structuredOutput)
-        }
-        
-        return model;
-    }
-
-    async execute(inferenceParams: InferenceParams): Promise<void> {
-        const { model, context, caller, environment, signal } = inferenceParams;
-
-        
-        const modelInfo = this.modelRepository.getModelInfo(model);
-
-        const generativeModel = this.setModelCapabilities(modelInfo.model, inferenceParams);
-        modelInfo.model = generativeModel;
-
-        const result = this.inferenceRunner.run(context, modelInfo, signal)
-    
-        for await (const item of result) {
-
-            if(signal?.aborted) {
-                break
-            }
-
-            if (item instanceof ReasoningItem) {
-                environment.deliverReasoning(caller, item)
-            } else if (item instanceof FunctionCallItem) {
-                environment.deliverFunctionCall(caller, item)
-            } else if (item instanceof ModelMessageItem) {
-                environment.deliverModelMessage(caller, item)
-            } else if (item instanceof SemanticEvent) {
-                environment.deliverSemanticEvent(caller, item)
-            }
-        }
-    }
+		for await (const item of result) {
+			if (signal?.aborted) {
+				break
+			}
+			if (item instanceof ReasoningItem) {
+				environment.deliverReasoning(caller, item)
+			} else if (item instanceof FunctionCallItem) {
+				environment.deliverFunctionCall(caller, item)
+			} else if (item instanceof ModelMessageItem) {
+				environment.deliverModelMessage(caller, item)
+			} else if (item instanceof SemanticEvent) {
+				environment.deliverSemanticEvent(caller, item)
+			}
+		}
+	}
 }
