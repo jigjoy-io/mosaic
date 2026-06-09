@@ -125,7 +125,7 @@ observer.join(environment)
 sendMessage(environment, "Hello", human)
 ```
 
-Participants react as soon as they `join()` — there is no separate `start()` step. The environment fans every item out to every subscriber synchronously and without awaiting them, so a slow listener never blocks producers or other listeners.
+Participants react as soon as they `join()` agentic environment. The environment fans every item out to every subscriber synchronously and without awaiting them, so a slow listener never blocks producers or other listeners.
 
 ---
 
@@ -153,7 +153,6 @@ export class ReactiveAgent extends BaseParticipant {
 	constructor(
 		private readonly environment: AgenticEnvironment,
 		private readonly context: ModelContext,
-		private readonly model: ModelName,
 		private readonly tools: Tool[] = [],
 	) {
 		super()
@@ -163,7 +162,7 @@ export class ReactiveAgent extends BaseParticipant {
 	async onMessage(message: string): Promise<void> {
 		this.context.addContextItem(UserMessageItem.create(message))
 		runInference({
-			model: this.model,
+			model: 'gpt-5.5',
 			context: this.context,
 			tools: this.tools,
 			caller: this,
@@ -182,7 +181,7 @@ export class ReactiveAgent extends BaseParticipant {
 	async onFunctionCallOutput(item: FunctionCallOutputItem): Promise<void> {
 		this.context.addContextItem(item)
 		runInference({
-			model: this.model,
+			model: 'gpt-5.5',
 			context: this.context,
 			tools: this.tools,
 			caller: this,
@@ -446,38 +445,6 @@ runInference({ model: "gpt-5.4", context, caller: this, environment })
 ```
 
 ---
-
-## Custom providers and tools
-
-Mozaik streams inference results incrementally so participants can react as items arrive. The two extension points are the provider `Endpoint` (how items are produced from a model) and the `Tool` (how a function call is executed).
-
-### Custom `Endpoint`
-
-A provider is an `Endpoint`. It exposes `infer` (one-shot, returns an `InferenceResponse` of typed `ContextItem`s plus optional `TokenUsage`) and `stream` (yields `SemanticEvent`s as the provider emits chunks). An `endpointMapper` translates the `ModelContext` to the provider's wire format and the provider's response back into typed items.
-
-```ts
-import { Endpoint, InferenceParams, InferenceResponse, SemanticEvent, ModelName } from "@mozaik-ai/core"
-
-export class MyProviderEndpoint implements Endpoint {
-	endpointMapper = new MyProviderMapper() // implements toRequest / toResponse
-
-	async infer(params: InferenceParams<ModelName>): Promise<InferenceResponse> {
-		const request = this.endpointMapper.toRequest(params)
-		const response = await callMyProvider(request)
-		return this.endpointMapper.toResponse(response)
-	}
-
-	async *stream(params: InferenceParams<ModelName>, signal?: AbortSignal): AsyncIterable<SemanticEvent<unknown>> {
-		const stream = await callMyProviderStreaming(this.endpointMapper.toRequest(params))
-		for await (const event of stream) {
-			if (signal?.aborted) break
-			yield new SemanticEvent(event.type, event)
-		}
-	}
-}
-```
-
-Bundled endpoints cover OpenAI (Responses API), Anthropic (Messages), Gemini (`generateContent`), and any OpenAI-compatible chat-completions provider such as DeepSeek.
 
 ### Tools
 
