@@ -1,6 +1,6 @@
-import { ModelName } from "@domain/generative-model/generative-model"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import type { ModelName } from "@domain/generative-model/generative-model"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
@@ -10,9 +10,9 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { SummaryText } from "@domain/model-context/context-item/item-content/summary-text"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import { ContextItem } from "@domain/model-context/context-item/context-item"
+import type { ContextItem } from "@domain/model-context/context-item/context-item"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
-import OpenAI from "openai"
+import type OpenAI from "openai"
 
 export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 	toRequest(inferenceParams: InferenceParams<ModelName>): any {

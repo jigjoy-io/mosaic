@@ -1,10 +1,10 @@
-import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
-import { AgenticEnvironment } from "./agentic-environment"
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { AgenticError } from "./errors/base-error"
+import type { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
+import type { AgenticEnvironment } from "./agentic-environment"
+import type { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
+import type { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
+import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
+import type { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import type { AgenticError } from "./errors/base-error"
 
 type ParticipantClassConstructor = new (...args: any[]) => Participant
 

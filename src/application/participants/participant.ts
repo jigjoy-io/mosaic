@@ -1,27 +1,27 @@
-import { AgenticError } from "@domain/agentic-environment/errors/base-error"
+import type { AgenticError } from "@domain/agentic-environment/errors/base-error"
 import { Participant } from "@domain/agentic-environment/participant"
-import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import type { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
+import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
+import type { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
+import type { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
+import type { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 
 export class BaseParticipant extends Participant {
-	onFunctionCall(item: FunctionCallItem) {}
-	onExternalFunctionCall(source: Participant, item: FunctionCallItem) {}
-	onFunctionCallOutput(item: FunctionCallOutputItem) {}
-	onExternalFunctionCallOutput(source: Participant, item: FunctionCallOutputItem) {}
-	onReasoning(item: ReasoningItem) {}
-	onExternalReasoning(source: Participant, item: ReasoningItem) {}
-	onModelMessage(item: ModelMessageItem) {}
-	onExternalModelMessage(source: Participant, item: ModelMessageItem) {}
-	onMessage(message: string) {}
+	onFunctionCall(_item: FunctionCallItem) {}
+	onExternalFunctionCall(_source: Participant, _item: FunctionCallItem) {}
+	onFunctionCallOutput(_item: FunctionCallOutputItem) {}
+	onExternalFunctionCallOutput(_source: Participant, _item: FunctionCallOutputItem) {}
+	onReasoning(_item: ReasoningItem) {}
+	onExternalReasoning(_source: Participant, _item: ReasoningItem) {}
+	onModelMessage(_item: ModelMessageItem) {}
+	onExternalModelMessage(_source: Participant, _item: ModelMessageItem) {}
+	onMessage(_message: string) {}
 	onJoined() {}
 	onLeft() {}
-	onParticipantJoined(participant: Participant) {}
-	onParticipantLeft(participant: Participant) {}
-	onInternalEvent(item: SemanticEvent<unknown>) {}
-	onExternalEvent(source: Participant, item: SemanticEvent<unknown>) {}
-	onError(error: AgenticError): void {}
-	onParticipantError(source: Participant, error: AgenticError): void {}
+	onParticipantJoined(_participant: Participant) {}
+	onParticipantLeft(_participant: Participant) {}
+	onInternalEvent(_item: SemanticEvent<unknown>) {}
+	onExternalEvent(_source: Participant, _item: SemanticEvent<unknown>) {}
+	onError(_error: AgenticError): void {}
+	onParticipantError(_source: Participant, _error: AgenticError): void {}
 }

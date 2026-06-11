@@ -1,6 +1,6 @@
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { RequestValidationRule } from "./rule"
-import { ModelName, ModelSpecification } from "../generative-model"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { RequestValidationRule } from "./rule"
+import type { ModelName, ModelSpecification } from "../generative-model"
 
 export class ReasoningEffortValidation implements RequestValidationRule {
 	readonly name = "reasoning-effort"

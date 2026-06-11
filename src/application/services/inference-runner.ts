@@ -1,10 +1,10 @@
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { Endpoint } from "@domain/generative-model/endpoint"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelName } from "@domain/generative-model/generative-model"
+import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
+import type { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
+import type { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
+import type { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import type { Endpoint } from "@domain/generative-model/endpoint"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { ModelName } from "@domain/generative-model/generative-model"
 
 type InferenceItem = ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent<unknown>
 

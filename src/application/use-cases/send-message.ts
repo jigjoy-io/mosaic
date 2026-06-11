@@ -1,6 +1,6 @@
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
-import { Participant } from "@domain/agentic-environment/participant"
-import { SendMessageUseCase } from "@domain/agentic-environment/use-cases/send-message"
+import type { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import type { Participant } from "@domain/agentic-environment/participant"
+import type { SendMessageUseCase } from "@domain/agentic-environment/use-cases/send-message"
 
 export class SendMessage implements SendMessageUseCase {
 	async execute(environment: AgenticEnvironment, message: string, caller: Participant): Promise<void> {

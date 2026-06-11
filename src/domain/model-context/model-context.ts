@@ -1,4 +1,4 @@
-import { ContextItem } from "@domain/model-context/context-item/context-item"
+import type { ContextItem } from "@domain/model-context/context-item/context-item"
 
 export class ModelContext {
 	readonly id: string

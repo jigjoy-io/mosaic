@@ -1,6 +1,6 @@
-import { Tool } from "@domain/generative-model/tool"
+import type { Tool } from "@domain/generative-model/tool"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
+import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 
 export class FunctionCallRunner {
 	async *run(call: FunctionCallItem, tool: Tool, signal?: AbortSignal): AsyncIterable<FunctionCallOutputItem> {

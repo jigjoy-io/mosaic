@@ -1,4 +1,4 @@
-import { ModelContext } from "@domain/model-context/model-context"
+import type { ModelContext } from "@domain/model-context/model-context"
 
 export interface ModelContextRepository {
 	save(context: ModelContext): Promise<void>

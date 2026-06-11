@@ -1,9 +1,9 @@
-import { Participant } from "@domain/agentic-environment/participant"
-import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import type { Participant } from "@domain/agentic-environment/participant"
+import type { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
+import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
+import type { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
+import type { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
+import type { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { AgenticError } from "./errors/base-error"
 
 export interface AgenticEnvironmentOptions {

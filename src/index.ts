@@ -25,7 +25,7 @@ import { FunctionCallRunner } from "@app/services/function-call-runner"
 import { BaseParticipant } from "@app/participants/participant"
 import { SendMessage } from "@app/use-cases/send-message"
 import { ModelName } from "@domain/generative-model/generative-model"
-import { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
+import type { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
 import { InMemoryGenerativeModelRepository } from "@infra/repository/generative-model-repository"
 import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
 

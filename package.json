@@ -38,6 +38,9 @@
 		"test:integration": "rstest run tests/integration",
 		"test:coverage": "rstest run --coverage",
 		"prepublishOnly": "npm run build",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"typecheck": "tsc --noEmit",
 		"prepare": "husky"
 	},
 	"keywords": [
@@ -56,14 +59,17 @@
 	],
 	"license": "MIT",
 	"devDependencies": {
+		"@eslint/js": "^10.0.1",
 		"@rstest/core": "^0.10.2",
 		"@rstest/coverage-istanbul": "^0.10.2",
+		"eslint": "^10.4.1",
 		"husky": "^9.1.7",
 		"lint-staged": "^17.0.7",
 		"prettier": "^3.7.4",
 		"rimraf": "^5.0.5",
 		"tsup": "^8.0.2",
-		"typescript": "^5.3.3"
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.61.0"
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.74.0",

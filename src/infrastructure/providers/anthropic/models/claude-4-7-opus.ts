@@ -1,4 +1,4 @@
-import { ModelSpecification } from "@domain/generative-model/generative-model"
+import type { ModelSpecification } from "@domain/generative-model/generative-model"
 
 export const claudeOpus47Specification: ModelSpecification = {
 	name: "claude-opus-4-7",

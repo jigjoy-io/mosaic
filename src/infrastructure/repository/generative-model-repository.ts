@@ -14,8 +14,8 @@ import { gpt54MiniSpecification } from "@infra/providers/openai/models/gpt-5-4-m
 import { gpt54NanoSpecification } from "@infra/providers/openai/models/gpt-5-4-nano"
 import { gpt55Specification } from "@infra/providers/openai/models/gpt-5-5"
 import { claudeHaiku45Specification } from "@infra/providers/anthropic/models/claude-4-5-haiku"
-import { GenerativeModel, ModelName } from "@domain/generative-model/generative-model"
-import { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
+import type { GenerativeModel, ModelName } from "@domain/generative-model/generative-model"
+import type { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
 
 export class InMemoryGenerativeModelRepository implements GenerativeModelRepository {
 	getByModelName(modelName: ModelName): Promise<GenerativeModel> {

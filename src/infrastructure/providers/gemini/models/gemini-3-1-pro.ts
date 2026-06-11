@@ -1,4 +1,4 @@
-import { ModelSpecification } from "@domain/generative-model/generative-model"
+import type { ModelSpecification } from "@domain/generative-model/generative-model"
 
 export const gemini31ProSpecification: ModelSpecification = {
 	name: "gemini-3.1-pro-preview",

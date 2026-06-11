@@ -1,11 +1,11 @@
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
+import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { Endpoint } from "@domain/generative-model/endpoint"
+import type { Endpoint } from "@domain/generative-model/endpoint"
 import { OpenAIChatCompletionsMapper } from "./openai-chat-completions-mapper"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelName } from "@domain/generative-model/generative-model"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { ModelName } from "@domain/generative-model/generative-model"
 import OpenAI from "openai"
-import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
 /**
  * Optional connection config. When omitted, the `openai` SDK reads
