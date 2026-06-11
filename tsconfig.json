@@ -7,19 +7,19 @@
 		"declarationMap": true,
 		"sourceMap": true,
 		"outDir": "./dist",
-		"rootDir": "./src",
+		"rootDir": ".",
 		"strict": true,
 		"moduleResolution": "node",
 		"baseUrl": ".",
 		"paths": {
 			"@app/*": ["src/application/*"],
 			"@domain/*": ["src/domain/*"],
-			"@infra/*": ["src/infrastructure/*"],
+			"@infra/*": ["src/infrastructure/*"]
 		},
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true
 	},
 	"include": ["src", "tests", "src/domain/types"],
-	"exclude": ["node_modules", "dist", "examples"]
+	"exclude": ["node_modules", "dist", "tests", "examples"] // For now excluded tests
 }
