@@ -1,4 +1,4 @@
-import { ModelSpecification } from "@domain/generative-model/generative-model"
+import type { ModelSpecification } from "@domain/generative-model/generative-model"
 
 export const deepSeekV4FlashSpecification: ModelSpecification = {
 	name: "deepseek-v4-flash",

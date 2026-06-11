@@ -2,12 +2,13 @@ import { ReasoningItem } from "@domain/model-context/context-item/model-item/rea
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { RunInferenceUseCase } from "@domain/agentic-environment/use-cases/run-inference"
-import { InferenceRunner, NonStreamingInference, StreamingInference } from "@app/services/inference-runner"
-import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
-import { ModelName } from "@domain/generative-model/generative-model"
-import { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { RunInferenceUseCase } from "@domain/agentic-environment/use-cases/run-inference"
+import type { InferenceRunner } from "@app/services/inference-runner"
+import { NonStreamingInference, StreamingInference } from "@app/services/inference-runner"
+import type { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
+import type { ModelName } from "@domain/generative-model/generative-model"
+import type { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
 
 export class RunInference implements RunInferenceUseCase<ModelName> {
 	constructor(

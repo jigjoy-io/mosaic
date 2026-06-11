@@ -1,7 +1,7 @@
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { AgenticEnvironment } from "../agentic-environment"
-import { Participant } from "../participant"
-import { Tool } from "@domain/generative-model/tool"
+import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
+import type { AgenticEnvironment } from "../agentic-environment"
+import type { Participant } from "../participant"
+import type { Tool } from "@domain/generative-model/tool"
 
 export interface ExecuteFunctionCallUseCase {
 	execute(

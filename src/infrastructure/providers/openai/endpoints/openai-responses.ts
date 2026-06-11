@@ -1,11 +1,11 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import { Endpoint } from "@domain/generative-model/endpoint"
+import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
+import type { Endpoint } from "@domain/generative-model/endpoint"
 import OpenAI from "openai"
-import { ModelName } from "@domain/generative-model/generative-model"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { ModelName } from "@domain/generative-model/generative-model"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { OpenAIResponsesMapper } from "./openai-responses-mapper"
-import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
 export class OpenAIResponses implements Endpoint {
 	endpointMapper: InferenceEndpointMapper

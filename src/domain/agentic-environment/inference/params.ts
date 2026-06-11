@@ -1,8 +1,8 @@
-import { Tool } from "@domain/generative-model/tool"
-import { ModelContext } from "@domain/model-context/model-context"
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
-import { Participant } from "../participant"
-import { StructuredOutputFormat } from "@domain/generative-model/request-validation/structured-output"
+import type { Tool } from "@domain/generative-model/tool"
+import type { ModelContext } from "@domain/model-context/model-context"
+import type { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import type { Participant } from "../participant"
+import type { StructuredOutputFormat } from "@domain/generative-model/request-validation/structured-output"
 
 export type InferenceParams<TModel extends string> = {
 	model: TModel

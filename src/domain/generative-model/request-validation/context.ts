@@ -1,11 +1,11 @@
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ContextItem } from "@domain/model-context/context-item/context-item"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { ContextItem } from "@domain/model-context/context-item/context-item"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
 import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { RequestValidationRule } from "./rule"
-import { ModelName, ModelSpecification } from "../generative-model"
+import type { RequestValidationRule } from "./rule"
+import type { ModelName, ModelSpecification } from "../generative-model"
 
 function getContextItemValidationKey(item: ContextItem): string {
 	if (item instanceof UserMessageItem) {

@@ -1,18 +1,18 @@
-import { ModelName } from "@domain/generative-model/generative-model"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { ModelName } from "@domain/generative-model/generative-model"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
 import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { InputText } from "@domain/model-context/context-item/item-content/input-text"
-import { ContextItem } from "@domain/model-context/context-item/context-item"
+import type { ContextItem } from "@domain/model-context/context-item/context-item"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
-import Anthropic from "@anthropic-ai/sdk"
+import type Anthropic from "@anthropic-ai/sdk"
 
 export class AnthropicMessagesMapper implements InferenceEndpointMapper {
 	toRequest(inferenceParams: InferenceParams<ModelName>) {

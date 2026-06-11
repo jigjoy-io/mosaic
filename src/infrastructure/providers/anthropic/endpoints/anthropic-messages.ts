@@ -1,11 +1,11 @@
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
+import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { Endpoint } from "@domain/generative-model/endpoint"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelName } from "@domain/generative-model/generative-model"
+import type { Endpoint } from "@domain/generative-model/endpoint"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { ModelName } from "@domain/generative-model/generative-model"
 import { AnthropicMessagesMapper } from "./anthropic-messages-mapper"
 import Anthropic from "@anthropic-ai/sdk"
-import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
 /**
  * Native Anthropic adapter on the `@anthropic-ai/sdk` (`messages.create`).
