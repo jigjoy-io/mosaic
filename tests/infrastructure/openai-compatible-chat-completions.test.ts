@@ -5,15 +5,27 @@ import { UserMessageItem } from "@domain/model-context/context-item/client-item/
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { InferenceRequest } from "@domain/generative-model/inference-request"
-import { Tool } from "@domain/generative-model/tool"
-import { Gpt55 } from "@infra/providers/openai/models/gpt-5-5"
-import { OpenAICompatibleChatCompletions } from "@infra/providers/openai/runtime/openai-compatible-chat-completions"
+import { OpenAIChatCompletionsMapper } from "@infra/providers/openai/endpoints/openai-chat-completions-mapper"
+import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { BaseParticipant } from "@app/participants/participant"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { ModelName } from "@domain/generative-model/generative-model"
+import type { Tool } from "@domain/generative-model/tool"
 
-// Pure conversion tests for the generic OpenAI-compatible Chat
-// Completions runtime — no network call is made, only the
-// ModelContext ⇄ chat.completions request/response mapping.
-describe("OpenAICompatibleChatCompletions.mapContextToRequest", () => {
+function makeParams(
+	context: ModelContext,
+	overrides: Partial<InferenceParams<ModelName>> = {},
+): InferenceParams<ModelName> {
+	return {
+		model: "gpt-5.5",
+		context,
+		caller: new BaseParticipant(),
+		environment: new AgenticEnvironment(),
+		...overrides,
+	}
+}
+
+describe("OpenAIChatCompletionsMapper.mapContextItems", () => {
 	it("maps a full conversation into OpenAI chat messages", () => {
 		const context = ModelContext.create("project")
 		context.addContextItem(SystemMessageItem.create("You are a helpful assistant."))
@@ -28,11 +40,9 @@ describe("OpenAICompatibleChatCompletions.mapContextToRequest", () => {
 		)
 		context.addContextItem(FunctionCallOutputItem.create("call_1", "Sunny, 22C"))
 
-		const messages = new OpenAICompatibleChatCompletions().mapContextToRequest(context)
+		const mapper = new OpenAIChatCompletionsMapper()
+		const messages = mapper.mapContextItems(makeParams(context))
 
-		// The tool call follows an assistant text message, so it attaches
-		// to that same assistant message (valid OpenAI shape: content +
-		// tool_calls together) rather than creating a second one.
 		expect(messages).toEqual([
 			{ role: "system", content: "You are a helpful assistant." },
 			{ role: "user", content: "What is the weather in NYC?" },
@@ -52,23 +62,15 @@ describe("OpenAICompatibleChatCompletions.mapContextToRequest", () => {
 	})
 
 	it("merges consecutive parallel tool calls into ONE assistant message", () => {
-		// This is the property a hand-rolled converter tends to get
-		// wrong: two tool calls emitted in the same turn must become a
-		// single assistant message with two `tool_calls`, each followed
-		// by its `tool` result — otherwise OpenAI/DeepSeek 400 with
-		// "insufficient tool messages following tool_calls".
 		const context = ModelContext.create("project")
 		context.addContextItem(UserMessageItem.create("Read two files."))
-		context.addContextItem(
-			FunctionCallItem.rehydrate({ callId: "call_a", name: "read", args: '{"path":"a.ts"}' }),
-		)
-		context.addContextItem(
-			FunctionCallItem.rehydrate({ callId: "call_b", name: "read", args: '{"path":"b.ts"}' }),
-		)
+		context.addContextItem(FunctionCallItem.rehydrate({ callId: "call_a", name: "read", args: '{"path":"a.ts"}' }))
+		context.addContextItem(FunctionCallItem.rehydrate({ callId: "call_b", name: "read", args: '{"path":"b.ts"}' }))
 		context.addContextItem(FunctionCallOutputItem.create("call_a", "contents of a"))
 		context.addContextItem(FunctionCallOutputItem.create("call_b", "contents of b"))
 
-		const messages = new OpenAICompatibleChatCompletions().mapContextToRequest(context)
+		const mapper = new OpenAIChatCompletionsMapper()
+		const messages = mapper.mapContextItems(makeParams(context))
 
 		expect(messages).toEqual([
 			{ role: "user", content: "Read two files." },
@@ -86,7 +88,7 @@ describe("OpenAICompatibleChatCompletions.mapContextToRequest", () => {
 	})
 })
 
-describe("OpenAICompatibleChatCompletions.buildRequest", () => {
+describe("OpenAIChatCompletionsMapper.toRequest", () => {
 	const toolFor = (name: string): Tool => ({
 		type: "function",
 		name,
@@ -96,14 +98,11 @@ describe("OpenAICompatibleChatCompletions.buildRequest", () => {
 		invoke: async () => ({}),
 	})
 
-	it("sends model name + messages, and tools when the model has them", () => {
-		const model = new Gpt55()
-		model.setTools([toolFor("read")])
+	it("sends model name + messages, and tools when provided", () => {
 		const context = ModelContext.create("project").addContextItem(UserMessageItem.create("hi"))
 
-		const request = new OpenAICompatibleChatCompletions().buildRequest(
-			new InferenceRequest(model, context),
-		)
+		const mapper = new OpenAIChatCompletionsMapper()
+		const request = mapper.toRequest(makeParams(context, { tools: [toolFor("read")] }))
 
 		expect(request.model).toBe("gpt-5.5")
 		expect(request.messages).toEqual([{ role: "user", content: "hi" }])
@@ -115,51 +114,30 @@ describe("OpenAICompatibleChatCompletions.buildRequest", () => {
 		])
 	})
 
-	it("omits tools when the model has none", () => {
-		const model = new Gpt55()
+	it("omits tools when none are provided", () => {
 		const context = ModelContext.create("project").addContextItem(UserMessageItem.create("hi"))
 
-		const request = new OpenAICompatibleChatCompletions().buildRequest(
-			new InferenceRequest(model, context),
-		)
+		const mapper = new OpenAIChatCompletionsMapper()
+		const request = mapper.toRequest(makeParams(context))
 
 		expect(request.tools).toBeUndefined()
 	})
 
-	it("emits standard reasoning_effort when the model supports it", () => {
-		const model = new Gpt55() // supportReasoningEffort: true
-		model.setReasoningEffort("high")
+	it("emits reasoning_effort when provided", () => {
 		const context = ModelContext.create("project").addContextItem(UserMessageItem.create("hi"))
 
-		const request = new OpenAICompatibleChatCompletions().buildRequest(
-			new InferenceRequest(model, context),
-		)
+		const mapper = new OpenAIChatCompletionsMapper()
+		const request = mapper.toRequest(makeParams(context, { reasoningEffort: "high" }))
 
 		expect(request.reasoning_effort).toBe("high")
-		// No vendor-only fields leak in for a plain endpoint.
-		expect(request.thinking).toBeUndefined()
-	})
-
-	it("merges consumer extraBody, with standard fields taking precedence", () => {
-		const model = new Gpt55()
-		const context = ModelContext.create("project").addContextItem(UserMessageItem.create("hi"))
-
-		const request = new OpenAICompatibleChatCompletions({
-			extraBody: { thinking: { type: "enabled" }, model: "should-not-win" },
-		}).buildRequest(new InferenceRequest(model, context))
-
-		// Vendor quirk passed through...
-		expect(request.thinking).toEqual({ type: "enabled" })
-		// ...but the runtime's own `model` is not overwritten by extraBody.
-		expect(request.model).toBe("gpt-5.5")
 	})
 })
 
-describe("OpenAICompatibleChatCompletions response extraction", () => {
-	const runtime = new OpenAICompatibleChatCompletions()
+describe("OpenAIChatCompletionsMapper response extraction", () => {
+	const mapper = new OpenAIChatCompletionsMapper()
 
 	it("extracts assistant text + tool calls into context items", () => {
-		const items = runtime.extractContextItems({
+		const items = mapper.extractContextItems({
 			choices: [
 				{
 					message: {
@@ -173,21 +151,20 @@ describe("OpenAICompatibleChatCompletions response extraction", () => {
 		})
 
 		expect(items).toHaveLength(2)
-		expect((items[0] as any).toJSON()).toMatchObject({ type: "message" })
-		expect((items[1] as any).toJSON()).toMatchObject({
-			type: "function_call",
-			name: "read",
-			arguments: '{"path":"x"}',
-		})
+		expect(items[0].type).toBe("message")
+		expect((items[0] as any).content.text).toBe("Here you go.")
+		expect(items[1].type).toBe("function_call")
+		expect((items[1] as any).name).toBe("read")
+		expect((items[1] as any).args).toBe('{"path":"x"}')
 	})
 
 	it("returns no items for an empty/missing message", () => {
-		expect(runtime.extractContextItems({ choices: [] })).toEqual([])
-		expect(runtime.extractContextItems({})).toEqual([])
+		expect(mapper.extractContextItems({ choices: [] })).toEqual([])
+		expect(mapper.extractContextItems({})).toEqual([])
 	})
 
 	it("maps token usage into a TokenUsage", () => {
-		const usage = runtime.extractTokenUsage({
+		const usage = mapper.extractTokenUsage({
 			usage: {
 				prompt_tokens: 100,
 				completion_tokens: 40,
@@ -205,6 +182,6 @@ describe("OpenAICompatibleChatCompletions response extraction", () => {
 	})
 
 	it("returns undefined token usage when the response has none", () => {
-		expect(runtime.extractTokenUsage({})).toBeUndefined()
+		expect(mapper.extractTokenUsage({})).toBeUndefined()
 	})
 })

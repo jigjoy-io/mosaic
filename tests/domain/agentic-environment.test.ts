@@ -1,7 +1,6 @@
 import { describe, it, expect } from "@rstest/core"
 import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
-import { Participant } from "@domain/agentic-environment/participants/participant"
-import { Human } from "@domain/agentic-environment/participants/human"
+import { Participant } from "@domain/agentic-environment/participant"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
@@ -80,8 +79,8 @@ class RecordingParticipant extends Participant {
 	}
 }
 
-/** Concrete Human used to exercise sendMessage. */
-class TestHuman extends Human {
+/** Concrete Participant that simulates sending messages (replaces the old Human class). */
+class TestHuman extends Participant {
 	readonly received: string[] = []
 	onParticipantJoined() {}
 	onParticipantLeft() {}
@@ -100,6 +99,15 @@ class TestHuman extends Human {
 	}
 	onInternalEvent() {}
 	onExternalEvent() {}
+	onError() {}
+	onParticipantError() {}
+
+	sendMessage(env: AgenticEnvironment, message: string) {
+		if (!this.isJoinedTo(env)) {
+			throw new Error("Not joined to environment")
+		}
+		env.deliverMessage(this, message)
+	}
 }
 
 class ErroringParticipant extends RecordingParticipant {
@@ -314,10 +322,7 @@ describe("AgenticEnvironment error delivery", () => {
 
 		const previousErrors = source.find("onError").length
 
-		env.deliverModelMessage(
-			source,
-			ModelMessageItem.rehydrate({ text: "hello" }),
-		)
+		env.deliverModelMessage(source, ModelMessageItem.rehydrate({ text: "hello" }))
 
 		expect(source.find("onModelMessage")).toEqual([])
 		expect(source.find("onError").length).toBe(previousErrors)
@@ -338,9 +343,7 @@ describe("AgenticEnvironment error delivery", () => {
 
 		env.deliverModelMessage(active, msg)
 
-		expect(active.find("onModelMessage")).toEqual([
-			{ m: "onModelMessage", args: [msg] },
-		])
+		expect(active.find("onModelMessage")).toEqual([{ m: "onModelMessage", args: [msg] }])
 
 		expect(failing.find("onExternalModelMessage")).toEqual([])
 	})
@@ -359,8 +362,6 @@ describe("AgenticEnvironment error delivery", () => {
 		const errorCall = source.find("onError")[0]
 
 		expect(errorCall.args[0]).toBeInstanceOf(AgenticError)
-		expect((errorCall.args[0] as AgenticError).message).toBe(
-			"agentic failure",
-		)
+		expect((errorCall.args[0] as AgenticError).message).toBe("agentic failure")
 	})
 })

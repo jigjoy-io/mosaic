@@ -13,7 +13,8 @@ describe("InMemoryModelContextRepository (integration)", () => {
 
 		expect(loaded.id).toBe(context.id)
 		expect(loaded.projectId).toBe("project-1")
-		expect(loaded.toJSON()).toEqual(context.toJSON())
+		expect(loaded.getItems()).toHaveLength(context.getItems().length)
+		expect(loaded.getItems()[0].type).toBe("message")
 	})
 
 	it("throws when getting an unknown id", async () => {

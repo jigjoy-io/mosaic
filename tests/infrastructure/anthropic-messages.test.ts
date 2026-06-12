@@ -5,12 +5,23 @@ import { UserMessageItem } from "@domain/model-context/context-item/client-item/
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { AnthropicMessages } from "@infra/providers/anthropic/runtime/anthropic-messages"
+import { AnthropicMessagesMapper } from "@infra/providers/anthropic/endpoints/anthropic-messages-mapper"
+import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { BaseParticipant } from "@app/participants/participant"
+import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { ModelName } from "@domain/generative-model/generative-model"
 
-// Integration: a ModelContext assembled from domain items is mapped by the
-// AnthropicMessages runtime into the shape the Anthropic Messages API expects.
-// No network call is made — only the pure context-to-request mapping is tested.
-describe("AnthropicMessages.mapContextToRequest (integration)", () => {
+function makeParams(context: ModelContext): InferenceParams<ModelName> {
+	return {
+		model: "claude-opus-4-7",
+		context,
+		caller: new BaseParticipant(),
+		environment: new AgenticEnvironment(),
+		maxOutputTokens: 32_000,
+	}
+}
+
+describe("AnthropicMessagesMapper.mapContextItems (integration)", () => {
 	it("maps a full conversation into Anthropic messages and a system prompt", () => {
 		const context = ModelContext.create("integration-project")
 		context.addContextItem(SystemMessageItem.create("You are a helpful assistant."))
@@ -25,8 +36,8 @@ describe("AnthropicMessages.mapContextToRequest (integration)", () => {
 		)
 		context.addContextItem(FunctionCallOutputItem.create("call_1", "Sunny, 22C"))
 
-		const runtime = new AnthropicMessages()
-		const { messages, system } = runtime.mapContextToRequest(context)
+		const mapper = new AnthropicMessagesMapper()
+		const { messages, system } = mapper.mapContextItems(makeParams(context))
 
 		expect(system).toBe("You are a helpful assistant.")
 
@@ -47,7 +58,8 @@ describe("AnthropicMessages.mapContextToRequest (integration)", () => {
 		const context = ModelContext.create("integration-project")
 		context.addContextItem(UserMessageItem.create("Hello"))
 
-		const { messages, system } = new AnthropicMessages().mapContextToRequest(context)
+		const mapper = new AnthropicMessagesMapper()
+		const { messages, system } = mapper.mapContextItems(makeParams(context))
 
 		expect(system).toBeUndefined()
 		expect(messages).toEqual([{ role: "user", content: [{ type: "text", text: "Hello" }] }])
