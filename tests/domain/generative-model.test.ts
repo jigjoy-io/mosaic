@@ -1,43 +1,8 @@
 import { describe, it, expect } from "@rstest/core"
-import { GenerativeModel } from "@domain/generative-model/generative-model"
-import { ModelSpecification } from "@domain/generative-model/generative-model"
-import { Tool } from "@domain/generative-model/tool"
 import { TokenUsage } from "@domain/generative-model/token-usage"
 import { InputTokenDetails, OutputTokenDetails } from "@domain/generative-model/token-usage"
-import { ModelContext } from "@domain/model-context/model-context"
-import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
-/** Minimal in-memory model satisfying the GenerativeModel port for wiring tests. */
-function makeModel(): GenerativeModel {
-	const specification: ModelSpecification = {
-		name: "test-model",
-		supportReasoningEffort: true,
-		defaultReasoningEffort: "medium",
-		supportStreaming: true,
-		contextWindowSize: 1000,
-		maxOutputTokens: 100,
-		supportFunctionCalling: true,
-	}
-	let effort = "medium"
-	let streaming = false
-	let tools: Tool[] = []
-	return {
-		specification,
-		setReasoningEffort: (e: string) => {
-			effort = e
-		},
-		getReasoningEffort: () => effort,
-		setStreaming: (s: boolean) => {
-			streaming = s
-		},
-		getStreaming: () => streaming,
-		setTools: (t: Tool[]) => {
-			tools = t
-		},
-		getTools: () => tools,
-	}
-}
 
 describe("TokenUsage", () => {
 	it("stores aggregate counts and the nested detail objects", () => {
@@ -48,18 +13,6 @@ describe("TokenUsage", () => {
 		expect(usage.totalTokens).toBe(140)
 		expect(usage.inputTokenDetails.cached_tokens).toBe(25)
 		expect(usage.outputTokenDetails.reasoning_tokens).toBe(10)
-	})
-})
-
-describe("InferenceRequest", () => {
-	it("holds the model and context it was constructed with", () => {
-		const model = makeModel()
-		const context = ModelContext.create("project-1")
-
-		const request = new InferenceRequest(model, context)
-
-		expect(request.model).toBe(model)
-		expect(request.context).toBe(context)
 	})
 })
 

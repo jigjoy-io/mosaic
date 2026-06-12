@@ -11,20 +11,29 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 
 describe("item content", () => {
-	it("InputText serialises to a single-element input_text array", () => {
-		expect(InputText.create("hello").toJSON()).toEqual([{ type: "input_text", text: "hello" }])
+	it("InputText stores its text and exposes the input_text type", () => {
+		const input = InputText.create("hello")
+
+		expect(input.type).toBe("input_text")
+		expect(input.text).toBe("hello")
 	})
 
 	it("InputText.rehydrate preserves the text", () => {
 		expect(InputText.rehydrate({ text: "round-trip" }).text).toBe("round-trip")
 	})
 
-	it("OutputText serialises to a single-element output_text array", () => {
-		expect(OutputText.rehydrate({ text: "out" }).toJSON()).toEqual([{ type: "output_text", text: "out" }])
+	it("OutputText stores its text and exposes the output_text type", () => {
+		const output = OutputText.rehydrate({ text: "out" })
+
+		expect(output.type).toBe("output_text")
+		expect(output.text).toBe("out")
 	})
 
-	it("SummaryText serialises to an object (not an array)", () => {
-		expect(SummaryText.rehydrate({ text: "sum" }).toJSON()).toEqual({ type: "summary_text", text: "sum" })
+	it("SummaryText stores its text and exposes the summary_text type", () => {
+		const summary = SummaryText.rehydrate({ text: "sum" })
+
+		expect(summary.type).toBe("summary_text")
+		expect(summary.text).toBe("sum")
 	})
 })
 
@@ -35,80 +44,63 @@ describe("client message items", () => {
 		expect(item.type).toBe("message")
 		expect(item.role).toBe("user")
 		expect(item.getType()).toBe("message")
-		expect(item.toJSON()).toEqual({
-			type: "message",
-			role: "user",
-			content: [{ type: "input_text", text: "hi" }],
-		})
+		expect(item.content.type).toBe("input_text")
+		expect(item.content.text).toBe("hi")
 	})
 
 	it("SystemMessageItem carries the system role", () => {
 		const item = SystemMessageItem.create("sys")
 
 		expect(item.role).toBe("system")
-		expect(item.toJSON()).toEqual({
-			type: "message",
-			role: "system",
-			content: [{ type: "input_text", text: "sys" }],
-		})
+		expect(item.content.text).toBe("sys")
 	})
 
 	it("DeveloperMessageItem carries the developer role", () => {
 		const item = DeveloperMessageItem.create("dev")
 
 		expect(item.role).toBe("developer")
-		expect(item.toJSON()).toEqual({
-			type: "message",
-			role: "developer",
-			content: [{ type: "input_text", text: "dev" }],
-		})
+		expect(item.content.text).toBe("dev")
 	})
 
 	it("message items rehydrate back to an equivalent item", () => {
 		const original = UserMessageItem.create("same")
 		const restored = UserMessageItem.rehydrate({ text: "same" })
 
-		expect(restored.toJSON()).toEqual(original.toJSON())
+		expect(restored.content.text).toBe(original.content.text)
+		expect(restored.role).toBe(original.role)
+		expect(restored.type).toBe(original.type)
 	})
 
-	it("FunctionCallOutputItem serialises call_id and output text", () => {
+	it("FunctionCallOutputItem stores call_id and output text", () => {
 		const item = FunctionCallOutputItem.create("call_1", "result")
 
 		expect(item.type).toBe("function_call_output")
 		expect(item.callId).toBe("call_1")
-		expect(item.toJSON()).toEqual({
-			type: "function_call_output",
-			call_id: "call_1",
-			output: [{ type: "input_text", text: "result" }],
-		})
+		expect(item.output.type).toBe("input_text")
+		expect(item.output.text).toBe("result")
 	})
 })
 
 describe("model output items", () => {
-	it("FunctionCallItem maps callId/args to call_id/arguments in JSON", () => {
+	it("FunctionCallItem stores callId, name, and args", () => {
 		const item = FunctionCallItem.rehydrate({ callId: "c1", name: "doThing", args: '{"a":1}' })
 
 		expect(item.type).toBe("function_call")
-		expect(item.toJSON()).toEqual({
-			type: "function_call",
-			call_id: "c1",
-			name: "doThing",
-			arguments: '{"a":1}',
-		})
+		expect(item.callId).toBe("c1")
+		expect(item.name).toBe("doThing")
+		expect(item.args).toBe('{"a":1}')
 	})
 
 	it("ModelMessageItem carries the assistant role and wraps output_text", () => {
 		const item = ModelMessageItem.rehydrate({ text: "answer" })
 
 		expect(item.role).toBe("assistant")
-		expect(item.toJSON()).toEqual({
-			type: "message",
-			role: "assistant",
-			content: [{ type: "output_text", text: "answer" }],
-		})
+		expect(item.type).toBe("message")
+		expect(item.content.type).toBe("output_text")
+		expect(item.content.text).toBe("answer")
 	})
 
-	it("ReasoningItem serialises content, encryptedContent and summary", () => {
+	it("ReasoningItem stores content, encryptedContent and summary", () => {
 		const item = ReasoningItem.rehydrate({
 			content: InputText.rehydrate({ text: "because" }),
 			encryptedContent: "enc",
@@ -116,12 +108,10 @@ describe("model output items", () => {
 		})
 
 		expect(item.type).toBe("reasoning")
-		expect(item.toJSON()).toEqual({
-			type: "reasoning",
-			content: [{ type: "input_text", text: "because" }],
-			encryptedContent: "enc",
-			summary: [{ type: "summary_text", text: "tl;dr" }],
-		})
+		expect(item.content?.text).toBe("because")
+		expect(item.encryptedContent).toBe("enc")
+		expect(item.summary).toHaveLength(1)
+		expect(item.summary[0].text).toBe("tl;dr")
 	})
 
 	it("ReasoningItem tolerates absent content and an empty summary", () => {
@@ -131,11 +121,9 @@ describe("model output items", () => {
 			summary: [],
 		})
 
-		expect(item.toJSON()).toEqual({
-			type: "reasoning",
-			content: undefined,
-			encryptedContent: undefined,
-			summary: [],
-		})
+		expect(item.type).toBe("reasoning")
+		expect(item.content).toBeUndefined()
+		expect(item.encryptedContent).toBeUndefined()
+		expect(item.summary).toEqual([])
 	})
 })
