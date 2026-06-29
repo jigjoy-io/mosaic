@@ -1,10 +1,10 @@
 # Mozaik
 
-**Mozaik** is TypeScript framework for building reactive agents. It provides the easiest way to build collaborative, **event-driven agents** that can work together in parallel.
+**Mozaik** is a TypeScript framework for building agentic teams. It enables AI agents to work in parallel, stay aware of each other, and collaborate through event-driven communication.
 
 ![npm downloads](https://img.shields.io/npm/dt/@mozaik-ai/core) ![npm downloads weekly](https://img.shields.io/npm/dw/@mozaik-ai/core) ![npm version](https://img.shields.io/npm/v/@mozaik-ai/core)
 
-Mozaik is built for **truly parallel, non-blocking agents**. It enables agents to communicate through semantic events, react to each other’s outputs, run asynchronously, and collaborate without being locked into a single sequential workflow.
+Instead of forcing agents into sequential workflows, Mozaik makes collaboration a first-class concept — creating the foundation for moving from autonomous agents to autonomous teams of AI agents.
 
 ---
 
