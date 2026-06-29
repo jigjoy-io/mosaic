@@ -10,6 +10,8 @@ import { FunctionCallOutputItem } from "@domain/model-context/context-item/clien
 import { ModelContextRepository } from "@domain/model-context/model-context-repository"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import { Tool } from "@domain/generative-model/tool"
+import { McpClient, type McpServerConfig, type McpToolSpec } from "@infra/mcp/mcp-client"
+import { McpToolRegistry } from "@infra/mcp/mcp-tool-registry"
 import { InMemoryModelContextRepository } from "@infra/repository/in-memory-model-context-repository"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
 import { Participant } from "@domain/agentic-environment/participant"
@@ -71,6 +73,10 @@ export {
 	InputTokenDetails,
 	OutputTokenDetails,
 	Tool,
+	McpClient,
+	type McpServerConfig,
+	type McpToolSpec,
+	McpToolRegistry,
 	Endpoint,
 	AgenticEnvironment,
 	Participant,
