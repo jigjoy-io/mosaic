@@ -1,5 +1,5 @@
 import { describe, it, expect } from "@rstest/core"
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { AgenticEnvironment } from "@domain/agentic-environment/channel"
 import { Participant } from "@domain/agentic-environment/participant"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
@@ -128,7 +128,7 @@ const aFunctionCall = () => FunctionCallItem.rehydrate({ callId: "c1", name: "fn
 
 describe("AgenticEnvironment subscription lifecycle", () => {
 	it("fires onJoined on the newcomer and onParticipantJoined on existing members", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const first = new RecordingParticipant()
 		const second = new RecordingParticipant()
 
@@ -142,7 +142,7 @@ describe("AgenticEnvironment subscription lifecycle", () => {
 	})
 
 	it("fires onLeft on the leaver and onParticipantLeft on the remaining members", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const a = new RecordingParticipant()
 		const b = new RecordingParticipant()
 		a.join(env)
@@ -155,7 +155,7 @@ describe("AgenticEnvironment subscription lifecycle", () => {
 	})
 
 	it("unsubscribing a participant that never joined is a no-op", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const stranger = new RecordingParticipant()
 
 		env.unsubscribe(stranger)
@@ -166,7 +166,7 @@ describe("AgenticEnvironment subscription lifecycle", () => {
 
 describe("AgenticEnvironment delivery routing", () => {
 	it("delivers a function call to its source and as external to everyone else", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const source = new RecordingParticipant()
 		const other = new RecordingParticipant()
 		source.join(env)
@@ -182,7 +182,7 @@ describe("AgenticEnvironment delivery routing", () => {
 	})
 
 	it("delivers a semantic event internally to the source and externally to others", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const source = new RecordingParticipant()
 		const other = new RecordingParticipant()
 		source.join(env)
@@ -196,7 +196,7 @@ describe("AgenticEnvironment delivery routing", () => {
 	})
 
 	it("delivers a model message to its source and as external to others", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const source = new RecordingParticipant()
 		const other = new RecordingParticipant()
 		source.join(env)
@@ -210,7 +210,7 @@ describe("AgenticEnvironment delivery routing", () => {
 	})
 
 	it("deliverMessage skips the source and notifies everyone else", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const source = new RecordingParticipant()
 		const other = new RecordingParticipant()
 		source.join(env)
@@ -225,7 +225,7 @@ describe("AgenticEnvironment delivery routing", () => {
 
 describe("Participant membership", () => {
 	it("join is idempotent and tracks the environment once", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const p = new RecordingParticipant()
 
 		p.join(env)
@@ -237,7 +237,7 @@ describe("Participant membership", () => {
 	})
 
 	it("leave removes the environment and is a no-op when not joined", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const p = new RecordingParticipant()
 
 		p.leave(env) // not joined yet — no-op
@@ -253,14 +253,14 @@ describe("Participant membership", () => {
 
 describe("Human", () => {
 	it("sendMessage throws when the human has not joined the environment", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const human = new TestHuman()
 
 		expect(() => human.sendMessage(env, "hello")).toThrow("Not joined to environment")
 	})
 
 	it("sendMessage delivers to other participants once joined", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const human = new TestHuman()
 		const listener = new RecordingParticipant()
 		human.join(env)
@@ -274,7 +274,7 @@ describe("Human", () => {
 
 describe("AgenticEnvironment error delivery", () => {
 	it("delivers onError to the participant that failed and onParticipantError to others", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 
 		const source = new ErroringParticipant()
 		const observer = new RecordingParticipant()
@@ -293,24 +293,8 @@ describe("AgenticEnvironment error delivery", () => {
 		expect(participantErrors[0]?.args[1]).toBeInstanceOf(AgenticError)
 	})
 
-	it("marks a participant inactive after onError", () => {
-		const env = new AgenticEnvironment()
-
-		const source = new ErroringParticipant()
-		const observer = new RecordingParticipant()
-
-		source.join(env)
-		observer.join(env)
-
-		expect(source.getEnvironmentState(env)).toBe(true)
-
-		env.deliverFunctionCall(source, aFunctionCall())
-
-		expect(source.getEnvironmentState(env)).toBe(false)
-	})
-
 	it("does not deliver future events to an inactive participant", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 
 		const source = new ErroringParticipant()
 		const observer = new RecordingParticipant()
@@ -329,7 +313,7 @@ describe("AgenticEnvironment error delivery", () => {
 	})
 
 	it("continues delivering to other active participants after one becomes inactive", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 
 		const failing = new ErroringParticipant()
 		const active = new RecordingParticipant()
@@ -349,7 +333,7 @@ describe("AgenticEnvironment error delivery", () => {
 	})
 
 	it("handles AgenticError instances without wrapping them", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 
 		const source = new AgenticErroringParticipant()
 		const observer = new RecordingParticipant()

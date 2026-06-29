@@ -17,7 +17,7 @@ export class RunInference implements RunInferenceUseCase<ModelName> {
 	) {}
 
 	async execute(inferenceParams: InferenceParams<ModelName>): Promise<void> {
-		const { caller, environment, signal } = inferenceParams
+		const { caller, channel, signal } = inferenceParams
 
 		const generativeModel = await this.generativeModelRepository.getByModelName(inferenceParams.model)
 
@@ -39,13 +39,33 @@ export class RunInference implements RunInferenceUseCase<ModelName> {
 				break
 			}
 			if (item instanceof ReasoningItem) {
-				environment.deliverReasoning(caller, item)
+				channel.deliver(
+					SemanticEvent.create({ type: "reasoning", producerId: caller.getProfile().getId(), data: item }),
+				)
 			} else if (item instanceof FunctionCallItem) {
-				environment.deliverFunctionCall(caller, item)
+				channel.deliver(
+					SemanticEvent.create({
+						type: "function_call",
+						producerId: caller.getProfile().getId(),
+						data: item,
+					}),
+				)
 			} else if (item instanceof ModelMessageItem) {
-				environment.deliverModelMessage(caller, item)
+				channel.deliver(
+					SemanticEvent.create({
+						type: "model_message",
+						producerId: caller.getProfile().getId(),
+						data: item,
+					}),
+				)
 			} else if (item instanceof SemanticEvent) {
-				environment.deliverSemanticEvent(caller, item)
+				channel.deliver(
+					SemanticEvent.create({
+						type: "semantic_event",
+						producerId: caller.getProfile().getId(),
+						data: item,
+					}),
+				)
 			}
 		}
 	}

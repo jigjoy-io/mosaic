@@ -5,7 +5,7 @@ import { SystemMessageItem } from "@domain/model-context/context-item/client-ite
 import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { AgenticEnvironment } from "@domain/agentic-environment/channel"
 import { BaseParticipant } from "@app/participants/participant"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import type { ModelName } from "@domain/generative-model/generative-model"
@@ -18,7 +18,7 @@ function makeParams(
 		model: "gemini-3.5-flash",
 		context,
 		caller: new BaseParticipant(),
-		environment: new AgenticEnvironment(),
+		environment: AgenticEnvironment.create({ name: "test" }),
 		...overrides,
 	}
 }

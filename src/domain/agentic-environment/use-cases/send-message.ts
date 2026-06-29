@@ -1,6 +1,6 @@
-import type { AgenticEnvironment } from "../agentic-environment"
+import type { Channel } from "../channel"
 import type { Participant } from "../participant"
 
 export interface SendMessageUseCase {
-	execute(environment: AgenticEnvironment, message: string, caller: Participant): Promise<void>
+	execute(channel: Channel, message: string, caller: Participant): Promise<void>
 }

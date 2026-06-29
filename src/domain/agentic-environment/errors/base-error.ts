@@ -1,4 +1,4 @@
-import type { AgenticEnvironment } from "../agentic-environment"
+import type { AgenticEnvironment } from "../channel"
 import type { Participant } from "../participant"
 
 interface AgenticErrorOpts {

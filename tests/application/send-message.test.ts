@@ -1,13 +1,13 @@
 import { describe, it, expect } from "@rstest/core"
 import { SendMessage } from "@app/use-cases/send-message"
 import { BaseParticipant } from "@app/participants/participant"
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { AgenticEnvironment } from "@domain/agentic-environment/channel"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { RecordingParticipant } from "../helpers/recording-participant"
 
 describe("SendMessage", () => {
 	it("broadcasts a message to other participants once the caller has joined", async () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test" })
 		const caller = new BaseParticipant()
 		const listener = new RecordingParticipant()
 		caller.join(env)
@@ -20,7 +20,7 @@ describe("SendMessage", () => {
 	})
 
 	it("throws when the caller has not joined the environment", async () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test" })
 		const caller = new BaseParticipant()
 
 		const useCase = new SendMessage()
@@ -31,7 +31,7 @@ describe("SendMessage", () => {
 
 describe("BaseParticipant", () => {
 	it("joins an environment and absorbs deliveries without throwing", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test" })
 		const participant = new BaseParticipant()
 		const sender = new RecordingParticipant()
 		participant.join(env)
@@ -41,7 +41,7 @@ describe("BaseParticipant", () => {
 	})
 
 	it("can leave an environment after joining", () => {
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test" })
 		const participant = new BaseParticipant()
 		participant.join(env)
 

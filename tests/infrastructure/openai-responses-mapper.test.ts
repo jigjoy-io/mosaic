@@ -5,7 +5,7 @@ import { UserMessageItem } from "@domain/model-context/context-item/client-item/
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { AgenticEnvironment } from "@domain/agentic-environment/channel"
 import { BaseParticipant } from "@app/participants/participant"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import type { ModelName } from "@domain/generative-model/generative-model"
@@ -18,7 +18,7 @@ function makeParams(
 		model: "gpt-5.4",
 		context,
 		caller: new BaseParticipant(),
-		environment: new AgenticEnvironment(),
+		environment: AgenticEnvironment.create({ name: "test" }),
 		...overrides,
 	}
 }

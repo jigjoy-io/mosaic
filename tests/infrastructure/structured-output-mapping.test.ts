@@ -5,7 +5,7 @@ import { OpenAIResponsesMapper } from "@infra/providers/openai/endpoints/openai-
 import { AnthropicMessagesMapper } from "@infra/providers/anthropic/endpoints/anthropic-messages-mapper"
 import { GeminiGenerateContentMapper } from "@infra/providers/gemini/endpoints/gemini-generate-content-mapper"
 import { deepSeekV4FlashSpecification } from "@infra/providers/deepseek/models/deepseek-v4-flash"
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { AgenticEnvironment } from "@domain/agentic-environment/channel"
 import { BaseParticipant } from "@app/participants/participant"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import type { ModelName } from "@domain/generative-model/generative-model"
@@ -28,7 +28,7 @@ function makeParams(model: ModelName, structuredOutput?: StructuredOutputFormat)
 		model,
 		context,
 		caller: new BaseParticipant(),
-		environment: new AgenticEnvironment(),
+		environment: AgenticEnvironment.create({ name: "test" }),
 		maxOutputTokens: 32_000,
 		structuredOutput,
 	}

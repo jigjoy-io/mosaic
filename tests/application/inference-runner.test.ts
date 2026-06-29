@@ -7,7 +7,7 @@ import type { Endpoint } from "@domain/generative-model/endpoint"
 import { ModelContext } from "@domain/model-context/model-context"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { AgenticEnvironment } from "@domain/agentic-environment/channel"
 import { BaseParticipant } from "@app/participants/participant"
 
 async function collect<T>(stream: AsyncIterable<T>): Promise<T[]> {
@@ -21,7 +21,7 @@ function makeParams(overrides: Partial<InferenceParams<ModelName>> = {}): Infere
 		model: "gpt-5.4",
 		context: ModelContext.create("test"),
 		caller: new BaseParticipant(),
-		environment: new AgenticEnvironment(),
+		environment: AgenticEnvironment.create({ name: "test" }),
 		...overrides,
 	}
 }

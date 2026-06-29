@@ -1,6 +1,6 @@
 import { describe, it, expect } from "@rstest/core"
 import { RunInference } from "@app/use-cases/run-inference"
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
+import { AgenticEnvironment } from "@domain/agentic-environment/channel"
 import { BaseParticipant } from "@app/participants/participant"
 import { ModelContext } from "@domain/model-context/model-context"
 import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
@@ -44,7 +44,7 @@ describe("RunInference", () => {
 		const endpoint = makeEndpoint([message])
 		const useCase = new RunInference(makeRepository(endpoint), noOpValidator)
 
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test", silent: false })
 		const caller = new BaseParticipant()
 		const observer = new RecordingParticipant()
 		caller.join(env)
@@ -70,7 +70,7 @@ describe("RunInference", () => {
 		const endpoint = makeEndpoint([call])
 		const useCase = new RunInference(makeRepository(endpoint), noOpValidator)
 
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test" })
 		const caller = new BaseParticipant()
 		const observer = new RecordingParticipant()
 		caller.join(env)
@@ -91,7 +91,7 @@ describe("RunInference", () => {
 		const endpoint = makeEndpoint([reasoning])
 		const useCase = new RunInference(makeRepository(endpoint), noOpValidator)
 
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test" })
 		const caller = new BaseParticipant()
 		const observer = new RecordingParticipant()
 		caller.join(env)
@@ -112,7 +112,7 @@ describe("RunInference", () => {
 		const endpoint = makeEndpoint([message])
 		const useCase = new RunInference(makeRepository(endpoint), noOpValidator)
 
-		const env = new AgenticEnvironment()
+		const env = AgenticEnvironment.create({ name: "test" })
 		const caller = new BaseParticipant()
 		const observer = new RecordingParticipant()
 		caller.join(env)
