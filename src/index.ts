@@ -20,6 +20,19 @@ import { AgenticError } from "@domain/agentic-environment/errors/base-error"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { Endpoint } from "@domain/generative-model/endpoint"
+import { OpenAIResponses } from "@infra/providers/openai/endpoints/openai-responses"
+import {
+	OpenAIChatCompletions,
+	type OpenAICompatibleConfig,
+} from "@infra/providers/openai/endpoints/openai-chat-completions"
+import {
+	AnthropicMessages,
+	type AnthropicConnectionConfig,
+} from "@infra/providers/anthropic/endpoints/anthropic-messages"
+import {
+	GeminiGenerateContent,
+	type GeminiConnectionConfig,
+} from "@infra/providers/gemini/endpoints/gemini-generate-content"
 import { RunInference } from "@app/use-cases/run-inference"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { ExecuteFunctionCall } from "@app/use-cases/execute-function-call"
@@ -78,6 +91,13 @@ export {
 	type McpToolSpec,
 	McpToolRegistry,
 	Endpoint,
+	OpenAIResponses,
+	OpenAIChatCompletions,
+	type OpenAICompatibleConfig,
+	AnthropicMessages,
+	type AnthropicConnectionConfig,
+	GeminiGenerateContent,
+	type GeminiConnectionConfig,
 	AgenticEnvironment,
 	Participant,
 	BaseParticipant,

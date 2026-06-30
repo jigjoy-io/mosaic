@@ -7,6 +7,11 @@ import { AnthropicMessagesMapper } from "./anthropic-messages-mapper"
 import Anthropic from "@anthropic-ai/sdk"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
+export interface AnthropicConnectionConfig {
+	baseURL?: string
+	apiKey?: string
+}
+
 /**
  * Native Anthropic adapter on the `@anthropic-ai/sdk` (`messages.create`).
  * Maps domain context to Anthropic's `messages`/`content` blocks shape,
@@ -16,9 +21,12 @@ export class AnthropicMessages implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
 	private readonly client: Anthropic
 
-	constructor(endpointMapper: InferenceEndpointMapper = new AnthropicMessagesMapper()) {
+	constructor(
+		endpointMapper: InferenceEndpointMapper = new AnthropicMessagesMapper(),
+		config: AnthropicConnectionConfig = {},
+	) {
 		this.endpointMapper = endpointMapper
-		this.client = new Anthropic()
+		this.client = new Anthropic({ baseURL: config.baseURL, apiKey: config.apiKey })
 	}
 
 	async infer(inferenceParams: InferenceParams<ModelName>): Promise<InferenceResponse> {
