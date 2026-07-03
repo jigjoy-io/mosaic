@@ -359,44 +359,6 @@ export class TranscriptLogger extends BaseParticipant {
 
 ---
 
-## Context and models (reference)
-
-`ModelContext` is the ordered list of `ContextItem`s a model is asked to reason over. It is constructed and mutated explicitly — typically inside a participant in response to delivered items.
-
-```ts
-import { ModelContext, DeveloperMessageItem, UserMessageItem, InMemoryModelContextRepository } from "@mozaik-ai/core"
-
-const context = ModelContext.create("project-id")
-	.addContextItem(DeveloperMessageItem.create("You are a helpful assistant."))
-	.addContextItem(UserMessageItem.create("What is the capital of France?"))
-
-const repo = new InMemoryModelContextRepository()
-await repo.save(context)
-```
-
-Implement `ModelContextRepository` to plug in any storage backend.
-
-A model is selected by its `ModelName` string. Mozaik resolves the name to a provider `Endpoint` and a `ModelSpecification` internally, maps the `ModelContext` to that provider's API, and returns typed `ContextItem`s (and `SemanticEvent`s when streaming). Bundled model names:
-
-| Provider  | `ModelName` values                                                                    |
-| --------- | ------------------------------------------------------------------------------------- |
-| OpenAI    | `"gpt-5.4"`, `"gpt-5.4-mini"`, `"gpt-5.4-nano"`, `"gpt-5.5"`                          |
-| Anthropic | `"claude-haiku-4-5"`, `"claude-sonnet-4-6"`, `"claude-opus-4-7"`, `"claude-opus-4-8"` |
-| Gemini    | `"gemini-3.5-flash"`, `"gemini-3.1-pro-preview"`                                      |
-| DeepSeek  | `"deepseek-v4-flash"`, `"deepseek-v4-pro"`                                            |
-
-You drive inference with the `runInference` capability; it streams the resulting items into the environment for participants to react to:
-
-```ts
-import { runInference, ModelContext } from "@mozaik-ai/core"
-
-const context = ModelContext.create("demo")
-
-runInference({ model: "gpt-5.4", context, caller: this, environment })
-// → environment delivers ReasoningItem | FunctionCallItem | ModelMessageItem (and SemanticEvent when streaming)
-```
----
-
 ## Examples
 
 Working examples are available here: [mozaik-examples](https://github.com/jigjoy-ai/mozaik-examples).
