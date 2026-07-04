@@ -1,5 +1,6 @@
 <div align="center">
 <h2>Mozaik is a TypeScript runtime for self-organizing AI agents</h2>
+<img width="150" height="150" alt="mozaik-avatar-dark" src="https://github.com/user-attachments/assets/e832c359-0581-42f7-96f3-d6e221c5af95" />
 
 ![npm downloads](https://img.shields.io/npm/dt/@mozaik-ai/core) ![npm downloads weekly](https://img.shields.io/npm/dw/@mozaik-ai/core) ![npm version](https://img.shields.io/npm/v/@mozaik-ai/core)
 
