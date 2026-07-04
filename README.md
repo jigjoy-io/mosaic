@@ -1,5 +1,5 @@
 <div align="center">
-<h2>Mozaik is a TypeScript runtime for self-organized AI agents</h2>
+<h2>Mozaik is a TypeScript runtime for self-organizing AI agents</h2>
 
 ![npm downloads](https://img.shields.io/npm/dt/@mozaik-ai/core) ![npm downloads weekly](https://img.shields.io/npm/dw/@mozaik-ai/core) ![npm version](https://img.shields.io/npm/v/@mozaik-ai/core)
 
