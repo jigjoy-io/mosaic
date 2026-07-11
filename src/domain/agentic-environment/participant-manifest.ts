@@ -23,12 +23,12 @@ export class ParticipantManifest<T> {
 		return this.details
 	}
 
-	create({ id, name, details }: { id: string; name: string; details: T }): Profile<T> {
+	create({ id, name, details }: { id: string; name: string; details: T }): ParticipantManifest<T> {
 		return new ParticipantManifest(id, name, details)
 	}
 }
 
-export class AgentProfile extends Profile<{ instruction: string; tools: Tool[] }> {
+export class AgentManifest extends ParticipantManifest<{ instruction: string; tools: Tool[] }> {
 	instruction: string
 	tools: Tool[]
 

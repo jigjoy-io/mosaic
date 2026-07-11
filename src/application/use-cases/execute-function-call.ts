@@ -13,15 +13,15 @@ export class ExecuteFunctionCall implements ExecuteFunctionCallUseCase {
 		channel: Channel,
 		functionCallItem: FunctionCallItem,
 		tool: Tool,
-		caller: Participant,
+		caller: Participant<unknown>,
 		signal?: AbortSignal,
 	): Promise<void> {
 		const stream = this.functionCallRunner.run(functionCallItem, tool, signal)
 
 		for await (const item of stream) {
-			const profile = caller.getProfile()
+			const manifest = caller.getManifest()
 			channel.deliver(
-				SemanticEvent.create({ type: "function_call_output", producerId: profile.getId(), data: item }),
+				SemanticEvent.create({ type: "function_call_output", producerId: manifest.getId(), data: item }),
 			)
 		}
 	}

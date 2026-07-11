@@ -14,9 +14,9 @@ export class Channel {
 	deliver(event: SemanticEvent<unknown>): void {
 		for (const subscription of this.subscriptions) {
 			if (subscription.eventType === event.type && subscription.producerId === event.getProducerId()) {
-				const consumer = this.participants.find((p) => p.getProfile().getId() === subscription.consumerId)
+				const consumer = this.participants.find((p) => p.getManifest().getId() === subscription.consumerId)
 				if (consumer) {
-					consumer.onEvent(event)
+					consumer.process(event)
 				}
 			}
 		}
@@ -26,8 +26,8 @@ export class Channel {
 		this.deliver(
 			SemanticEvent.create({
 				type: "participant-joined",
-				producerId: participant.getProfile().getId(),
-				data: participant.getProfile(),
+				producerId: participant.getManifest().getId(),
+				data: participant.getManifest(),
 			}),
 		)
 		this.participants.push(participant)
@@ -37,15 +37,15 @@ export class Channel {
 		this.deliver(
 			SemanticEvent.create({
 				type: "participant-left",
-				producerId: participant.getProfile().getId(),
-				data: participant.getProfile(),
+				producerId: participant.getManifest().getId(),
+				data: participant.getManifest(),
 			}),
 		)
 		this.participants = this.participants.filter((p) => p !== participant)
 	}
 
 	subscribe(subscription: Subscription) {
-		if (this.participants.some((p) => p.getProfile().getId() === subscription.consumerId)) {
+		if (!this.participants.some((p) => p.getManifest().getId() === subscription.consumerId)) {
 			throw new Error("Participant is not joined to the channel")
 		}
 
@@ -57,7 +57,7 @@ export class Channel {
 			throw new Error("Subscription already exists")
 		}
 
-		if (this.participants.some((p) => p.getProfile().getId() === subscription.producerId)) {
+		if (this.participants.some((p) => p.getManifest().getId() === subscription.producerId)) {
 			throw new Error("Producer is not joined to the channel")
 		}
 

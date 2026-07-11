@@ -6,22 +6,25 @@ import type { ModelMessageItem } from "@domain/model-context/context-item/model-
 import type { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import type { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 
-export class BaseParticipant extends Participant {
+export class BaseParticipant extends Participant<unknown> {
+	process(event: SemanticEvent<unknown>): void {
+		throw new Error("Method not implemented.")
+	}
 	onFunctionCall(_item: FunctionCallItem) {}
-	onExternalFunctionCall(_source: Participant, _item: FunctionCallItem) {}
+	onExternalFunctionCall(_source: Participant<unknown>, _item: FunctionCallItem) {}
 	onFunctionCallOutput(_item: FunctionCallOutputItem) {}
-	onExternalFunctionCallOutput(_source: Participant, _item: FunctionCallOutputItem) {}
+	onExternalFunctionCallOutput(_source: Participant<unknown>, _item: FunctionCallOutputItem) {}
 	onReasoning(_item: ReasoningItem) {}
-	onExternalReasoning(_source: Participant, _item: ReasoningItem) {}
+	onExternalReasoning(_source: Participant<unknown>, _item: ReasoningItem) {}
 	onModelMessage(_item: ModelMessageItem) {}
-	onExternalModelMessage(_source: Participant, _item: ModelMessageItem) {}
+	onExternalModelMessage(_source: Participant<unknown>, _item: ModelMessageItem) {}
 	onMessage(_message: string) {}
 	onJoined() {}
 	onLeft() {}
-	onParticipantJoined(_participant: Participant) {}
-	onParticipantLeft(_participant: Participant) {}
+	onParticipantJoined(_participant: Participant<unknown>) {}
+	onParticipantLeft(_participant: Participant<unknown>) {}
 	onInternalEvent(_item: SemanticEvent<unknown>) {}
-	onExternalEvent(_source: Participant, _item: SemanticEvent<unknown>) {}
+	onExternalEvent(_source: Participant<unknown>, _item: SemanticEvent<unknown>) {}
 	onError(_error: AgenticError): void {}
-	onParticipantError(_source: Participant, _error: AgenticError): void {}
+	onParticipantError(_source: Participant<unknown>, _error: AgenticError): void {}
 }
