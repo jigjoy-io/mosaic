@@ -1,12 +1,11 @@
-export class SemanticEvent<T> {
-	readonly type: string
+export abstract class SemanticEvent {
+	abstract readonly type: string
 	readonly producerId: string
-	readonly data: T
+	readonly occurredAt: Date
 
-	constructor(type: string, producerId: string, data: T) {
-		this.type = type
-		this.data = data
+	constructor(producerId: string, occurredAt: Date) {
 		this.producerId = producerId
+		this.occurredAt = occurredAt
 	}
 
 	getType(): string {
@@ -17,11 +16,7 @@ export class SemanticEvent<T> {
 		return this.producerId
 	}
 
-	getData(): T {
-		return this.data
-	}
-
-	static create<T>({ type, producerId, data }: { type: string; producerId: string; data: T }): SemanticEvent<T> {
-		return new SemanticEvent(type, producerId, data)
+	getOccurredAt(): Date {
+		return this.occurredAt
 	}
 }

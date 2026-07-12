@@ -10,31 +10,31 @@ type MaybePromise<T> = T | Promise<T>
 export interface ParticipantEventMap {
 	functionCall: {
 		item: FunctionCallItem
-		source: Participant<unknown>
+		source: Participant
 		origin: "self" | "external"
 	}
 
 	functionCallOutput: {
 		item: FunctionCallOutputItem
-		source: Participant<unknown>
+		source: Participant
 		origin: "self" | "external"
 	}
 
 	reasoning: {
 		item: ReasoningItem
-		source: Participant<unknown>
+		source: Participant
 		origin: "self" | "external"
 	}
 
 	modelMessage: {
 		item: ModelMessageItem
-		source: Participant<unknown>
+		source: Participant
 		origin: "self" | "external"
 	}
 
 	message: {
 		message: string
-		source: Participant<unknown>
+		source: Participant
 	}
 
 	joined: {}
@@ -42,16 +42,16 @@ export interface ParticipantEventMap {
 	left: {}
 
 	participantJoined: {
-		participant: Participant<unknown>
+		participant: Participant
 	}
 
 	participantLeft: {
-		participant: Participant<unknown>
+		participant: Participant
 	}
 
 	error: {
 		error: AgenticError
-		source?: Participant<unknown>
+		source?: Participant
 	}
 }
 

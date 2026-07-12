@@ -8,10 +8,10 @@ export type Subscription = {
 }
 
 export class Channel {
-	private participants: Participant<unknown>[] = []
+	private participants: Participant[] = []
 	private subscriptions: Subscription[] = []
 
-	deliver(event: SemanticEvent<unknown>): void {
+	deliver(event: SemanticEvent): void {
 		for (const subscription of this.subscriptions) {
 			if (subscription.eventType === event.type && subscription.producerId === event.getProducerId()) {
 				const consumer = this.participants.find((p) => p.getManifest().getId() === subscription.consumerId)
@@ -20,28 +20,6 @@ export class Channel {
 				}
 			}
 		}
-	}
-
-	join(participant: Participant<unknown>) {
-		this.deliver(
-			SemanticEvent.create({
-				type: "participant-joined",
-				producerId: participant.getManifest().getId(),
-				data: participant.getManifest(),
-			}),
-		)
-		this.participants.push(participant)
-	}
-
-	leave(participant: Participant<unknown>) {
-		this.deliver(
-			SemanticEvent.create({
-				type: "participant-left",
-				producerId: participant.getManifest().getId(),
-				data: participant.getManifest(),
-			}),
-		)
-		this.participants = this.participants.filter((p) => p !== participant)
 	}
 
 	subscribe(subscription: Subscription) {

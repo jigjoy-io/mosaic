@@ -1,14 +1,12 @@
 import { Tool } from "@domain/generative-model/tool"
 
-export class ParticipantManifest<T> {
+export class ParticipantManifest {
 	readonly id: string
 	readonly name: string
-	readonly details: T
 
-	constructor(id: string, name: string, details: T) {
+	constructor(id: string, name: string) {
 		this.id = id
 		this.name = name
-		this.details = details
 	}
 
 	getId(): string {
@@ -19,21 +17,17 @@ export class ParticipantManifest<T> {
 		return this.name
 	}
 
-	getDetails(): T {
-		return this.details
-	}
-
-	create({ id, name, details }: { id: string; name: string; details: T }): ParticipantManifest<T> {
-		return new ParticipantManifest(id, name, details)
+	create({ id, name }: { id: string; name: string }): ParticipantManifest {
+		return new ParticipantManifest(id, name)
 	}
 }
 
-export class AgentManifest extends ParticipantManifest<{ instruction: string; tools: Tool[] }> {
+export class AgentManifest extends ParticipantManifest {
 	instruction: string
 	tools: Tool[]
 
 	constructor(id: string, name: string, instruction: string, tools: Tool[] = []) {
-		super(id, name, { instruction, tools })
+		super(id, name)
 		this.instruction = instruction
 		this.tools = tools
 	}
