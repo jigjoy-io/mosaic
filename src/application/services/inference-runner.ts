@@ -4,16 +4,15 @@ import type { ReasoningItem } from "@domain/model-context/context-item/model-ite
 import type { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import type { Endpoint } from "@domain/generative-model/endpoint"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
-import type { ModelName } from "@domain/generative-model/generative-model"
 
-type InferenceItem = ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent<unknown>
+type InferenceItem = ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent
 
 export interface InferenceRunner {
-	run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem>
+	run(request: InferenceParams, endpoint: Endpoint): AsyncIterable<InferenceItem>
 }
 
 export class StreamingInference implements InferenceRunner {
-	async *run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem> {
+	async *run(request: InferenceParams, endpoint: Endpoint): AsyncIterable<InferenceItem> {
 		if (request.signal?.aborted) {
 			return
 		}
@@ -22,7 +21,7 @@ export class StreamingInference implements InferenceRunner {
 }
 
 export class NonStreamingInference implements InferenceRunner {
-	async *run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem> {
+	async *run(request: InferenceParams, endpoint: Endpoint): AsyncIterable<InferenceItem> {
 		if (request.signal?.aborted) {
 			return
 		}
