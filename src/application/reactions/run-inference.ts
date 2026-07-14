@@ -1,21 +1,22 @@
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import type { InferenceRunner } from "@app/services/inference-runner"
 import { NonStreamingInference, StreamingInference } from "@app/services/inference-runner"
 import type { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
-import type { ModelName } from "@domain/generative-model/generative-model"
 import type { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
+import { Reaction } from "@domain/agentic-environment/participant"
 
-export class RunInference {
+export class RunInference extends Reaction<{
+	inferenceParams: InferenceParams
+}> {
 	constructor(
 		private readonly generativeModelRepository: GenerativeModelRepository,
 		private readonly requestValidator: InferenceRequestValidator,
-	) {}
+	) {
+		super()
+	}
 
-	async execute(inferenceParams: InferenceParams): Promise<void> {
+	async *execute({ inferenceParams }: { inferenceParams: InferenceParams }): AsyncIterable<SemanticEvent> {
 		const { caller, channel, signal } = inferenceParams
 
 		const generativeModel = await this.generativeModelRepository.getByModelName(inferenceParams.model)
@@ -33,38 +34,9 @@ export class RunInference {
 
 		const result = inferenceRunner.run(resolvedParams, generativeModel.endpoint)
 
-		for await (const item of result) {
+		for await (const contextItem of result) {
 			if (signal?.aborted) {
 				break
-			}
-			if (item instanceof ReasoningItem) {
-				channel.deliver(
-					SemanticEvent.create({ type: "reasoning", producerId: caller.getManifest().getId(), data: item }),
-				)
-			} else if (item instanceof FunctionCallItem) {
-				channel.deliver(
-					SemanticEvent.create({
-						type: "function_call",
-						producerId: caller.getManifest().getId(),
-						data: item,
-					}),
-				)
-			} else if (item instanceof ModelMessageItem) {
-				channel.deliver(
-					SemanticEvent.create({
-						type: "model_message",
-						producerId: caller.getManifest().getId(),
-						data: item,
-					}),
-				)
-			} else if (item instanceof SemanticEvent) {
-				channel.deliver(
-					SemanticEvent.create({
-						type: "semantic_event",
-						producerId: caller.getManifest().getId(),
-						data: item,
-					}),
-				)
 			}
 		}
 	}

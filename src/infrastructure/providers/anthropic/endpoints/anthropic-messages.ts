@@ -2,7 +2,6 @@ import type { InferenceResponse } from "@domain/agentic-environment/inference/re
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import type { Endpoint } from "@domain/generative-model/endpoint"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
-import type { ModelName } from "@domain/generative-model/generative-model"
 import { AnthropicMessagesMapper } from "./anthropic-messages-mapper"
 import Anthropic from "@anthropic-ai/sdk"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
@@ -21,17 +20,14 @@ export class AnthropicMessages implements Endpoint {
 		this.client = new Anthropic()
 	}
 
-	async infer(inferenceParams: InferenceParams<ModelName>): Promise<InferenceResponse> {
+	async infer(inferenceParams: InferenceParams): Promise<InferenceResponse> {
 		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
 		const response = await this.client.messages.create(inferenceRequest)
 
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(
-		inferenceParams: InferenceParams<ModelName>,
-		signal?: AbortSignal,
-	): AsyncIterable<SemanticEvent<unknown>> {
+	async *stream(inferenceParams: InferenceParams, signal?: AbortSignal): AsyncIterable<SemanticEvent> {
 		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
 		const stream: any = await this.client.messages.create(inferenceRequest)
 

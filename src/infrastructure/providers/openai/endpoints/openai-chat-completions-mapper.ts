@@ -1,4 +1,3 @@
-import type { ModelName } from "@domain/generative-model/generative-model"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
@@ -14,7 +13,7 @@ import type { ContextItem } from "@domain/model-context/context-item/context-ite
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 
 export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
-	toRequest(inferenceParams: InferenceParams<ModelName>) {
+	toRequest(inferenceParams: InferenceParams) {
 		const request: any = {
 			model: inferenceParams.model,
 			messages: this.mapContextItems(inferenceParams),
@@ -48,7 +47,7 @@ export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
 		return new InferenceResponse(contextItems, tokenUsage)
 	}
 
-	mapContextItems(inferenceParams: InferenceParams<ModelName>): any[] {
+	mapContextItems(inferenceParams: InferenceParams): any[] {
 		const messages: any[] = []
 
 		for (const item of inferenceParams.context.getItems()) {

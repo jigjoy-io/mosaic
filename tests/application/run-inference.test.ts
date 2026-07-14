@@ -1,5 +1,5 @@
 import { describe, it, expect } from "@rstest/core"
-import { RunInference } from "@app/use-cases/run-inference"
+import { RunInference } from "@app/reactions/run-inference"
 import { AgenticEnvironment } from "@domain/agentic-environment/channel"
 import { BaseParticipant } from "@app/participants/participant"
 import { ModelContext } from "@domain/model-context/model-context"

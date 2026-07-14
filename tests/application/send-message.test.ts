@@ -1,5 +1,5 @@
 import { describe, it, expect } from "@rstest/core"
-import { SendMessage } from "@app/use-cases/send-message"
+import { SendMessage } from "@app/reactions/send-message"
 import { BaseParticipant } from "@app/participants/participant"
 import { AgenticEnvironment } from "@domain/agentic-environment/channel"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"

@@ -1,7 +1,7 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { ParticipantManifest } from "../participant-manifest"
 
-export class ParticipantJoined extends SemanticEvent {
+export class ParticipantJoinedEvent extends SemanticEvent {
 	readonly type = "participant.joined"
 
 	constructor(
@@ -12,7 +12,13 @@ export class ParticipantJoined extends SemanticEvent {
 		super(producerId, occurredAt)
 	}
 
-	static create({ producerId, manifest }: { producerId: string; manifest: ParticipantManifest }): ParticipantJoined {
-		return new ParticipantJoined(producerId, new Date(), manifest)
+	static create({
+		producerId,
+		manifest,
+	}: {
+		producerId: string
+		manifest: ParticipantManifest
+	}): ParticipantJoinedEvent {
+		return new ParticipantJoinedEvent(producerId, new Date(), manifest)
 	}
 }
