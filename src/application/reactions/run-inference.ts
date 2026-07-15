@@ -6,9 +6,7 @@ import type { InferenceRequestValidator } from "@domain/generative-model/request
 import type { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
 import { Reaction } from "@domain/agentic-environment/participant"
 
-export class RunInference extends Reaction<{
-	inferenceParams: InferenceParams
-}> {
+export class RunInference extends Reaction {
 	constructor(
 		private readonly generativeModelRepository: GenerativeModelRepository,
 		private readonly requestValidator: InferenceRequestValidator,

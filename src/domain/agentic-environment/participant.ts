@@ -1,48 +1,46 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { AgentManifest, ParticipantManifest } from "./participant-manifest"
 import { ModelContext } from "@domain/model-context/model-context"
-import { ContextItem } from "@domain/model-context/context-item/context-item"
-import { DecisionPolicy } from "./decision/policy"
+import { DecisionSpecification } from "./decision/specification"
+
+export class WorkingMemory {}
+
+export class Behavior {
+	constructor(
+		private readonly decisionSpecification: DecisionSpecification,
+		private readonly reactions: readonly Reaction[],
+	) {}
+
+	async *execute(workingMemory: WorkingMemory): AsyncIterable<SemanticEvent> {
+		const decision = this.decisionSpecification.isSatisfiedBy(workingMemory)
+
+		if (!decision) {
+			return
+		}
+
+		for (const reaction of this.reactions) {
+			yield* reaction.execute(workingMemory)
+		}
+	}
+}
 
 export abstract class Participant {
-	readonly manifest: ParticipantManifest
-	private readonly decisionPolicy: DecisionPolicy<SemanticEvent>
-	private readonly perceptionRules: Map<Function, PerceptionRule>
-
 	constructor(
-		manifest: ParticipantManifest,
-		decisionPolicy: DecisionPolicy<SemanticEvent>,
-		perceptionRules: Map<Function, PerceptionRule>,
-	) {
-		this.decisionPolicy = decisionPolicy
-		this.manifest = manifest
-		this.perceptionRules = perceptionRules
-	}
+		readonly manifest: ParticipantManifest,
+		private readonly behaviors: readonly Behavior[],
+	) {}
 
 	getManifest(): ParticipantManifest {
 		return this.manifest
 	}
 
-	registerPerceptionRule(eventType: new (...args: any[]) => SemanticEvent, rule: PerceptionRule): void {
-		this.perceptionRules.set(eventType, rule)
-	}
-
-	perceive(event: SemanticEvent): Perception {
-		const rule = this.perceptionRules.get(event.constructor)
-
-		return (
-			rule?.perceive(event, this) ?? {
-				contextItems: [],
-			}
-		)
-	}
+	protected abstract prepareWorkingMemory(event: SemanticEvent): WorkingMemory
 
 	async *process(event: SemanticEvent): AsyncIterable<SemanticEvent> {
-		const record = this.decisionPolicy.decide(event)
-		const perception = this.perceive(event)
+		const workingMemory = this.prepareWorkingMemory(event)
 
-		for (const reaction of record.reactions) {
-			yield* reaction.execute(perception)
+		for (const behavior of this.behaviors) {
+			yield* behavior.execute(workingMemory)
 		}
 	}
 }
@@ -51,25 +49,12 @@ export abstract class Agent extends Participant {
 	constructor(
 		readonly context: ModelContext,
 		manifest: AgentManifest,
-		decisionPolicy: DecisionPolicy<SemanticEvent>,
-		perceptionRules: Map<Function, PerceptionRule>,
+		behaviors: readonly Behavior[],
 	) {
-		super(manifest, decisionPolicy, perceptionRules)
+		super(manifest, behaviors)
 	}
 }
 
-interface PerceptionRule {
-	perceive(event: SemanticEvent, participant: Participant): Perception
-}
-
-type Perception = {
-	contextItems: ContextItem[]
-}
-
-export interface ContextProjection {
-	project(event: SemanticEvent): Perception
-}
-
-export abstract class Reaction<T> {
-	abstract execute(input: T): AsyncIterable<SemanticEvent>
+export abstract class Reaction {
+	abstract execute(workingMemory: WorkingMemory): AsyncIterable<SemanticEvent>
 }

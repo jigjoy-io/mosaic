@@ -1,51 +1,53 @@
-export abstract class DecisionSpecification<T> {
-	abstract isSatisfiedBy(candidate: T): boolean
+import { WorkingMemory } from "../participant"
 
-	and(other: DecisionSpecification<T>): DecisionSpecification<T> {
+export abstract class DecisionSpecification {
+	abstract isSatisfiedBy(workingMemory: WorkingMemory): boolean
+
+	and(other: DecisionSpecification): DecisionSpecification {
 		return new AndDecisionSpecification(this, other)
 	}
 
-	or(other: DecisionSpecification<T>): DecisionSpecification<T> {
+	or(other: DecisionSpecification): DecisionSpecification {
 		return new OrDecisionSpecification(this, other)
 	}
 
-	not(): DecisionSpecification<T> {
+	not(): DecisionSpecification {
 		return new NotDecisionSpecification(this)
 	}
 }
 
-class AndDecisionSpecification<T> extends DecisionSpecification<T> {
+class AndDecisionSpecification extends DecisionSpecification {
 	constructor(
-		private readonly left: DecisionSpecification<T>,
-		private readonly right: DecisionSpecification<T>,
+		private readonly left: DecisionSpecification,
+		private readonly right: DecisionSpecification,
 	) {
 		super()
 	}
 
-	isSatisfiedBy(candidate: T): boolean {
-		return this.left.isSatisfiedBy(candidate) && this.right.isSatisfiedBy(candidate)
+	isSatisfiedBy(workingMemory: WorkingMemory): boolean {
+		return this.left.isSatisfiedBy(workingMemory) && this.right.isSatisfiedBy(workingMemory)
 	}
 }
 
-class OrDecisionSpecification<T> extends DecisionSpecification<T> {
+class OrDecisionSpecification extends DecisionSpecification {
 	constructor(
-		private readonly left: DecisionSpecification<T>,
-		private readonly right: DecisionSpecification<T>,
+		private readonly left: DecisionSpecification,
+		private readonly right: DecisionSpecification,
 	) {
 		super()
 	}
 
-	isSatisfiedBy(candidate: T): boolean {
-		return this.left.isSatisfiedBy(candidate) || this.right.isSatisfiedBy(candidate)
+	isSatisfiedBy(workingMemory: WorkingMemory): boolean {
+		return this.left.isSatisfiedBy(workingMemory) || this.right.isSatisfiedBy(workingMemory)
 	}
 }
 
-class NotDecisionSpecification<T> extends DecisionSpecification<T> {
-	constructor(private readonly specification: DecisionSpecification<T>) {
+class NotDecisionSpecification extends DecisionSpecification {
+	constructor(private readonly specification: DecisionSpecification) {
 		super()
 	}
 
-	isSatisfiedBy(candidate: T): boolean {
-		return !this.specification.isSatisfiedBy(candidate)
+	isSatisfiedBy(workingMemory: WorkingMemory): boolean {
+		return !this.specification.isSatisfiedBy(workingMemory)
 	}
 }

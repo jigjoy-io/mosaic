@@ -6,13 +6,7 @@ import type { Tool } from "@domain/generative-model/tool"
 import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 
-export class FunctionCall extends Reaction<{
-	channel: Channel
-	functionCallItem: FunctionCallItem
-	tool: Tool
-	caller: Participant
-	signal?: AbortSignal
-}> {
+export class FunctionCall extends Reaction {
 	constructor(private readonly functionCallRunner: FunctionCallRunner) {
 		super()
 	}
