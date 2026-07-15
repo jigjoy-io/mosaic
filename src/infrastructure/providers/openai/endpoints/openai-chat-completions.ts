@@ -76,14 +76,15 @@ export class OpenAIChatCompletions implements Endpoint {
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(inferenceParams: InferenceParams, signal?: AbortSignal): AsyncIterable<SemanticEvent> {
+	async *stream(inferenceParams: InferenceParams): AsyncIterable<SemanticEvent> {
+		const { signal } = inferenceParams
 		const stream: any = await this.client.chat.completions.create(this.buildRequest(inferenceParams))
 
 		for await (const event of stream) {
 			if (signal?.aborted) {
 				break
 			}
-			yield new SemanticEvent(event.object ?? "chat.completion.chunk", event)
+			yield event
 		}
 	}
 }

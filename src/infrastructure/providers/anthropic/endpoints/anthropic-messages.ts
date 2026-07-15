@@ -27,7 +27,8 @@ export class AnthropicMessages implements Endpoint {
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(inferenceParams: InferenceParams, signal?: AbortSignal): AsyncIterable<SemanticEvent> {
+	async *stream(inferenceParams: InferenceParams): AsyncIterable<SemanticEvent> {
+		const { signal } = inferenceParams
 		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
 		const stream: any = await this.client.messages.create(inferenceRequest)
 
@@ -35,7 +36,7 @@ export class AnthropicMessages implements Endpoint {
 			if (signal?.aborted) {
 				break
 			}
-			yield new SemanticEvent(event.type, event)
+			yield event
 		}
 	}
 }

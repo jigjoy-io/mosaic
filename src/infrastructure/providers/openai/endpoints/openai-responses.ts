@@ -22,7 +22,8 @@ export class OpenAIResponses implements Endpoint {
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(inferenceParams: InferenceParams, signal?: AbortSignal): AsyncIterable<SemanticEvent> {
+	async *stream(inferenceParams: InferenceParams): AsyncIterable<SemanticEvent> {
+		const { signal } = inferenceParams
 		const request = this.endpointMapper.toRequest(inferenceParams)
 		const response: any = await this.client.responses.create(request)
 
@@ -30,7 +31,7 @@ export class OpenAIResponses implements Endpoint {
 			if (signal?.aborted) {
 				break
 			}
-			yield new SemanticEvent(event.type, event)
+			yield event
 		}
 	}
 }

@@ -30,15 +30,16 @@ export class GeminiGenerateContent implements Endpoint {
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(inferenceParams: InferenceParams, signal?: AbortSignal): AsyncIterable<SemanticEvent> {
+	async *stream(inferenceParams: InferenceParams): AsyncIterable<SemanticEvent> {
+		const { signal } = inferenceParams
 		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
-		const stream = await this.client.models.generateContentStream(inferenceRequest)
+		const stream: any = await this.client.models.generateContentStream(inferenceRequest)
 
 		for await (const chunk of stream) {
 			if (signal?.aborted) {
 				break
 			}
-			yield new SemanticEvent("generate_content_chunk", chunk)
+			yield chunk
 		}
 	}
 }

@@ -15,44 +15,12 @@ import { McpToolRegistry } from "@infra/mcp/mcp-tool-registry"
 import { InMemoryModelContextRepository } from "@infra/repository/in-memory-model-context-repository"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
 import { Participant } from "@domain/agentic-environment/participant"
-import { AgenticEnvironment } from "@domain/agentic-environment/channel"
 import { AgenticError } from "@domain/agentic-environment/errors/base-error"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { Endpoint } from "@domain/generative-model/endpoint"
-import { RunInference } from "@app/reactions/run-inference"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ExecuteFunctionCall } from "@app/reactions/function-call"
-import { FunctionCallRunner } from "@app/services/function-call-runner"
-import { BaseParticipant } from "@app/participants/participant"
-import { SendMessage } from "@app/reactions/send-message"
 import { ModelName } from "@domain/generative-model/generative-model"
-import type { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
-import { InMemoryGenerativeModelRepository } from "@infra/repository/generative-model-repository"
-import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
-
-const generativeModelRepository: GenerativeModelRepository = new InMemoryGenerativeModelRepository()
-const inferenceRequestValidator = new InferenceRequestValidator()
-const runInferenceUseCase = new RunInference(generativeModelRepository, inferenceRequestValidator)
-const executeFunctionCallUseCase = new ExecuteFunctionCall(new FunctionCallRunner())
-const sendMessageUseCase = new SendMessage()
-
-const runInference = (inferenceParams: InferenceParams<ModelName>): void => {
-	runInferenceUseCase.execute(inferenceParams)
-}
-
-const executeFunctionCall = (
-	environment: AgenticEnvironment,
-	functionCallItem: FunctionCallItem,
-	tool: Tool,
-	caller: Participant,
-): void => {
-	executeFunctionCallUseCase.execute(environment, functionCallItem, tool, caller)
-}
-
-const sendMessage = (environment: AgenticEnvironment, message: string, caller: Participant): void => {
-	sendMessageUseCase.execute(environment, message, caller)
-}
 
 export {
 	ModelContext,
@@ -78,13 +46,8 @@ export {
 	type McpToolSpec,
 	McpToolRegistry,
 	Endpoint,
-	AgenticEnvironment,
 	Participant,
-	BaseParticipant,
 	AgenticError,
 	InferenceResponse,
 	InferenceParams,
-	runInference,
-	executeFunctionCall,
-	sendMessage,
 }
