@@ -1,28 +1,7 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { AgentManifest, ParticipantManifest } from "./participant-manifest"
-import { ModelContext } from "@domain/model-context/model-context"
-import { DecisionSpecification } from "./decision/specification"
-
-export class WorkingMemory {}
-
-export class Behavior {
-	constructor(
-		private readonly decisionSpecification: DecisionSpecification,
-		private readonly actions: readonly Action[],
-	) {}
-
-	async *execute(workingMemory: WorkingMemory): AsyncIterable<SemanticEvent> {
-		const decision = this.decisionSpecification.isSatisfiedBy(workingMemory)
-
-		if (!decision) {
-			return
-		}
-
-		for (const action of this.actions) {
-			yield* action.execute(workingMemory)
-		}
-	}
-}
+import { ParticipantManifest } from "./participant-manifest"
+import { Behavior } from "./behavior"
+import { WorkingMemory } from "./working-memory"
 
 export abstract class Participant {
 	constructor(
@@ -43,18 +22,4 @@ export abstract class Participant {
 			yield* behavior.execute(workingMemory)
 		}
 	}
-}
-
-export abstract class Agent extends Participant {
-	constructor(
-		readonly context: ModelContext,
-		manifest: AgentManifest,
-		behaviors: readonly Behavior[],
-	) {
-		super(manifest, behaviors)
-	}
-}
-
-export abstract class Action {
-	abstract execute(workingMemory: WorkingMemory): AsyncIterable<SemanticEvent>
 }

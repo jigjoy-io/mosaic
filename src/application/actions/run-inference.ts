@@ -4,7 +4,7 @@ import type { InferenceRunner } from "@app/services/inference-runner"
 import { NonStreamingInference, StreamingInference } from "@app/services/inference-runner"
 import type { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
 import type { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
-import { Action } from "@domain/agentic-environment/participant"
+import { Action } from "@domain/agentic-environment/action"
 
 export class RunInference extends Action {
 	constructor(
