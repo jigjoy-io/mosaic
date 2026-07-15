@@ -8,7 +8,7 @@ export class WorkingMemory {}
 export class Behavior {
 	constructor(
 		private readonly decisionSpecification: DecisionSpecification,
-		private readonly reactions: readonly Reaction[],
+		private readonly actions: readonly Action[],
 	) {}
 
 	async *execute(workingMemory: WorkingMemory): AsyncIterable<SemanticEvent> {
@@ -18,8 +18,8 @@ export class Behavior {
 			return
 		}
 
-		for (const reaction of this.reactions) {
-			yield* reaction.execute(workingMemory)
+		for (const action of this.actions) {
+			yield* action.execute(workingMemory)
 		}
 	}
 }
@@ -55,6 +55,6 @@ export abstract class Agent extends Participant {
 	}
 }
 
-export abstract class Reaction {
+export abstract class Action {
 	abstract execute(workingMemory: WorkingMemory): AsyncIterable<SemanticEvent>
 }
