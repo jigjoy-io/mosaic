@@ -1,4 +1,4 @@
-import { WorkingMemory } from "../working-memory"
+import { WorkingMemory } from "../agent/memory"
 
 export abstract class DecisionSpecification {
 	abstract isSatisfiedBy(workingMemory: WorkingMemory): boolean

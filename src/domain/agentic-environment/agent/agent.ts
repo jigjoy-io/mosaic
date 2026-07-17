@@ -1,7 +1,7 @@
 import { ModelContext } from "@domain/model-context/model-context"
-import { AgentManifest } from "./participant-manifest"
-import { Participant } from "./participant"
-import { Behavior } from "./behavior"
+import { AgentManifest } from "../participant-manifest"
+import { Participant } from "../participant"
+import { Behavior } from "../behavior/behavior"
 
 export abstract class Agent extends Participant {
 	constructor(

@@ -20,7 +20,7 @@ import { InferenceResponse } from "@domain/agentic-environment/inference/respons
 import { Endpoint } from "@domain/generative-model/endpoint"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { ModelName } from "@domain/generative-model/generative-model"
-import { Action } from "@domain/agentic-environment/participant"
+import { Action } from "@domain/agentic-environment/behavior/action"
 
 export {
 	ModelContext,

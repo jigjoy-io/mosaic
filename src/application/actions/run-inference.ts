@@ -4,7 +4,7 @@ import type { InferenceRunner } from "@app/services/inference-runner"
 import { NonStreamingInference, StreamingInference } from "@app/services/inference-runner"
 import type { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
 import type { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
-import { Action } from "@domain/agentic-environment/action"
+import { Action } from "@domain/agentic-environment/behavior/action"
 
 export class RunInference extends Action {
 	constructor(
@@ -14,7 +14,7 @@ export class RunInference extends Action {
 		super()
 	}
 
-	async *execute({ inferenceParams }: { inferenceParams: InferenceParams }): AsyncIterable<SemanticEvent> {
+	async *execute(inferenceParams: InferenceParams): AsyncIterable<SemanticEvent> {
 		const { channel, signal } = inferenceParams
 
 		const generativeModel = await this.generativeModelRepository.getByModelName(inferenceParams.model)

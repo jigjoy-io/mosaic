@@ -1,7 +1,7 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { ParticipantManifest } from "./participant-manifest"
-import { Behavior } from "./behavior"
-import { WorkingMemory } from "./working-memory"
+import { Behavior } from "./behavior/behavior"
+import { WorkingMemory } from "./agent/memory"
 
 export abstract class Participant {
 	constructor(

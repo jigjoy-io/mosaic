@@ -1,7 +1,7 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { Action } from "./action"
-import { DecisionSpecification } from "./decision/specification"
-import { WorkingMemory } from "./working-memory"
+import { DecisionSpecification } from "./decision-specification"
+import { WorkingMemory } from "../agent/memory"
 
 export class Behavior {
 	constructor(
