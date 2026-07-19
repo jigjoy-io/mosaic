@@ -1,7 +1,8 @@
+import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { WorkingMemory } from "../agent/memory"
 
 export abstract class DecisionSpecification {
-	abstract isSatisfiedBy(workingMemory: WorkingMemory): boolean
+	abstract isSatisfiedBy(event: SemanticEvent, workingMemory: WorkingMemory): boolean
 
 	and(other: DecisionSpecification): DecisionSpecification {
 		return new AndDecisionSpecification(this, other)
@@ -24,8 +25,8 @@ class AndDecisionSpecification extends DecisionSpecification {
 		super()
 	}
 
-	isSatisfiedBy(workingMemory: WorkingMemory): boolean {
-		return this.left.isSatisfiedBy(workingMemory) && this.right.isSatisfiedBy(workingMemory)
+	isSatisfiedBy(event: SemanticEvent, workingMemory: WorkingMemory): boolean {
+		return this.left.isSatisfiedBy(event, workingMemory) && this.right.isSatisfiedBy(event, workingMemory)
 	}
 }
 
@@ -37,8 +38,8 @@ class OrDecisionSpecification extends DecisionSpecification {
 		super()
 	}
 
-	isSatisfiedBy(workingMemory: WorkingMemory): boolean {
-		return this.left.isSatisfiedBy(workingMemory) || this.right.isSatisfiedBy(workingMemory)
+	isSatisfiedBy(event: SemanticEvent, workingMemory: WorkingMemory): boolean {
+		return this.left.isSatisfiedBy(event, workingMemory) || this.right.isSatisfiedBy(event, workingMemory)
 	}
 }
 
@@ -47,7 +48,7 @@ class NotDecisionSpecification extends DecisionSpecification {
 		super()
 	}
 
-	isSatisfiedBy(workingMemory: WorkingMemory): boolean {
-		return !this.specification.isSatisfiedBy(workingMemory)
+	isSatisfiedBy(event: SemanticEvent, workingMemory: WorkingMemory): boolean {
+		return !this.specification.isSatisfiedBy(event, workingMemory)
 	}
 }

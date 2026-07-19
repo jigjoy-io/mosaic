@@ -1,6 +1,5 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { WorkingMemory } from "../agent/memory"
 
-export abstract class Action {
-	abstract execute(workingMemory: WorkingMemory): AsyncIterable<SemanticEvent>
+export abstract class Action<TParams> {
+	abstract execute(params: TParams): AsyncIterable<SemanticEvent>
 }

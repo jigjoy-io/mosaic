@@ -7,24 +7,21 @@ import type { Tool } from "@domain/generative-model/tool"
 import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 
-export class FunctionCall extends Action {
+export type FunctionCallParameters = {
+	channel: Channel
+	functionCallItem: FunctionCallItem
+	tool: Tool
+	caller: Participant
+	signal?: AbortSignal
+}
+
+export class FunctionCall extends Action<FunctionCallParameters> {
 	constructor(private readonly functionCallRunner: FunctionCallRunner) {
 		super()
 	}
 
-	async *execute({
-		channel,
-		functionCallItem,
-		tool,
-		caller,
-		signal,
-	}: {
-		channel: Channel
-		functionCallItem: FunctionCallItem
-		tool: Tool
-		caller: Participant
-		signal?: AbortSignal
-	}): AsyncIterable<SemanticEvent> {
+	async *execute(functionCallParameters: FunctionCallParameters): AsyncIterable<SemanticEvent> {
+		const { channel, functionCallItem, tool, caller, signal } = functionCallParameters
 		const stream = this.functionCallRunner.run(functionCallItem, tool, signal)
 
 		for await (const item of stream) {
