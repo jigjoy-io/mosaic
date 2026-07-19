@@ -1,6 +1,6 @@
 <div align="center">
 <h1>Mozaik</h1>
-<p>TypeScript runtime for adaptive AI agents</p>
+<p>TypeScript runtime for concurrent AI agents</p>
 
 <img width="150" height="150" alt="mozaik-avatar-dark" src="https://github.com/user-attachments/assets/e832c359-0581-42f7-96f3-d6e221c5af95" />
 
