@@ -3,6 +3,10 @@ import { Action } from "../behavior/action"
 
 export class WorkingMemory {}
 
+export interface ContextProjection<TParams> {
+	project(event: SemanticEvent, memory: WorkingMemory): TParams
+}
+
 export interface BoundAction {
 	execute(event: SemanticEvent, memory: WorkingMemory): AsyncIterable<SemanticEvent>
 }
@@ -10,10 +14,10 @@ export interface BoundAction {
 export class ActionBinding<TParams> implements BoundAction {
 	constructor(
 		private readonly action: Action<TParams>,
-		private readonly resolveParams: (event: SemanticEvent, memory: WorkingMemory) => TParams,
+		private readonly contextProjection: ContextProjection<TParams>,
 	) {}
 
 	execute(event: SemanticEvent, memory: WorkingMemory): AsyncIterable<SemanticEvent> {
-		return this.action.execute(this.resolveParams(event, memory))
+		return this.action.execute(this.contextProjection.project(event, memory))
 	}
 }
