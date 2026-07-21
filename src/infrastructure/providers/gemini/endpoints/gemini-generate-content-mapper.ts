@@ -1,6 +1,5 @@
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import type { ModelName } from "@domain/generative-model/generative-model"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
@@ -14,7 +13,7 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 
 export class GeminiGenerateContentMapper implements InferenceEndpointMapper {
-	toRequest(inferenceParams: InferenceParams<ModelName>) {
+	toRequest(inferenceParams: InferenceParams) {
 		const { contents, systemInstruction } = this.mapContextItems(inferenceParams)
 		const config: any = {}
 
@@ -65,7 +64,7 @@ export class GeminiGenerateContentMapper implements InferenceEndpointMapper {
 		return new InferenceResponse(contextItems, tokenUsage)
 	}
 
-	mapContextItems(inferenceParams: InferenceParams<ModelName>): { contents: any[]; systemInstruction?: string } {
+	mapContextItems(inferenceParams: InferenceParams): { contents: any[]; systemInstruction?: string } {
 		const context = inferenceParams.context
 		const contents: any[] = []
 		const system: string[] = []

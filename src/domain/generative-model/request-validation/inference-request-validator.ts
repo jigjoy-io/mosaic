@@ -1,5 +1,5 @@
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
-import type { ModelName, ModelSpecification } from "../generative-model"
+import type { ModelSpecification } from "../generative-model"
 import type { RequestValidationRule } from "./rule"
 import { ReasoningEffortValidation } from "./reasoning-effort"
 import { ToolCallingValidation } from "./tool-calling"
@@ -18,7 +18,7 @@ export const defaultRequestValidationRules: RequestValidationRule[] = [
 export class InferenceRequestValidator {
 	constructor(private readonly rules: RequestValidationRule[] = defaultRequestValidationRules) {}
 
-	validate(inferenceParams: InferenceParams<ModelName>, model: ModelSpecification): void {
+	validate(inferenceParams: InferenceParams, model: ModelSpecification): void {
 		for (const rule of this.rules) {
 			if (!rule.isValid(inferenceParams, model)) {
 				throw new Error(`Request validation "${rule.name}" failed for model "${model.name}"`)

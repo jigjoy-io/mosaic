@@ -2,7 +2,6 @@ import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-eve
 import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import type { Endpoint } from "@domain/generative-model/endpoint"
 import OpenAI from "openai"
-import type { ModelName } from "@domain/generative-model/generative-model"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { OpenAIResponsesMapper } from "./openai-responses-mapper"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
@@ -16,17 +15,15 @@ export class OpenAIResponses implements Endpoint {
 		this.client = new OpenAI()
 	}
 
-	async infer(inferenceParams: InferenceParams<ModelName>): Promise<InferenceResponse> {
+	async infer(inferenceParams: InferenceParams): Promise<InferenceResponse> {
 		const request = this.endpointMapper.toRequest(inferenceParams)
 		const response = await this.client.responses.create(request)
 
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(
-		inferenceParams: InferenceParams<ModelName>,
-		signal?: AbortSignal,
-	): AsyncIterable<SemanticEvent<unknown>> {
+	async *stream(inferenceParams: InferenceParams): AsyncIterable<SemanticEvent> {
+		const { signal } = inferenceParams
 		const request = this.endpointMapper.toRequest(inferenceParams)
 		const response: any = await this.client.responses.create(request)
 
@@ -34,7 +31,7 @@ export class OpenAIResponses implements Endpoint {
 			if (signal?.aborted) {
 				break
 			}
-			yield new SemanticEvent(event.type, event)
+			yield event
 		}
 	}
 }

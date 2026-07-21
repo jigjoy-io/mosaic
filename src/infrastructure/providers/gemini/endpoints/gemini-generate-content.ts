@@ -3,7 +3,6 @@ import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-eve
 import { GoogleGenAI } from "@google/genai"
 import type { Endpoint } from "@domain/generative-model/endpoint"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
-import type { ModelName } from "@domain/generative-model/generative-model"
 import { GeminiGenerateContentMapper } from "./gemini-generate-content-mapper"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
@@ -35,25 +34,23 @@ export class GeminiGenerateContent implements Endpoint {
 		})
 	}
 
-	async infer(inferenceParams: InferenceParams<ModelName>): Promise<InferenceResponse> {
+	async infer(inferenceParams: InferenceParams): Promise<InferenceResponse> {
 		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
 		const response = await this.client.models.generateContent(inferenceRequest)
 
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(
-		inferenceParams: InferenceParams<ModelName>,
-		signal?: AbortSignal,
-	): AsyncIterable<SemanticEvent<unknown>> {
+	async *stream(inferenceParams: InferenceParams): AsyncIterable<SemanticEvent> {
+		const { signal } = inferenceParams
 		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
-		const stream = await this.client.models.generateContentStream(inferenceRequest)
+		const stream: any = await this.client.models.generateContentStream(inferenceRequest)
 
 		for await (const chunk of stream) {
 			if (signal?.aborted) {
 				break
 			}
-			yield new SemanticEvent("generate_content_chunk", chunk)
+			yield chunk
 		}
 	}
 }

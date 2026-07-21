@@ -1,4 +1,3 @@
-import type { ModelName } from "@domain/generative-model/generative-model"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
@@ -15,7 +14,7 @@ import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/gener
 import type Anthropic from "@anthropic-ai/sdk"
 
 export class AnthropicMessagesMapper implements InferenceEndpointMapper {
-	toRequest(inferenceParams: InferenceParams<ModelName>) {
+	toRequest(inferenceParams: InferenceParams) {
 		const { messages, system } = this.mapContextItems(inferenceParams)
 		const outputConfig: any = {}
 
@@ -80,7 +79,7 @@ export class AnthropicMessagesMapper implements InferenceEndpointMapper {
 		})
 	}
 
-	mapContextItems(inferenceParams: InferenceParams<ModelName>): { messages: any[]; system?: string } {
+	mapContextItems(inferenceParams: InferenceParams): { messages: any[]; system?: string } {
 		const context = inferenceParams.context
 		const messages: any[] = []
 		const system: string[] = []
