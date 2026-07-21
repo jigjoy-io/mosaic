@@ -20,6 +20,6 @@
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true
 	},
-	"include": ["src", "tests", "src/domain/types"],
-	"exclude": ["node_modules", "dist", "examples"] // For now excluded tests
+	"include": ["src", "src/domain/types", "examples"],
+	"exclude": ["node_modules", "dist"] // For now excluded tests
 }
