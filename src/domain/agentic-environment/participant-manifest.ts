@@ -31,4 +31,18 @@ export class AgentManifest extends ParticipantManifest {
 		this.instruction = instruction
 		this.tools = tools
 	}
+
+	static create({
+		id,
+		name,
+		instruction,
+		tools,
+	}: {
+		id: string
+		name: string
+		instruction: string
+		tools: Tool[]
+	}): AgentManifest {
+		return new AgentManifest(id, name, instruction, tools)
+	}
 }

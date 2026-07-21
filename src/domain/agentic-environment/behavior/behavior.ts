@@ -3,7 +3,7 @@ import { DecisionSpecification } from "./decision-specification"
 import { BoundAction, WorkingMemory } from "../agent/memory"
 
 export class Behavior {
-	constructor(
+	private constructor(
 		private readonly id: string,
 		private decisionSpecification: DecisionSpecification,
 		private boundActions: BoundAction[],

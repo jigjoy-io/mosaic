@@ -5,7 +5,7 @@ import { SystemMessageItem } from "@domain/model-context/context-item/client-ite
 import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import type { RequestValidationRule } from "./rule"
-import type { ModelName, ModelSpecification } from "../generative-model"
+import type { ModelSpecification } from "../generative-model"
 
 function getContextItemValidationKey(item: ContextItem): string {
 	if (item instanceof UserMessageItem) {
@@ -26,7 +26,7 @@ function getContextItemValidationKey(item: ContextItem): string {
 export class ContextValidation implements RequestValidationRule {
 	readonly name = "context"
 
-	isValid(inferenceParams: InferenceParams<ModelName>, model: ModelSpecification): boolean {
+	isValid(inferenceParams: InferenceParams, model: ModelSpecification): boolean {
 		return inferenceParams.context.items.every((item) =>
 			model.supportedContextItemTypes.includes(getContextItemValidationKey(item)),
 		)

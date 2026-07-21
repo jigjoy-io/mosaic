@@ -21,3 +21,7 @@ export class ActionBinding<TParams> implements BoundAction {
 		return this.action.execute(this.contextProjection.project(event, memory))
 	}
 }
+
+export type FunctionCallParams = {
+	signal?: AbortSignal
+}
