@@ -1,10 +1,13 @@
-# Mozaik
+<div align="center">
+<h1>Mozaik</h1>
+<p>TypeScript runtime for concurrent AI agents</p>
 
-**Mozaik** is a TypeScript framework for building agentic teams. It enables AI agents to work in parallel, stay aware of each other, and collaborate through event-driven communication.
+<img width="150" height="150" alt="mozaik-avatar-dark" src="https://github.com/user-attachments/assets/e832c359-0581-42f7-96f3-d6e221c5af95" />
 
 ![npm downloads](https://img.shields.io/npm/dt/@mozaik-ai/core) ![npm downloads weekly](https://img.shields.io/npm/dw/@mozaik-ai/core) ![npm version](https://img.shields.io/npm/v/@mozaik-ai/core)
 
-Instead of forcing agents into sequential workflows, Mozaik makes collaboration a first-class concept — creating the foundation for moving from autonomous agents to autonomous teams of AI agents.
+Mozaik is a TypeScript runtime for non-blocking AI agents that work independently, communicate through semantic events, and coordinate without predefined workflows.
+</div>
 
 ---
 
@@ -247,54 +250,6 @@ Requesting streaming for a model whose specification has `supportsStreaming: fal
 
 ---
 
-## Structured output
-
-When you need the model to respond with a specific JSON shape instead of free-form text, use structured output. Pass a `structuredOutput` (a `StructuredOutputFormat`) on the `runInference` params and the provider will enforce the JSON Schema:
-
-```ts
-import { runInference } from "@mozaik-ai/core"
-
-runInference({
-	model: "gpt-5.4",
-	context,
-	caller: this,
-	environment,
-	structuredOutput: {
-		name: "weather",
-		schema: {
-			type: "object",
-			properties: {
-				city: { type: "string" },
-				temperature: { type: "number" },
-				condition: { type: "string" },
-			},
-			required: ["city", "temperature", "condition"],
-			additionalProperties: false,
-		},
-		strict: true,
-	},
-})
-```
-
-The response comes back as a `ModelMessageItem` with valid JSON in the text field — no new item type, consistent with OpenResponses.
-
-Structured output works alongside tools and streaming. When streaming is enabled, partial JSON chunks arrive as `SemanticEvent`s and the final event contains the complete response.
-
-To return to free-form text, simply omit `structuredOutput` on the next `runInference` call.
-
-### Provider support
-
-| Provider  | Models                                                                | Strict schema enforcement                              |
-| --------- | --------------------------------------------------------------------- | ------------------------------------------------------ |
-| OpenAI    | gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.5                          | Yes                                                    |
-| Anthropic | claude-opus-4-7, claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5 | Yes                                                    |
-| Gemini    | gemini-3.1-pro-preview, gemini-3.5-flash                              | Yes                                                    |
-| DeepSeek  | deepseek-v4-flash, deepseek-v4-pro                                    | Not supported — use prompt-based JSON guidance instead |
-
-Requesting structured output for a model whose specification has `supportsStructuredOutput: false` fails request validation before the API call.
-
----
-
 ## Lifecycle hooks
 
 Every participant receives lifecycle notifications when it or others join/leave an environment:
@@ -402,69 +357,6 @@ export class TranscriptLogger extends BaseParticipant {
 	async onExternalModelMessage(source: Participant, item: ModelMessageItem): Promise<void> {
 		console.log(`[${source.constructor.name}] model_message`, item)
 	}
-}
-```
-
----
-
-## Context and models (reference)
-
-`ModelContext` is the ordered list of `ContextItem`s a model is asked to reason over. It is constructed and mutated explicitly — typically inside a participant in response to delivered items.
-
-```ts
-import { ModelContext, DeveloperMessageItem, UserMessageItem, InMemoryModelContextRepository } from "@mozaik-ai/core"
-
-const context = ModelContext.create("project-id")
-	.addContextItem(DeveloperMessageItem.create("You are a helpful assistant."))
-	.addContextItem(UserMessageItem.create("What is the capital of France?"))
-
-const repo = new InMemoryModelContextRepository()
-await repo.save(context)
-```
-
-Implement `ModelContextRepository` to plug in any storage backend.
-
-A model is selected by its `ModelName` string. Mozaik resolves the name to a provider `Endpoint` and a `ModelSpecification` internally, maps the `ModelContext` to that provider's API, and returns typed `ContextItem`s (and `SemanticEvent`s when streaming). Bundled model names:
-
-| Provider  | `ModelName` values                                                                    |
-| --------- | ------------------------------------------------------------------------------------- |
-| OpenAI    | `"gpt-5.4"`, `"gpt-5.4-mini"`, `"gpt-5.4-nano"`, `"gpt-5.5"`                          |
-| Anthropic | `"claude-haiku-4-5"`, `"claude-sonnet-4-6"`, `"claude-opus-4-7"`, `"claude-opus-4-8"` |
-| Gemini    | `"gemini-3.5-flash"`, `"gemini-3.1-pro-preview"`                                      |
-| DeepSeek  | `"deepseek-v4-flash"`, `"deepseek-v4-pro"`                                            |
-
-You drive inference with the `runInference` capability; it streams the resulting items into the environment for participants to react to:
-
-```ts
-import { runInference, ModelContext } from "@mozaik-ai/core"
-
-const context = ModelContext.create("demo")
-
-runInference({ model: "gpt-5.4", context, caller: this, environment })
-// → environment delivers ReasoningItem | FunctionCallItem | ModelMessageItem (and SemanticEvent when streaming)
-```
-
----
-
-### Tools
-
-A `Tool` is a function declaration with its own executor: `name`, `description`, JSON Schema `parameters`, `strict`, and an `invoke(args)` that runs the call. Pass tools on the `runInference` params; when the model emits a `FunctionCallItem`, run it with `executeFunctionCall`, which calls the matching tool's `invoke` and emits a `FunctionCallOutputItem`.
-
-```ts
-import { Tool } from "@mozaik-ai/core"
-
-const getWeather: Tool = {
-	type: "function",
-	name: "get_weather",
-	description: "Get the current weather for a city",
-	parameters: {
-		type: "object",
-		properties: { city: { type: "string" } },
-		required: ["city"],
-		additionalProperties: false,
-	},
-	strict: true,
-	invoke: async ({ city }: { city: string }) => ({ city, temperature: 21, condition: "sunny" }),
 }
 ```
 
