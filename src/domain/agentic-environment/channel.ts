@@ -4,9 +4,9 @@ import { Participant } from "./participant"
 export class Channel {
 	private participants: Participant[] = []
 
-	deliver(event: SemanticEvent): void {
+	async *deliver(event: SemanticEvent): AsyncIterable<SemanticEvent> {
 		for (const participant of this.participants) {
-			participant.process(event)
+			yield* participant.process(event)
 		}
 	}
 
@@ -16,5 +16,9 @@ export class Channel {
 
 	unsubscribe(participant: Participant) {
 		this.participants = this.participants.filter((p) => p !== participant)
+	}
+
+	getParticipants(): Participant[] {
+		return this.participants
 	}
 }

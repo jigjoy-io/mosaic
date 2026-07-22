@@ -2,7 +2,6 @@ import { Agent } from "@domain/agentic-environment/agent/agent"
 import { AgentManifest } from "@domain/agentic-environment/participant-manifest"
 import { Behavior } from "@domain/agentic-environment/behavior/behavior"
 import { ActionBinding, ContextProjection, WorkingMemory } from "@domain/agentic-environment/agent/memory"
-import { Channel } from "@domain/agentic-environment/channel"
 import { DecisionSpecification } from "@domain/agentic-environment/behavior/decision-specification"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { RunInference } from "@app/actions/run-inference"
@@ -11,6 +10,7 @@ import { InferenceRequestValidator } from "@domain/generative-model/request-vali
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { ModelContext } from "@domain/model-context/model-context"
 import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
+import { runtime } from "src"
 
 const manifest = AgentManifest.create({
 	id: "1",
@@ -82,14 +82,11 @@ const behaviors = [
 ]
 const agent = Agent.create({ manifest, behaviors, workingMemory: new DefaultWorkingMemory(0) })
 
-const channel = new Channel()
-
-channel.subscribe(agent)
-
 const context = ModelContext.create("1")
 context.addItem(UserMessageItem.create("What is the meaning of life?"))
 
-channel.deliver(
+runtime.join(agent)
+runtime.deliver(
 	new RequestInfereceEvent("1", new Date(), {
 		model: "gpt-5.4",
 		caller: agent,

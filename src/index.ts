@@ -21,8 +21,14 @@ import { Endpoint } from "@domain/generative-model/endpoint"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { ModelName } from "@domain/generative-model/generative-model"
 import { Action } from "@domain/agentic-environment/behavior/action"
+import { RuntimeService } from "./application/services/runtime"
+import { Channel } from "@domain/agentic-environment/channel"
+
+const channel = new Channel()
+const runtime = new RuntimeService(channel)
 
 export {
+	runtime,
 	ModelContext,
 	ModelContextRepository,
 	ModelName,

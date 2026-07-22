@@ -1,5 +1,4 @@
 import type { FunctionCallRunner } from "@app/services/function-call-runner"
-import type { Channel } from "@domain/agentic-environment/channel"
 import { FunctionCallExecuted } from "@domain/agentic-environment/events/function-call"
 import { type Participant } from "@domain/agentic-environment/participant"
 import { Action } from "@domain/agentic-environment/behavior/action"
