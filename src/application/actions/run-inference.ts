@@ -15,7 +15,7 @@ export class RunInference extends Action<InferenceParams> {
 	}
 
 	async *execute(inferenceParams: InferenceParams): AsyncIterable<SemanticEvent> {
-		const { channel, signal } = inferenceParams
+		const { signal } = inferenceParams
 
 		const generativeModel = await this.generativeModelRepository.getByModelName(inferenceParams.model)
 
@@ -37,7 +37,7 @@ export class RunInference extends Action<InferenceParams> {
 				break
 			}
 
-			channel.deliver(event)
+			yield event
 		}
 	}
 }

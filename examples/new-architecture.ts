@@ -80,7 +80,7 @@ const behaviors = [
 		then: [new ActionBinding<InferenceParams>(action, new RequestInferenceMapping())],
 	}),
 ]
-const agent = new Agent(manifest, behaviors, [numberOfTrySatisfied])
+const agent = Agent.create({ manifest, behaviors, workingMemory: new DefaultWorkingMemory(0) })
 
 const channel = new Channel()
 
@@ -93,7 +93,6 @@ channel.deliver(
 	new RequestInfereceEvent("1", new Date(), {
 		model: "gpt-5.4",
 		caller: agent,
-		channel: channel,
 		context: context,
 	}),
 )

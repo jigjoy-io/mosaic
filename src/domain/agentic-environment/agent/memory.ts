@@ -17,8 +17,11 @@ export class ActionBinding<TParams> implements BoundAction {
 		private readonly contextProjection: ContextProjection<TParams>,
 	) {}
 
-	execute(event: SemanticEvent, memory: WorkingMemory): AsyncIterable<SemanticEvent> {
-		return this.action.execute(this.contextProjection.project(event, memory))
+	async *execute(event: SemanticEvent, memory: WorkingMemory): AsyncIterable<SemanticEvent> {
+		const result = this.action.execute(this.contextProjection.project(event, memory))
+		for await (const event of result) {
+			yield event
+		}
 	}
 }
 

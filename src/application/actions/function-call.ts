@@ -8,7 +8,6 @@ import type { FunctionCallItem } from "@domain/model-context/context-item/model-
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 
 export type FunctionCallParameters = {
-	channel: Channel
 	functionCallItem: FunctionCallItem
 	tool: Tool
 	caller: Participant
@@ -21,12 +20,12 @@ export class FunctionCall extends Action<FunctionCallParameters> {
 	}
 
 	async *execute(functionCallParameters: FunctionCallParameters): AsyncIterable<SemanticEvent> {
-		const { channel, functionCallItem, tool, caller, signal } = functionCallParameters
+		const { functionCallItem, tool, caller, signal } = functionCallParameters
 		const stream = this.functionCallRunner.run(functionCallItem, tool, signal)
 
 		for await (const item of stream) {
 			const manifest = caller.getManifest()
-			channel.deliver(FunctionCallExecuted.create({ producerId: manifest.getId(), output: item }))
+			yield FunctionCallExecuted.create({ producerId: manifest.getId(), output: item })
 		}
 	}
 }
