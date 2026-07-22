@@ -23,11 +23,20 @@ import { ModelName } from "@domain/generative-model/generative-model"
 import { Action } from "@domain/agentic-environment/behavior/action"
 import { RuntimeService } from "./application/services/runtime"
 import { Channel } from "@domain/agentic-environment/channel"
+import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
+import { RunInference } from "@app/actions/run-inference"
+import { InMemoryGenerativeModelRepository } from "@infra/repository/generative-model-repository"
 
 const channel = new Channel()
 const runtime = new RuntimeService(channel)
 
+const generativeModelRepository = new InMemoryGenerativeModelRepository()
+const inferenceRequestValidator = new InferenceRequestValidator()
+
+const infrenceRunner = new RunInference(generativeModelRepository, inferenceRequestValidator)
+
 export {
+	infrenceRunner,
 	runtime,
 	ModelContext,
 	ModelContextRepository,

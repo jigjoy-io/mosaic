@@ -1,16 +1,13 @@
 import { Agent } from "@domain/agentic-environment/agent/agent"
 import { AgentManifest } from "@domain/agentic-environment/participant-manifest"
 import { Behavior } from "@domain/agentic-environment/behavior/behavior"
-import { ActionBinding, ContextProjection, WorkingMemory } from "@domain/agentic-environment/agent/memory"
+import { ActionBinding, WorkingMemory } from "@domain/agentic-environment/agent/memory"
 import { DecisionSpecification } from "@domain/agentic-environment/behavior/decision-specification"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { RunInference } from "@app/actions/run-inference"
-import { InMemoryGenerativeModelRepository } from "@infra/repository/generative-model-repository"
-import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelContext } from "@domain/model-context/model-context"
-import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
-import { runtime } from "src"
+import { infrenceRunner, runtime } from "src"
+import { UserMessageEvent } from "./events/user-message-event"
+import { RequestInferenceMapping } from "./events/run-inference-event"
 
 const manifest = AgentManifest.create({
 	id: "1",
@@ -47,49 +44,17 @@ class NumberOfTrySatisfied extends DecisionSpecification {
 	}
 }
 
-const generativeModelRepository = new InMemoryGenerativeModelRepository()
-const inferenceRequestValidator = new InferenceRequestValidator()
-
-const action = new RunInference(generativeModelRepository, inferenceRequestValidator)
 const numberOfTrySatisfied = new NumberOfTrySatisfied(3)
-
-class RequestInfereceEvent extends SemanticEvent {
-	type = "inference_requested"
-	constructor(
-		producerId: string,
-		occurredAt: Date,
-		private readonly inferenceParams: InferenceParams,
-	) {
-		super(producerId, occurredAt)
-	}
-
-	getInferenceParams(): InferenceParams {
-		return this.inferenceParams
-	}
-}
-
-class RequestInferenceMapping implements ContextProjection<InferenceParams> {
-	project(event: RequestInfereceEvent, memory: WorkingMemory): InferenceParams {
-		return event.getInferenceParams()
-	}
-}
 
 const behaviors = [
 	Behavior.create({
 		when: numberOfTrySatisfied,
-		then: [new ActionBinding<InferenceParams>(action, new RequestInferenceMapping())],
+		then: [new ActionBinding<InferenceParams>(infrenceRunner, new RequestInferenceMapping())],
 	}),
 ]
-const agent = Agent.create({ manifest, behaviors, workingMemory: new DefaultWorkingMemory(0) })
 
-const context = ModelContext.create("1")
-context.addItem(UserMessageItem.create("What is the meaning of life?"))
+const workingMemory = new DefaultWorkingMemory(0)
+const agent = Agent.create({ manifest, behaviors, workingMemory })
 
 runtime.join(agent)
-runtime.deliver(
-	new RequestInfereceEvent("1", new Date(), {
-		model: "gpt-5.4",
-		caller: agent,
-		context: context,
-	}),
-)
+runtime.deliver(new UserMessageEvent(agent.getId(), new Date(), "What is the capital of France?"))

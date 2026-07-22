@@ -2,11 +2,9 @@ import type { ContextItem } from "@domain/model-context/context-item/context-ite
 
 export class ModelContext {
 	readonly id: string
-	readonly projectId: string
 	readonly items: ContextItem[]
 
-	constructor(id: string, projectId: string, items: ContextItem[]) {
-		this.projectId = projectId
+	constructor(id: string, items: ContextItem[]) {
 		this.id = id
 		this.items = items
 	}
@@ -38,12 +36,12 @@ export class ModelContext {
 		return this.items[this.items.length - 1]
 	}
 
-	static create(projectId: string): ModelContext {
+	static create(): ModelContext {
 		const id = crypto.randomUUID()
-		return new ModelContext(id, projectId, [])
+		return new ModelContext(id, [])
 	}
 
-	static rehydrate(data: { id: string; projectId: string; items: ContextItem[] }): ModelContext {
-		return new ModelContext(data.id, data.projectId, data.items)
+	static rehydrate(data: { id: string; items: ContextItem[] }): ModelContext {
+		return new ModelContext(data.id, data.items)
 	}
 }
