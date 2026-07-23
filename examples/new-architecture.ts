@@ -1,13 +1,13 @@
 import { Agent } from "@domain/agentic-environment/agent/agent"
 import { AgentManifest } from "@domain/agentic-environment/participant-manifest"
 import { Behavior } from "@domain/agentic-environment/behavior/behavior"
-import { ActionBinding, WorkingMemory } from "@domain/agentic-environment/agent/memory"
+import { EventProcessing, Memory } from "@domain/agentic-environment/agent/memory"
 import { DecisionSpecification } from "@domain/agentic-environment/behavior/decision-specification"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { infrenceRunner, runtime } from "src"
 import { UserMessageEvent } from "./events/user-message-event"
-import { RequestInferenceMapping } from "./events/run-inference-event"
+import { RequestInferenceEventMapper } from "./events/run-inference-event"
 
 const manifest = AgentManifest.create({
 	id: "1",
@@ -16,7 +16,7 @@ const manifest = AgentManifest.create({
 	tools: [],
 })
 
-class DefaultWorkingMemory extends WorkingMemory {
+class DefaultMemory extends Memory {
 	constructor(private numberOfTry: number) {
 		super()
 	}
@@ -35,26 +35,27 @@ class NumberOfTrySatisfied extends DecisionSpecification {
 		super()
 	}
 
-	isSatisfiedBy(event: SemanticEvent, workingMemory: DefaultWorkingMemory): boolean {
+	isSatisfiedBy(event: SemanticEvent, memory: DefaultMemory): boolean {
 		if (event.getType() !== "inference_requested") {
 			return false
 		}
 
-		return workingMemory.getNumberOfTry() === this.numberOfTry
+		return memory.getNumberOfTry() === this.numberOfTry
 	}
 }
 
 const numberOfTrySatisfied = new NumberOfTrySatisfied(3)
+const requestInferenceEventMapper = new RequestInferenceEventMapper()
 
 const behaviors = [
 	Behavior.create({
 		when: numberOfTrySatisfied,
-		then: [new ActionBinding<InferenceParams>(infrenceRunner, new RequestInferenceMapping())],
+		then: [new EventProcessing<InferenceParams>(requestInferenceEventMapper, infrenceRunner)],
 	}),
 ]
 
-const workingMemory = new DefaultWorkingMemory(0)
-const agent = Agent.create({ manifest, behaviors, workingMemory })
+const memory = new DefaultMemory(0)
+const agent = Agent.create({ manifest, behaviors, memory })
 
 runtime.join(agent)
 runtime.deliver(new UserMessageEvent(agent.getId(), new Date(), "What is the capital of France?"))

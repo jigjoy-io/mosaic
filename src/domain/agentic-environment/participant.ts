@@ -1,6 +1,6 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { ParticipantManifest } from "./participant-manifest"
-import { WorkingMemory } from "./agent/memory"
+import { Memory } from "./agent/memory"
 import { Behavior } from "./behavior/behavior"
 
 export class Participant {
@@ -8,7 +8,7 @@ export class Participant {
 		readonly id: string,
 		readonly manifest: ParticipantManifest,
 		readonly behaviors: readonly Behavior[],
-		readonly workingMemory: WorkingMemory,
+		readonly memory: Memory,
 	) {}
 
 	getManifest(): ParticipantManifest {
@@ -17,7 +17,7 @@ export class Participant {
 
 	async *process(event: SemanticEvent): AsyncIterable<SemanticEvent> {
 		for (const behavior of this.behaviors) {
-			yield* behavior.execute(event, this.workingMemory)
+			yield* behavior.execute(event, this.memory)
 		}
 	}
 
@@ -28,27 +28,27 @@ export class Participant {
 	static create({
 		manifest,
 		behaviors,
-		workingMemory,
+		memory,
 	}: {
 		manifest: ParticipantManifest
 		behaviors: readonly Behavior[]
-		workingMemory: WorkingMemory
+		memory: Memory
 	}): Participant {
 		const id = crypto.randomUUID()
-		return new Participant(id, manifest, behaviors, workingMemory)
+		return new Participant(id, manifest, behaviors, memory)
 	}
 
 	static rehydrate({
 		id,
 		manifest,
 		behaviors,
-		workingMemory,
+		memory,
 	}: {
 		id: string
 		manifest: ParticipantManifest
 		behaviors: readonly Behavior[]
-		workingMemory: WorkingMemory
+		memory: Memory
 	}): Participant {
-		return new Participant(id, manifest, behaviors, workingMemory)
+		return new Participant(id, manifest, behaviors, memory)
 	}
 }

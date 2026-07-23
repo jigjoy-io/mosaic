@@ -13,10 +13,8 @@ export type FunctionCallParameters = {
 	signal?: AbortSignal
 }
 
-export class FunctionCall extends Action<FunctionCallParameters> {
-	constructor(private readonly functionCallRunner: FunctionCallRunner) {
-		super()
-	}
+export class FunctionCall implements Action<FunctionCallParameters> {
+	constructor(private readonly functionCallRunner: FunctionCallRunner) {}
 
 	async *execute(functionCallParameters: FunctionCallParameters): AsyncIterable<SemanticEvent> {
 		const { functionCallItem, tool, caller, signal } = functionCallParameters

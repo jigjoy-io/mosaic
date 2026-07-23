@@ -1,3 +1,4 @@
+import { EventMapper } from "@domain/agentic-environment/agent/memory"
 import { SemanticEvent } from "src"
 
 export class UserMessageEvent extends SemanticEvent {
@@ -12,5 +13,11 @@ export class UserMessageEvent extends SemanticEvent {
 
 	getMessage(): string {
 		return this.message
+	}
+}
+
+export class UserMessageEventMapper implements EventMapper<string> {
+	map(event: UserMessageEvent): string {
+		return event.getMessage()
 	}
 }

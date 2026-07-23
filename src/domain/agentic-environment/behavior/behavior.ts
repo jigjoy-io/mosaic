@@ -1,12 +1,12 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { DecisionSpecification } from "./decision-specification"
-import { BoundAction, WorkingMemory } from "../agent/memory"
+import { EventProcessor, Memory } from "../agent/memory"
 
 export class Behavior {
 	private constructor(
 		private readonly id: string,
 		private decisionSpecification: DecisionSpecification,
-		private boundActions: BoundAction[],
+		private eventProcessors: EventProcessor[],
 	) {}
 
 	getId(): string {
@@ -17,28 +17,32 @@ export class Behavior {
 		return this.decisionSpecification
 	}
 
-	getBoundActions(): BoundAction[] {
-		return this.boundActions
+	getEventProcessors(): EventProcessor[] {
+		return this.eventProcessors
 	}
 
-	async *execute(event: SemanticEvent, workingMemory: WorkingMemory): AsyncIterable<SemanticEvent> {
-		const isSatisfied = this.decisionSpecification.isSatisfiedBy(event, workingMemory)
+	async *execute(event: SemanticEvent, memory: Memory): AsyncIterable<SemanticEvent> {
+		const isSatisfied = this.decisionSpecification.isSatisfiedBy(event, memory)
 
 		if (!isSatisfied) {
 			return
 		}
 
-		for (const boundAction of this.boundActions) {
-			yield* boundAction.execute(event, workingMemory)
+		for (const eventProcessor of this.eventProcessors) {
+			yield* eventProcessor.execute(event)
 		}
 	}
 
-	static create({ when, then }: { when: DecisionSpecification; then: BoundAction[] }): Behavior {
+	static create({ when, then }: { when: DecisionSpecification; then: EventProcessor[] }): Behavior {
 		const id = crypto.randomUUID()
 		return new Behavior(id, when, then)
 	}
 
-	static rehydrate(id: string, decisionSpecification: DecisionSpecification, actions: BoundAction[]): Behavior {
-		return new Behavior(id, decisionSpecification, actions)
+	static rehydrate(
+		id: string,
+		decisionSpecification: DecisionSpecification,
+		eventProcessors: EventProcessor[],
+	): Behavior {
+		return new Behavior(id, decisionSpecification, eventProcessors)
 	}
 }

@@ -1,27 +1,27 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { Action } from "../behavior/action"
 
-export class WorkingMemory {}
+export class Memory {}
 
-export interface ContextProjection<TParams> {
-	project(event: SemanticEvent, memory: WorkingMemory): TParams
+export interface EventMapper<TParams> {
+	map(event: SemanticEvent): TParams
 }
 
-export interface BoundAction {
-	execute(event: SemanticEvent, memory: WorkingMemory): AsyncIterable<SemanticEvent>
+export interface EventProcessor {
+	execute(event: SemanticEvent): AsyncIterable<SemanticEvent>
 }
 
-export class ActionBinding<TParams> implements BoundAction {
+export class EventProcessing<TParams> implements EventProcessor {
 	constructor(
+		private readonly eventMapper: EventMapper<TParams>,
 		private readonly action: Action<TParams>,
-		private readonly contextProjection: ContextProjection<TParams>,
 	) {}
 
-	async *execute(event: SemanticEvent, memory: WorkingMemory): AsyncIterable<SemanticEvent> {
-		const result = this.action.execute(this.contextProjection.project(event, memory))
-		for await (const event of result) {
-			yield event
-		}
+	async *execute(event: SemanticEvent): AsyncIterable<SemanticEvent> {
+		const params = this.eventMapper.map(event)
+		const result = this.action.execute(params)
+
+		yield* result
 	}
 }
 

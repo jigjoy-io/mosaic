@@ -6,13 +6,11 @@ import type { InferenceRequestValidator } from "@domain/generative-model/request
 import type { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
 import { Action } from "@domain/agentic-environment/behavior/action"
 
-export class RunInference extends Action<InferenceParams> {
+export class RunInference implements Action<InferenceParams> {
 	constructor(
 		private readonly generativeModelRepository: GenerativeModelRepository,
 		private readonly requestValidator: InferenceRequestValidator,
-	) {
-		super()
-	}
+	) {}
 
 	async *execute(inferenceParams: InferenceParams): AsyncIterable<SemanticEvent> {
 		const { signal } = inferenceParams

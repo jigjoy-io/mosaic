@@ -1,4 +1,4 @@
-import { ContextProjection, WorkingMemory } from "@domain/agentic-environment/agent/memory"
+import { EventMapper } from "@domain/agentic-environment/agent/memory"
 import { InferenceParams, SemanticEvent } from "src"
 
 export class RequestInfereceEvent extends SemanticEvent {
@@ -16,8 +16,8 @@ export class RequestInfereceEvent extends SemanticEvent {
 	}
 }
 
-export class RequestInferenceMapping implements ContextProjection<InferenceParams> {
-	project(event: RequestInfereceEvent, memory: WorkingMemory): InferenceParams {
+export class RequestInferenceEventMapper implements EventMapper<InferenceParams> {
+	map(event: RequestInfereceEvent): InferenceParams {
 		return event.getInferenceParams()
 	}
 }
