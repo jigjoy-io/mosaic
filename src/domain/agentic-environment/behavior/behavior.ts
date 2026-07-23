@@ -1,6 +1,6 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { DecisionSpecification } from "./decision-specification"
-import { EventProcessor, Memory } from "../agent/memory"
+import { Contract, EventProcessor, Memory } from "../agent/memory"
 
 export class Behavior {
 	private constructor(
@@ -21,8 +21,8 @@ export class Behavior {
 		return this.eventProcessors
 	}
 
-	async *execute(event: SemanticEvent, memory: Memory): AsyncIterable<SemanticEvent> {
-		const isSatisfied = this.decisionSpecification.isSatisfiedBy(event, memory)
+	async *execute(event: SemanticEvent, memory: Memory, contract: Contract): AsyncIterable<SemanticEvent> {
+		const isSatisfied = this.decisionSpecification.isSatisfiedBy(event, memory, contract)
 
 		if (!isSatisfied) {
 			return

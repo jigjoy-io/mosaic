@@ -3,6 +3,8 @@ import { Action } from "../behavior/action"
 
 export class Memory {}
 
+export class Contract {}
+
 export interface EventMapper<TParams> {
 	map(event: SemanticEvent): TParams
 }

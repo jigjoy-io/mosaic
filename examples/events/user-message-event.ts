@@ -3,7 +3,7 @@ import { SemanticEvent } from "src"
 
 export class UserMessageEvent extends SemanticEvent {
 	type = "user_message"
-	constructor(
+	private constructor(
 		producerId: string,
 		occurredAt: Date,
 		private readonly message: string,
@@ -13,6 +13,10 @@ export class UserMessageEvent extends SemanticEvent {
 
 	getMessage(): string {
 		return this.message
+	}
+
+	static create(producerId: string, message: string): UserMessageEvent {
+		return new UserMessageEvent(producerId, new Date(), message)
 	}
 }
 

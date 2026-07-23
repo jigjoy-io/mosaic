@@ -1,13 +1,9 @@
 import { Agent } from "@domain/agentic-environment/agent/agent"
 import { AgentManifest } from "@domain/agentic-environment/participant-manifest"
-import { Behavior } from "@domain/agentic-environment/behavior/behavior"
-import { EventProcessing, Memory } from "@domain/agentic-environment/agent/memory"
-import { DecisionSpecification } from "@domain/agentic-environment/behavior/decision-specification"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { infrenceRunner, runtime } from "src"
+import { runtime } from "src"
 import { UserMessageEvent } from "./events/user-message-event"
-import { RequestInferenceEventMapper } from "./events/run-inference-event"
+import { runInferenceBehavior } from "./behaviors/run-inference"
+import { FreemiumContract } from "./contracts/freemium"
 
 const manifest = AgentManifest.create({
 	id: "1",
@@ -16,46 +12,12 @@ const manifest = AgentManifest.create({
 	tools: [],
 })
 
-class DefaultMemory extends Memory {
-	constructor(private numberOfTry: number) {
-		super()
-	}
+const behaviors = [runInferenceBehavior]
 
-	getNumberOfTry(): number {
-		return this.numberOfTry
-	}
-
-	addTry(): void {
-		this.numberOfTry++
-	}
-}
-
-class NumberOfTrySatisfied extends DecisionSpecification {
-	constructor(private readonly numberOfTry: number) {
-		super()
-	}
-
-	isSatisfiedBy(event: SemanticEvent, memory: DefaultMemory): boolean {
-		if (event.getType() !== "inference_requested") {
-			return false
-		}
-
-		return memory.getNumberOfTry() === this.numberOfTry
-	}
-}
-
-const numberOfTrySatisfied = new NumberOfTrySatisfied(3)
-const requestInferenceEventMapper = new RequestInferenceEventMapper()
-
-const behaviors = [
-	Behavior.create({
-		when: numberOfTrySatisfied,
-		then: [new EventProcessing<InferenceParams>(requestInferenceEventMapper, infrenceRunner)],
-	}),
-]
-
-const memory = new DefaultMemory(0)
-const agent = Agent.create({ manifest, behaviors, memory })
+const contract = new FreemiumContract(3)
+const agent = Agent.create({ manifest, behaviors, contract })
 
 runtime.join(agent)
-runtime.deliver(new UserMessageEvent(agent.getId(), new Date(), "What is the capital of France?"))
+
+const userMessageEvent = UserMessageEvent.create("user", "What is the capital of France?")
+runtime.deliver(userMessageEvent)
