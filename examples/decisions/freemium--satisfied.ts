@@ -1,3 +1,4 @@
+import { Memory } from "@domain/agentic-environment/agent/memory"
 import { DecisionSpecification } from "@domain/agentic-environment/behavior/decision-specification"
 import { FreemiumContract } from "examples/contracts/freemium"
 import { SemanticEvent } from "src"
@@ -7,7 +8,7 @@ export class FreemiumSatisfied extends DecisionSpecification {
 		super()
 	}
 
-	isSatisfiedBy(event: SemanticEvent, contract: FreemiumContract): boolean {
+	isSatisfiedBy(event: SemanticEvent, memory: Memory, contract: FreemiumContract): boolean {
 		if (event.getType() !== "inference_requested") {
 			return false
 		}

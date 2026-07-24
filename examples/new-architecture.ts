@@ -14,7 +14,7 @@ const manifest = AgentManifest.create({
 
 const behaviors = [runInferenceBehavior]
 
-const contract = new FreemiumContract(3)
+const contract = FreemiumContract.create(3)
 const agent = Agent.create({ manifest, behaviors, contract })
 
 runtime.join(agent)
