@@ -1,6 +1,7 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { Action } from "../behavior/action"
 import { ModelContext } from "@domain/model-context/model-context"
+import { Situation } from "../behavior/situation"
 
 export class Memory {
 	private readonly context: ModelContext
@@ -18,30 +19,22 @@ export class Memory {
 	}
 }
 
-export class Contract {
-	protected constructor(private readonly id: string) {}
-
-	getId(): string {
-		return this.id
-	}
+export interface SituationMapper<ActionParameters> {
+	map(situation: Situation): ActionParameters
 }
 
-export interface EventMapper<TParams> {
-	map(event: SemanticEvent): TParams
+export interface SituationProcessor {
+	process(situation: Situation): AsyncIterable<SemanticEvent>
 }
 
-export interface EventProcessor {
-	execute(event: SemanticEvent): AsyncIterable<SemanticEvent>
-}
-
-export class EventProcessing<TParams> implements EventProcessor {
+export class SituationProcessing<ActionParameters> implements SituationProcessor {
 	constructor(
-		private readonly eventMapper: EventMapper<TParams>,
-		private readonly action: Action<TParams>,
+		private readonly situationMapper: SituationMapper<ActionParameters>,
+		private readonly action: Action<ActionParameters>,
 	) {}
 
-	async *execute(event: SemanticEvent): AsyncIterable<SemanticEvent> {
-		const params = this.eventMapper.map(event)
+	async *process(situation: Situation): AsyncIterable<SemanticEvent> {
+		const params = this.situationMapper.map(situation)
 		const result = this.action.execute(params)
 
 		yield* result

@@ -32,6 +32,10 @@ export class AgentManifest extends ParticipantManifest {
 		this.tools = tools
 	}
 
+	getTools(): Tool[] {
+		return this.tools
+	}
+
 	static create({
 		id,
 		name,

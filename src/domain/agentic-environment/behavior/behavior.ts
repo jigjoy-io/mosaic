@@ -1,48 +1,45 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { DecisionSpecification } from "./decision-specification"
-import { Contract, EventProcessor, Memory } from "../agent/memory"
+import { Constraint } from "./specification"
+import { SituationProcessor } from "../agent/memory"
+import { Situation } from "./situation"
 
 export class Behavior {
 	private constructor(
 		private readonly id: string,
-		private decisionSpecification: DecisionSpecification,
-		private eventProcessors: EventProcessor[],
+		private constraint: Constraint,
+		private situationProcessors: SituationProcessor[],
 	) {}
 
 	getId(): string {
 		return this.id
 	}
 
-	getDecisionSpecification(): DecisionSpecification {
-		return this.decisionSpecification
+	getConstraint(): Constraint {
+		return this.constraint
 	}
 
-	getEventProcessors(): EventProcessor[] {
-		return this.eventProcessors
+	getSituationProcessors(): SituationProcessor[] {
+		return this.situationProcessors
 	}
 
-	async *execute(event: SemanticEvent, memory: Memory, contract: Contract): AsyncIterable<SemanticEvent> {
-		const isSatisfied = this.decisionSpecification.isSatisfiedBy(event, memory, contract)
+	async *execute(situation: Situation): AsyncIterable<SemanticEvent> {
+		const isSatisfied = this.constraint.isSatisfiedBy(situation)
 
 		if (!isSatisfied) {
 			return
 		}
 
-		for (const eventProcessor of this.eventProcessors) {
-			yield* eventProcessor.execute(event)
+		for (const situationProcessor of this.situationProcessors) {
+			yield* situationProcessor.process(situation)
 		}
 	}
 
-	static create({ when, then }: { when: DecisionSpecification; then: EventProcessor[] }): Behavior {
+	static create({ when, then }: { when: Constraint; then: SituationProcessor[] }): Behavior {
 		const id = crypto.randomUUID()
 		return new Behavior(id, when, then)
 	}
 
-	static rehydrate(
-		id: string,
-		decisionSpecification: DecisionSpecification,
-		eventProcessors: EventProcessor[],
-	): Behavior {
-		return new Behavior(id, decisionSpecification, eventProcessors)
+	static rehydrate(id: string, constraint: Constraint, situationProcessors: SituationProcessor[]): Behavior {
+		return new Behavior(id, constraint, situationProcessors)
 	}
 }

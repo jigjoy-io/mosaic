@@ -22,21 +22,28 @@ import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { ModelName } from "@domain/generative-model/generative-model"
 import { Action } from "@domain/agentic-environment/behavior/action"
 import { RuntimeService } from "./application/services/runtime"
-import { Channel } from "@domain/agentic-environment/channel"
 import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
-import { RunInference } from "@app/actions/run-inference"
+import { Inference } from "@app/actions/inference"
 import { InMemoryGenerativeModelRepository } from "@infra/repository/generative-model-repository"
+import { FunctionCallRunner } from "@app/services/function-call-runner"
+import { FunctionCall } from "@app/actions/function-call"
+import { FreemiumAccount, FreemiumRuntimeState } from "examples/behaviors/freemium-situation"
 
-const channel = new Channel()
-const runtime = new RuntimeService(channel)
+const freemiumAccount = FreemiumAccount.init(3)
+
+const runtime = new RuntimeService(new FreemiumRuntimeState(freemiumAccount))
 
 const generativeModelRepository = new InMemoryGenerativeModelRepository()
 const inferenceRequestValidator = new InferenceRequestValidator()
 
-const infrenceRunner = new RunInference(generativeModelRepository, inferenceRequestValidator)
+const inference = new Inference(generativeModelRepository, inferenceRequestValidator)
+
+const functionCallRunner = new FunctionCallRunner()
+const functionCall = new FunctionCall(functionCallRunner)
 
 export {
-	infrenceRunner,
+	inference,
+	functionCall,
 	runtime,
 	ModelContext,
 	ModelContextRepository,

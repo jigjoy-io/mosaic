@@ -1,9 +1,8 @@
 import { Agent } from "@domain/agentic-environment/agent/agent"
 import { AgentManifest } from "@domain/agentic-environment/participant-manifest"
 import { runtime } from "src"
-import { UserMessageEvent } from "./events/user-message-event"
-import { runInferenceBehavior } from "./behaviors/run-inference"
-import { FreemiumContract } from "./contracts/freemium"
+import { freemiumBehavior } from "./behaviors/freemium-behavior"
+import { ParticipantMessage } from "../src/domain/agentic-environment/events/participant-message"
 
 const manifest = AgentManifest.create({
 	id: "1",
@@ -12,12 +11,11 @@ const manifest = AgentManifest.create({
 	tools: [],
 })
 
-const behaviors = [runInferenceBehavior]
+const behaviors = [freemiumBehavior]
 
-const contract = FreemiumContract.create(3)
-const agent = Agent.create({ manifest, behaviors, contract })
+const agent = Agent.create({ manifest, behaviors })
 
 runtime.join(agent)
 
-const userMessageEvent = UserMessageEvent.create("user", "What is the capital of France?")
-runtime.deliver(userMessageEvent)
+const participantMessage = ParticipantMessage.create("user", "What is the capital of France?")
+runtime.deliver(participantMessage)
