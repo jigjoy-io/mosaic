@@ -1,14 +1,13 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { ParticipantManifest } from "./participant-manifest"
 import { Memory } from "./agent/memory"
-import { Behavior } from "./behavior/behavior"
-import { RuntimeState } from "./runtime-state"
+import { EventProcessor } from "./behavior/event-processor"
 
 export class Participant {
 	protected constructor(
 		readonly id: string,
 		readonly manifest: ParticipantManifest,
-		readonly behaviors: readonly Behavior[],
+		readonly eventProcessors: readonly EventProcessor[],
 		readonly memory: Memory,
 	) {}
 
@@ -16,9 +15,9 @@ export class Participant {
 		return this.manifest
 	}
 
-	async *process(event: SemanticEvent, runtimeState: RuntimeState): AsyncIterable<SemanticEvent> {
-		for (const behavior of this.behaviors) {
-			yield* behavior.execute({ event, participant: this, runtimeState })
+	async *process(event: SemanticEvent): AsyncIterable<SemanticEvent> {
+		for (const eventProcessor of this.eventProcessors) {
+			yield* eventProcessor.reactTo(event)
 		}
 	}
 

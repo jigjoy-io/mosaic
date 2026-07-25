@@ -1,7 +1,7 @@
-import { Situation } from "./situation"
+import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 
 export abstract class Constraint {
-	abstract isSatisfiedBy(situation: Situation): boolean
+	abstract isSatisfiedBy(event: SemanticEvent): boolean
 
 	and(other: Constraint): Constraint {
 		return new AndConstraint(this, other)
@@ -24,8 +24,8 @@ class AndConstraint extends Constraint {
 		super()
 	}
 
-	isSatisfiedBy(situation: Situation): boolean {
-		return this.left.isSatisfiedBy(situation) && this.right.isSatisfiedBy(situation)
+	isSatisfiedBy(event: SemanticEvent): boolean {
+		return this.left.isSatisfiedBy(event) && this.right.isSatisfiedBy(event)
 	}
 }
 
@@ -37,8 +37,8 @@ class OrConstraint extends Constraint {
 		super()
 	}
 
-	isSatisfiedBy(situation: Situation): boolean {
-		return this.left.isSatisfiedBy(situation) || this.right.isSatisfiedBy(situation)
+	isSatisfiedBy(event: SemanticEvent): boolean {
+		return this.left.isSatisfiedBy(event) || this.right.isSatisfiedBy(event)
 	}
 }
 
@@ -47,7 +47,7 @@ class NotConstraint extends Constraint {
 		super()
 	}
 
-	isSatisfiedBy(situation: Situation): boolean {
-		return !this.constraint.isSatisfiedBy(situation)
+	isSatisfiedBy(event: SemanticEvent): boolean {
+		return !this.constraint.isSatisfiedBy(event)
 	}
 }
