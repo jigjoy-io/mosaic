@@ -1,5 +1,5 @@
 import { createBehavior } from "@app/use-cases/create-behavior"
-import { FreemiumAvailable } from "./constraints"
+import { FreemiumAvailable } from "./constraint"
 import { FreemiumAction } from "./action"
 import { createAgent } from "@app/use-cases/create-agent"
 

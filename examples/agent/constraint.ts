@@ -1,5 +1,5 @@
 import { Constraint } from "@domain/agentic-environment/participant/behavior/constraint"
-import { resolveRuntime } from "./runtime"
+import { resolveRuntime } from "../runtime"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { Participant } from "@domain/agentic-environment/participant/participant"
 

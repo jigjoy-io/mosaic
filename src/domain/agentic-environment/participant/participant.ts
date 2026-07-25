@@ -17,4 +17,15 @@ export class Participant {
 	getId(): string {
 		return this.id
 	}
+
+	static create({
+		manifest,
+		behaviors,
+	}: {
+		manifest: ParticipantManifest
+		behaviors: readonly Behavior[]
+	}): Participant {
+		const memory = Memory.create()
+		return new Participant(manifest.getName(), manifest, behaviors, memory)
+	}
 }

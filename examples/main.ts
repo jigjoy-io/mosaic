@@ -1,4 +1,4 @@
-import { agent } from "./agent"
+import { agent } from "./agent/agent"
 import { ParticipantMessage } from "../src/domain/agentic-environment/events/participant-message"
 import { EnvironmentState, FreemiumAccount, initializeRuntime } from "./runtime"
 

@@ -6,6 +6,7 @@ export type AgentManifestParams = {
 	instruction: string
 	tools: Tool[]
 }
+
 export class AgentManifest extends ParticipantManifest {
 	instruction: string
 	tools: Tool[]
