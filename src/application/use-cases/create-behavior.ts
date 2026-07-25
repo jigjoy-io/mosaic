@@ -1,10 +1,10 @@
-import { Constraint } from "@domain/agentic-environment/agent/constraint"
-import { Action } from "@domain/agentic-environment/agent/action"
-import { Behavior } from "@domain/agentic-environment/agent/behavior"
+import { Constraint } from "@domain/agentic-environment/participant/behavior/constraint"
+import { Action } from "@domain/agentic-environment/participant/behavior/action"
+import { Behavior } from "@domain/agentic-environment/participant/behavior/behavior"
 
-export function createBehavior({ when, then }: { when: Constraint; then: Action[] }): Behavior {
+export function createBehavior({ constraint, actions }: { constraint: Constraint; actions: Action[] }): Behavior {
 	return Behavior.create({
-		when,
-		then,
+		constraint,
+		actions,
 	})
 }

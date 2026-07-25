@@ -20,9 +20,9 @@ export class Behavior {
 		return this.actions
 	}
 
-	static create({ when, then }: { when: Constraint; then: Action[] }): Behavior {
+	static create({ constraint, actions }: { constraint: Constraint; actions: Action[] }): Behavior {
 		const id = crypto.randomUUID()
-		return new Behavior(id, when, then)
+		return new Behavior(id, constraint, actions)
 	}
 
 	static rehydrate(id: string, constraint: Constraint, actions: Action[]): Behavior {

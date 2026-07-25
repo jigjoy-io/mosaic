@@ -1,5 +1,5 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { Participant } from "../participant/participant"
+import { Participant } from "../participant"
 
 export abstract class Constraint {
 	abstract isSatisfiedBy(event: SemanticEvent, consumer: Participant): boolean

@@ -1,4 +1,4 @@
-import { Behavior } from "../agent/behavior"
+import { Behavior } from "./behavior/behavior"
 import { Memory } from "./memory"
 import { ParticipantManifest } from "./participant-manifest"
 

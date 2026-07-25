@@ -19,7 +19,7 @@ import { InferenceResponse } from "@domain/agentic-environment/inference/respons
 import { Endpoint } from "@domain/generative-model/endpoint"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { ModelName } from "@domain/generative-model/generative-model"
-import { Action } from "@domain/agentic-environment/agent/action"
+import { Action } from "@domain/agentic-environment/participant/behavior/action"
 import { RuntimeService } from "./application/services/runtime"
 import { resolveInferenceRunner } from "@app/use-cases/resolve-inference-runner"
 import { resolveFunctionCallRunner } from "@app/use-cases/resolve-function-call-runner"

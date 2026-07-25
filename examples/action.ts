@@ -1,6 +1,6 @@
 import { Action, InferenceParams, resolveInferenceRunner, SemanticEvent, UserMessageItem } from "src"
 import { ParticipantMessage } from "@domain/agentic-environment/events/participant-message"
-import { Agent } from "@domain/agentic-environment/agent/agent"
+import { Agent } from "@domain/agentic-environment/participant/agent"
 
 export class FreemiumAction implements Action {
 	private readonly inferenceRunner = resolveInferenceRunner()
