@@ -1,9 +1,9 @@
-import { Constraint } from "@domain/agentic-environment/behavior/constraint"
-import { Action } from "@domain/agentic-environment/behavior/action"
-import { EventProcessor } from "@domain/agentic-environment/behavior/event-processor"
+import { Constraint } from "@domain/agentic-environment/situation/constraint"
+import { Action } from "@domain/agentic-environment/situation/action"
+import { Behavior } from "@domain/agentic-environment/situation/behavior"
 
-export function createEventProcessor({ when, then }: { when: Constraint; then: Action[] }): EventProcessor {
-	return EventProcessor.create({
+export function createBehavior({ when, then }: { when: Constraint; then: Action[] }): Behavior {
+	return Behavior.create({
 		when,
 		then,
 	})

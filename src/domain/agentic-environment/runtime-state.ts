@@ -1,4 +1,4 @@
-import { Participant } from "./participant"
+import { Participant } from "./participant/participant"
 
 export abstract class RuntimeState {
 	participants: readonly Participant[] = []
@@ -9,6 +9,10 @@ export abstract class RuntimeState {
 
 	removeParticipant(participant: Participant): void {
 		this.participants = this.participants.filter((p) => p !== participant)
+	}
+
+	getParticipant(id: string): Participant | undefined {
+		return this.participants.find((p) => p.id === id)
 	}
 
 	getParticipants(): readonly Participant[] {

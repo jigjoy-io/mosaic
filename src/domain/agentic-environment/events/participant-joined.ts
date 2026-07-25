@@ -1,5 +1,5 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { ParticipantManifest } from "../participant-manifest"
+import { ParticipantManifest } from "../participant/participant-manifest"
 
 export class ParticipantJoinedEvent extends SemanticEvent {
 	readonly type = "participant.joined"

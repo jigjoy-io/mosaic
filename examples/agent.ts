@@ -1,10 +1,10 @@
-import { createEventProcessor } from "@app/use-cases/create-reaction"
+import { createBehavior } from "@app/use-cases/create-reaction"
 import { FreemiumAvailable } from "./constraints"
 import { FreemiumAction } from "./freemium-request"
-import { AgentManifest } from "@domain/agentic-environment/participant-manifest"
-import { Agent } from "@domain/agentic-environment/agent/agent"
+import { AgentManifest } from "@domain/agentic-environment/participant/participant-manifest"
+import { Agent } from "@domain/agentic-environment/participant/agent"
 
-const freemium = createEventProcessor({
+const freemium = createBehavior({
 	when: new FreemiumAvailable(),
 	then: [new FreemiumAction()],
 })
@@ -16,8 +16,8 @@ const manifest = AgentManifest.create({
 	tools: [],
 })
 
-const eventProcessors = [freemium]
+const behaviors = [freemium]
 
-const agent = Agent.create({ manifest, eventProcessors })
+const agent = Agent.create({ manifest, behaviors })
 
 export { agent }

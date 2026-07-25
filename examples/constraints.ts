@@ -1,10 +1,11 @@
-import { Constraint } from "@domain/agentic-environment/behavior/constraint"
+import { Constraint } from "@domain/agentic-environment/situation/constraint"
 import { resolveRuntime } from "./runtime"
-import { SemanticEvent } from "src"
+import { Situation } from "@domain/agentic-environment/situation/situation"
 
 export class FreemiumAvailable extends Constraint {
 	private readonly runtime = resolveRuntime()
-	isSatisfiedBy(event: SemanticEvent): boolean {
+	isSatisfiedBy(situation: Situation): boolean {
+		const { event } = situation
 		const { freemiumAccount } = this.runtime.state
 
 		if (event.getType() !== "participant_message") {
