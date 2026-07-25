@@ -1,11 +1,11 @@
 import { RuntimeService } from "@app/services/runtime"
 import { Participant } from "@domain/agentic-environment/participant/participant"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { SituationProcessor } from "@domain/agentic-environment/situation/processor"
+import { EventProcessor } from "@domain/agentic-environment/events/processor"
 
 export function defineRuntime<TRuntimeState extends RuntimeState>() {
 	let runtime: RuntimeService<TRuntimeState> | null = null
-	const processor = new SituationProcessor()
+	const processor = new EventProcessor()
 
 	function initializeRuntime(runtimeState: TRuntimeState): RuntimeService<TRuntimeState> {
 		if (runtime) {

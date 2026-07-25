@@ -1,11 +1,11 @@
 import { Action, InferenceParams, resolveInferenceRunner, SemanticEvent, UserMessageItem } from "src"
-import { FreemiumSituation } from "./freemium-siutaiton"
+import { ParticipantMessage } from "@domain/agentic-environment/events/participant-message"
+import { Agent } from "@domain/agentic-environment/agent/agent"
 
 export class FreemiumAction implements Action {
 	private readonly inferenceRunner = resolveInferenceRunner()
 
-	async *process(situation: FreemiumSituation): AsyncIterable<SemanticEvent> {
-		const { consumer, event } = situation
+	async *process(event: ParticipantMessage, consumer: Agent): AsyncIterable<SemanticEvent> {
 		const message = `${event.getProducerId()}: ${event.getMessage()}`
 
 		let context = consumer.memory.getContext()

@@ -1,7 +1,7 @@
-import { Behavior } from "../situation/behavior"
-import { Memory } from "./memory"
-import { Participant } from "./participant"
-import { AgentManifest } from "./participant-manifest"
+import { Behavior } from "./behavior"
+import { Memory } from "../participant/memory"
+import { Participant } from "../participant/participant"
+import { AgentManifest } from "../participant/participant-manifest"
 
 export class Agent extends Participant {
 	readonly manifest: AgentManifest

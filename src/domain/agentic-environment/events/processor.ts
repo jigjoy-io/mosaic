@@ -1,15 +1,13 @@
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 import { Participant } from "../participant/participant"
-import { Situation } from "./situation"
 
-export class SituationProcessor {
+export class EventProcessor {
 	async *process(event: SemanticEvent, consumer: Participant): AsyncIterable<SemanticEvent> {
-		const situation = new Situation(consumer, event)
 		for (const behavior of consumer.behaviors) {
-			const isSatisfied = behavior.getConstraint().isSatisfiedBy(situation)
+			const isSatisfied = behavior.getConstraint().isSatisfiedBy(event, consumer)
 			if (isSatisfied) {
 				for (const action of behavior.getActions()) {
-					yield* action.process(situation)
+					yield* action.process(event, consumer)
 				}
 			}
 		}

@@ -1,12 +1,12 @@
 import { Participant } from "@domain/agentic-environment/participant/participant"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { SituationProcessor } from "@domain/agentic-environment/situation/processor"
+import { EventProcessor } from "@domain/agentic-environment/events/processor"
 import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
 
 export class RuntimeService<TRuntimeState extends RuntimeState> {
 	constructor(
 		public readonly state: TRuntimeState,
-		private readonly processor: SituationProcessor,
+		private readonly processor: EventProcessor,
 	) {}
 
 	join(participant: Participant): void {
@@ -31,8 +31,8 @@ export class RuntimeService<TRuntimeState extends RuntimeState> {
 		return this.state.getParticipant(id)
 	}
 
-	private async react(participant: Participant, event: SemanticEvent): Promise<void> {
-		for await (const emittedEvent of this.processor.process(event, participant)) {
+	private async react(consumer: Participant, event: SemanticEvent): Promise<void> {
+		for await (const emittedEvent of this.processor.process(event, consumer)) {
 			this.deliver(emittedEvent)
 		}
 	}
