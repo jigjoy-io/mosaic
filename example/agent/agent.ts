@@ -1,7 +1,6 @@
-import { createBehavior } from "@app/use-cases/create-behavior"
 import { FreemiumAvailable } from "./constraint"
 import { FreemiumAction } from "./action"
-import { createAgent } from "@app/use-cases/create-agent"
+import { createAgent, createBehavior } from "src"
 
 const freemium = createBehavior({
 	constraint: new FreemiumAvailable(),

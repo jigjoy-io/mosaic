@@ -25,11 +25,21 @@ import { resolveInferenceRunner } from "@app/use-cases/resolve-inference-runner"
 import { resolveFunctionCallRunner } from "@app/use-cases/resolve-function-call-runner"
 import { defineRuntime } from "@app/use-cases/runtime"
 import { Participant } from "@domain/agentic-environment/participant/participant"
+import { createBehavior } from "@app/use-cases/create-behavior"
+import { createAgent } from "@app/use-cases/create-agent"
+import { createParticipant } from "@app/use-cases/create-participant"
+import { Constraint } from "@domain/agentic-environment/participant/behavior/constraint"
+import { ParticipantMessage } from "@domain/agentic-environment/events/participant-message"
+import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 
 export {
 	defineRuntime,
+	RuntimeState,
 	resolveInferenceRunner,
 	resolveFunctionCallRunner,
+	createBehavior,
+	createAgent,
+	createParticipant,
 	RuntimeService,
 	ModelContext,
 	ModelContextRepository,
@@ -53,8 +63,10 @@ export {
 	type McpServerConfig,
 	type McpToolSpec,
 	McpToolRegistry,
+	ParticipantMessage,
 	Endpoint,
 	Participant,
+	Constraint,
 	Action,
 	InferenceResponse,
 	InferenceParams,

@@ -1,5 +1,4 @@
-import { createParticipant } from "@app/use-cases/create-participant"
-import { createBehavior } from "@app/use-cases/create-behavior"
+import { createParticipant, createBehavior } from "src"
 import { ParticipantMessageConstraint } from "./constraint"
 import { AnswerAction } from "./action"
 

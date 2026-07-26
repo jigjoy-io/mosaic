@@ -1,5 +1,4 @@
-import { defineRuntime } from "@app/use-cases/runtime"
-import { RuntimeState } from "@domain/agentic-environment/runtime-state"
+import { defineRuntime, RuntimeState } from "src"
 
 export class FreemiumAccount {
 	private constructor(

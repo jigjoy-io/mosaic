@@ -1,6 +1,4 @@
-import { Constraint } from "@domain/agentic-environment/participant/behavior/constraint"
-import { Participant } from "@domain/agentic-environment/participant/participant"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { Constraint, Participant, SemanticEvent } from "src"
 
 export class ParticipantMessageConstraint extends Constraint {
 	isSatisfiedBy(event: SemanticEvent, consumer: Participant): boolean {
