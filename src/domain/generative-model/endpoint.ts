@@ -1,6 +1,6 @@
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import type { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import type { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import type { InferenceEndpointMapper } from "./inference-endpoint-mapper"
 
 export interface Endpoint {

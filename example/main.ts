@@ -1,5 +1,5 @@
+import { UserMessageSentEvent } from "@domain/agentic-environment/semantic-event/event"
 import { agent } from "./agent/agent"
-import { ParticipantMessage } from "src"
 import { EnvironmentState, FreemiumAccount, initializeRuntime } from "./runtime"
 import { user } from "./user/user"
 
@@ -11,5 +11,13 @@ const runtime = initializeRuntime(runtimeState)
 runtime.join(user)
 runtime.join(agent)
 
-const participantMessage = ParticipantMessage.create(user.getId(), "What is the capital of France?")
-runtime.deliver(participantMessage)
+const userMessage: UserMessageSentEvent = {
+	type: "user.sent.message",
+	producerId: user.getId(),
+	occurredAt: new Date(),
+	payload: {
+		userId: user.getId(),
+		message: "What is the capital of France?",
+	},
+}
+runtime.deliver(userMessage)

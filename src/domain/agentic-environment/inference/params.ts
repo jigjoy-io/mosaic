@@ -11,6 +11,6 @@ export type InferenceParams = {
 	streaming?: boolean
 	structuredOutput?: StructuredOutputFormat
 	context: ModelContext
-	caller: string
+	callerId: string
 	signal?: AbortSignal
 }

@@ -12,39 +12,41 @@ import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/gener
 import { Tool } from "@domain/generative-model/tool"
 import { McpClient, type McpServerConfig, type McpToolSpec } from "@infra/mcp/mcp-client"
 import { McpToolRegistry } from "@infra/mcp/mcp-tool-registry"
-import { InMemoryModelContextRepository } from "@infra/repository/in-memory-model-context-repository"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { Endpoint } from "@domain/generative-model/endpoint"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { ModelName } from "@domain/generative-model/generative-model"
-import { Action } from "@domain/agentic-environment/participant/behavior/action"
 import { RuntimeService } from "./application/services/runtime"
-import { resolveInferenceRunner } from "@app/use-cases/resolve-inference-runner"
-import { resolveFunctionCallRunner } from "@app/use-cases/resolve-function-call-runner"
 import { defineRuntime } from "@app/use-cases/runtime"
 import { Participant } from "@domain/agentic-environment/participant/participant"
-import { createBehavior } from "@app/use-cases/create-behavior"
 import { createAgent } from "@app/use-cases/create-agent"
 import { createParticipant } from "@app/use-cases/create-participant"
-import { Constraint } from "@domain/agentic-environment/participant/behavior/constraint"
-import { ParticipantMessage } from "@domain/agentic-environment/events/participant-message"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
+import { Condition } from "@domain/agentic-environment/participant/process/condition"
+import { createRule } from "@app/use-cases/create-rule"
+import { Action } from "@domain/agentic-environment/participant/process/process"
+import { Inference } from "@app/services/inference"
+import { FunctionCall } from "@app/services/function-call"
+import { InMemoryGenerativeModelRepository } from "@infra/repository/generative-model-repository"
+import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
+
+const functionCall = new FunctionCall()
+const generativeModelRepository = new InMemoryGenerativeModelRepository()
+const requestValidator = new InferenceRequestValidator()
+const inference = new Inference(generativeModelRepository, requestValidator)
 
 export {
 	defineRuntime,
 	RuntimeState,
-	resolveInferenceRunner,
-	resolveFunctionCallRunner,
-	createBehavior,
+	createRule,
 	createAgent,
 	createParticipant,
 	RuntimeService,
 	ModelContext,
 	ModelContextRepository,
 	ModelName,
-	InMemoryModelContextRepository,
 	ContextItem,
 	SemanticEvent,
 	UserMessageItem,
@@ -63,11 +65,12 @@ export {
 	type McpServerConfig,
 	type McpToolSpec,
 	McpToolRegistry,
-	ParticipantMessage,
 	Endpoint,
 	Participant,
-	Constraint,
+	Condition,
 	Action,
+	inference,
+	functionCall,
 	InferenceResponse,
 	InferenceParams,
 }

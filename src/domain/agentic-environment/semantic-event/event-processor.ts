@@ -1,4 +1,4 @@
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { Participant } from "../participant/participant"
 
 export class EventProcessor {

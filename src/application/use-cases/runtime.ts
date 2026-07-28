@@ -1,7 +1,7 @@
 import { RuntimeService } from "@app/services/runtime"
 import { Participant } from "@domain/agentic-environment/participant/participant"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { EventProcessor } from "@domain/agentic-environment/events/processor"
+import { EventProcessor } from "@domain/agentic-environment/semantic-event/event-processor"
 
 export function defineRuntime<TRuntimeState extends RuntimeState>() {
 	let runtime: RuntimeService<TRuntimeState> | null = null

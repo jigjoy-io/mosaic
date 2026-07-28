@@ -1,5 +1,5 @@
 import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import type { Endpoint } from "@domain/generative-model/endpoint"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { AnthropicMessagesMapper } from "./anthropic-messages-mapper"

@@ -1,7 +1,7 @@
 import { Participant } from "@domain/agentic-environment/participant/participant"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { EventProcessor } from "@domain/agentic-environment/events/processor"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { EventProcessor } from "@domain/agentic-environment/semantic-event/event-processor"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 
 export class RuntimeService<TRuntimeState extends RuntimeState> {
 	constructor(

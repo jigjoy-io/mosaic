@@ -1,11 +1,10 @@
-import { ParticipantMessage } from "@domain/agentic-environment/events/participant-message"
-import { Action } from "@domain/agentic-environment/participant/behavior/action"
-import { Participant } from "@domain/agentic-environment/participant/participant"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { Action, SemanticEvent } from "src"
 
-export class AnswerAction implements Action {
-	async *process(event: ParticipantMessage, consumer: Participant): AsyncIterable<SemanticEvent> {
-		const message = `${event.getProducerId()}: ${event.getMessage()}`
-		console.log(message)
+export class AnswerAction implements Action<{ message: string }> {
+	id: string = "answer"
+
+	async *run({ message, producerId }: { message: string; producerId: string }): AsyncIterable<SemanticEvent> {
+		const messageText = `${producerId}: ${message}`
+		console.log(messageText)
 	}
 }

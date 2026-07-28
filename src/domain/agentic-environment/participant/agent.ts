@@ -1,4 +1,3 @@
-import { Behavior } from "./behavior/behavior"
 import { Memory } from "./memory"
 import { Participant } from "./participant"
 import { AgentManifest } from "./agent-manifest"
@@ -6,8 +5,8 @@ import { AgentManifest } from "./agent-manifest"
 export class Agent extends Participant {
 	readonly manifest: AgentManifest
 
-	constructor(id: string, manifest: AgentManifest, behaviors: readonly Behavior[], memory: Memory) {
-		super(id, manifest, behaviors, memory)
+	constructor(id: string, manifest: AgentManifest, memory: Memory) {
+		super(id, manifest, memory)
 		this.manifest = manifest
 	}
 
@@ -15,9 +14,9 @@ export class Agent extends Participant {
 		return this.manifest
 	}
 
-	static create({ manifest, behaviors }: { manifest: AgentManifest; behaviors: readonly Behavior[] }): Agent {
+	static create({ manifest }: { manifest: AgentManifest }): Agent {
 		const id = crypto.randomUUID()
 		const memory = Memory.create()
-		return new Agent(id, manifest, behaviors, memory)
+		return new Agent(id, manifest, memory)
 	}
 }

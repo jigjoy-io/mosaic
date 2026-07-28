@@ -1,4 +1,3 @@
-import { Behavior } from "./behavior/behavior"
 import { Memory } from "./memory"
 import { ParticipantManifest } from "./participant-manifest"
 
@@ -6,7 +5,6 @@ export class Participant {
 	protected constructor(
 		readonly id: string,
 		readonly manifest: ParticipantManifest,
-		readonly behaviors: readonly Behavior[],
 		readonly memory: Memory,
 	) {}
 
@@ -18,14 +16,8 @@ export class Participant {
 		return this.id
 	}
 
-	static create({
-		manifest,
-		behaviors,
-	}: {
-		manifest: ParticipantManifest
-		behaviors: readonly Behavior[]
-	}): Participant {
+	static create({ manifest }: { manifest: ParticipantManifest }): Participant {
 		const memory = Memory.create()
-		return new Participant(manifest.getName(), manifest, behaviors, memory)
+		return new Participant(manifest.getName(), manifest, memory)
 	}
 }

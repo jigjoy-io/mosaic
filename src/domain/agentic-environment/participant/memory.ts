@@ -15,7 +15,3 @@ export class Memory {
 		return new Memory(context)
 	}
 }
-
-export type FunctionCallParams = {
-	signal?: AbortSignal
-}
