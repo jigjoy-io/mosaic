@@ -1,7 +1,7 @@
 import type { Tool } from "@domain/generative-model/tool"
 import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
-import { Action } from "@domain/agentic-environment/participant/process"
+import { Action } from "@domain/agentic-environment/participant/action"
 
 export type FunctionCallParams = {
 	readonly call: FunctionCallItem

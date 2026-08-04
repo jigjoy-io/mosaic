@@ -2,7 +2,7 @@ import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import type { InferenceParams } from "@domain/agentic-environment/inference/params"
 import type { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
 import type { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
-import { Action } from "@domain/agentic-environment/participant/process"
+import { Action } from "@domain/agentic-environment/participant/action"
 
 export class Inference implements Action<InferenceParams> {
 	readonly actionId: string = "inference"
