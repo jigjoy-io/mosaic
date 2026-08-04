@@ -1,5 +1,6 @@
-import { FunctionCallParams } from "@app/services/function-call"
+import { FunctionCallOutputParams, FunctionCallParams } from "@app/services/function-call"
 import { InferenceResponse } from "../inference/response"
+import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 
 export interface SemanticEvent<TType extends string = string, TPayload = unknown> {
 	readonly type: TType
@@ -16,11 +17,8 @@ export type UserMessageSentEvent = SemanticEvent<"user.sent.message", { userId: 
 
 export type AgentMessageSentEvent = SemanticEvent<"agent.sent.message", { agentId: string; message: string }>
 
-export type FunctionCallRequestedEvent = SemanticEvent<"functions.call.requested", FunctionCallParams>
+export type FunctionCallRequestedEvent = SemanticEvent<"function.call.requested", FunctionCallParams>
 
-export type FunctionCallCompletedEvent = SemanticEvent<
-	"functions.call.completed",
-	{ functionId: string; result: unknown }
->
+export type FunctionCallOutputEvent = SemanticEvent<"function.call.output", FunctionCallOutputParams>
 
 export type InferenceCompletedEvent = SemanticEvent<"inference.completed", InferenceResponse>

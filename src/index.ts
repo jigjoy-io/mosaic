@@ -24,13 +24,11 @@ import { Participant } from "@domain/agentic-environment/participant/participant
 import { createAgent } from "@app/use-cases/create-agent"
 import { createParticipant } from "@app/use-cases/create-participant"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { Condition } from "@domain/agentic-environment/participant/process/condition"
-import { createRule } from "@app/use-cases/create-rule"
-import { Action } from "@domain/agentic-environment/participant/process/process"
-import { Inference } from "@app/services/inference"
 import { FunctionCall } from "@app/services/function-call"
 import { InMemoryGenerativeModelRepository } from "@infra/repository/generative-model-repository"
 import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
+import { Inference } from "@app/services/inference"
+import { Interception } from "@domain/agentic-environment/participant/interception"
 
 const functionCall = new FunctionCall()
 const generativeModelRepository = new InMemoryGenerativeModelRepository()
@@ -40,7 +38,6 @@ const inference = new Inference(generativeModelRepository, requestValidator)
 export {
 	defineRuntime,
 	RuntimeState,
-	createRule,
 	createAgent,
 	createParticipant,
 	RuntimeService,
@@ -67,8 +64,7 @@ export {
 	McpToolRegistry,
 	Endpoint,
 	Participant,
-	Condition,
-	Action,
+	Interception,
 	inference,
 	functionCall,
 	InferenceResponse,
