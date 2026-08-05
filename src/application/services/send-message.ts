@@ -7,5 +7,14 @@ export class SendMessage implements Action<{ answer: string; producerId: string 
 	async *run({ answer, producerId }: { answer: string; producerId: string }): AsyncIterable<SemanticEvent> {
 		const messageText = `${producerId}: ${answer}`
 		console.log(messageText)
+
+		yield {
+			type: "participant.send.message",
+			producerId: producerId,
+			occurredAt: new Date(),
+			payload: {
+				message: messageText,
+			},
+		}
 	}
 }

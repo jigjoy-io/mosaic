@@ -1,7 +1,8 @@
+import { FunctionCallOutputParams } from "@app/services/function-call"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { Situation, SituationContext } from "@domain/agentic-environment/participant/situation"
 import { SituationSpecification } from "@domain/agentic-environment/participant/situation-specification"
-import { inference, Interception } from "src"
+import { FunctionCallOutputItem, inference, Interception } from "src"
 
 export class FunctionCallCompleted extends SituationSpecification {
 	readonly conditionId = "function.call.completed"
@@ -13,7 +14,11 @@ export class FunctionCallCompleted extends SituationSpecification {
 
 export class FunctionCallCompletedInterception implements Interception<InferenceParams> {
 	apply(context: SituationContext): InferenceParams {
-		const { participant } = context
+		const { event, participant } = context
+		const functionOutput = event.payload as FunctionCallOutputParams
+		participant.memory
+			.getContext()
+			.addItem(FunctionCallOutputItem.create(functionOutput.callId, functionOutput.output))
 		return {
 			model: "gpt-5.4",
 			streaming: false,

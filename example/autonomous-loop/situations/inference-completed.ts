@@ -1,5 +1,5 @@
 import { Situation } from "@domain/agentic-environment/participant/situation"
-import { SendMessage } from "../actions/send-message"
+import { SendMessage } from "../../../src/application/services/send-message"
 import { Interception } from "@domain/agentic-environment/participant/interception"
 import { SituationContext } from "@domain/agentic-environment/participant/situation"
 import { SituationSpecification } from "@domain/agentic-environment/participant/situation-specification"
