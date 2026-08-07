@@ -1,19 +1,14 @@
 import { Situation } from "@domain/agentic-environment/participant/situation"
-import { SendMessage } from "../../../src/application/services/send-message"
 import { Interception } from "@domain/agentic-environment/participant/interception"
 import { SituationContext } from "@domain/agentic-environment/participant/situation"
-import { SituationSpecification } from "@domain/agentic-environment/participant/situation-specification"
+import { inferenceCompleted, sendMessage } from "src"
+import { InferenceCompletedParams } from "@app/services/inference"
 
-export class InferenceCompleted extends SituationSpecification {
-	readonly conditionId = "inference.completed"
-	isSatisfiedBy(situationContext: SituationContext): boolean {
-		const { event } = situationContext
-		return event.type === "inference.completed"
-	}
-}
+export class PrepareInferenceRequest implements Interception<InferenceCompletedParams> {
+	id: string = "prepare-inference-request"
+	name: string = "Prepare Inference Request"
 
-export class InferenceCompletedInterception implements Interception<{ answer: string; producerId: string }> {
-	apply(context: SituationContext): { answer: string; producerId: string } {
+	apply(context: SituationContext): InferenceCompletedParams {
 		const { participant, event } = context
 		const { answer } = event.payload as { answer: string }
 		return {
@@ -23,8 +18,8 @@ export class InferenceCompletedInterception implements Interception<{ answer: st
 	}
 }
 
-export const inferenceCompleted: Situation<{ answer: string; producerId: string }> = {
-	specification: new InferenceCompleted(),
-	intercepttion: new InferenceCompletedInterception(),
-	action: new SendMessage(),
+export const inferenceCompletedSituation: Situation<InferenceCompletedParams> = {
+	specification: inferenceCompleted,
+	intercepttion: new PrepareInferenceRequest(),
+	action: sendMessage,
 }

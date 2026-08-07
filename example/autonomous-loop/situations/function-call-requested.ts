@@ -1,17 +1,11 @@
 import { FunctionCallParams } from "@app/services/function-call"
 import { Situation, SituationContext } from "@domain/agentic-environment/participant/situation"
-import { SituationSpecification } from "@domain/agentic-environment/participant/situation-specification"
-import { functionCall, FunctionCallItem, Interception } from "src"
-
-export class FunctionCallRequested extends SituationSpecification {
-	readonly conditionId = "function.call.requested"
-	isSatisfiedBy(situationContext: SituationContext): boolean {
-		const { event } = situationContext
-		return event.type === "functions.call.requested"
-	}
-}
+import { functionCall, functionCallRequested, FunctionCallItem, Interception } from "src"
 
 export class FunctionCallRequestedInterception implements Interception<FunctionCallParams> {
+	id: string = "function-call-requested"
+	name: string = "Function Call Requested"
+
 	apply(context: SituationContext): FunctionCallParams {
 		const { event, participant } = context
 		const { call, tool } = event.payload as FunctionCallParams
@@ -24,8 +18,8 @@ export class FunctionCallRequestedInterception implements Interception<FunctionC
 	}
 }
 
-export const functionCallRequested: Situation<FunctionCallParams> = {
-	specification: new FunctionCallRequested(),
+export const functionCallRequestedSituation: Situation<FunctionCallParams> = {
+	specification: functionCallRequested,
 	intercepttion: new FunctionCallRequestedInterception(),
 	action: functionCall,
 }

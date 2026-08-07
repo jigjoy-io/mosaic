@@ -1,18 +1,12 @@
 import { FunctionCallOutputParams } from "@app/services/function-call"
 import { InferenceParams } from "@domain/agentic-environment/inference/params"
 import { Situation, SituationContext } from "@domain/agentic-environment/participant/situation"
-import { SituationSpecification } from "@domain/agentic-environment/participant/situation-specification"
-import { FunctionCallOutputItem, inference, Interception } from "src"
-
-export class FunctionCallCompleted extends SituationSpecification {
-	readonly conditionId = "function.call.completed"
-	isSatisfiedBy(situationContext: SituationContext): boolean {
-		const { event } = situationContext
-		return event.type === "functions.call.completed"
-	}
-}
+import { functionCallCompleted, FunctionCallOutputItem, inference, Interception } from "src"
 
 export class FunctionCallCompletedInterception implements Interception<InferenceParams> {
+	id: string = "function-call-completed"
+	name: string = "Function Call Completed"
+
 	apply(context: SituationContext): InferenceParams {
 		const { event, participant } = context
 		const functionOutput = event.payload as FunctionCallOutputParams
@@ -28,8 +22,8 @@ export class FunctionCallCompletedInterception implements Interception<Inference
 	}
 }
 
-export const functionCallCompleted: Situation<InferenceParams> = {
-	specification: new FunctionCallCompleted(),
+export const functionCallCompletedSituation: Situation<InferenceParams> = {
+	specification: functionCallCompleted,
 	intercepttion: new FunctionCallCompletedInterception(),
 	action: inference,
 }
