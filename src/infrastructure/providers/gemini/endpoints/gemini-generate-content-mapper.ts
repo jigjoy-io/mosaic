@@ -1,4 +1,4 @@
-import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
@@ -13,18 +13,18 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 
 export class GeminiGenerateContentMapper implements InferenceEndpointMapper {
-	toRequest(inferenceParams: InferenceParams) {
-		const { contents, systemInstruction } = this.mapContextItems(inferenceParams)
+	toRequest(inferenceRequest: InferenceRequest) {
+		const { contents, systemInstruction } = this.mapContextItems(inferenceRequest)
 		const config: any = {}
 
 		if (systemInstruction) {
 			config.systemInstruction = systemInstruction
 		}
 
-		if (inferenceParams.tools && inferenceParams.tools.length > 0) {
+		if (inferenceRequest.tools && inferenceRequest.tools.length > 0) {
 			config.tools = [
 				{
-					functionDeclarations: inferenceParams.tools.map((tool) => ({
+					functionDeclarations: inferenceRequest.tools.map((tool) => ({
 						name: tool.name,
 						description: tool.description,
 						parametersJsonSchema: tool.parameters,
@@ -33,26 +33,26 @@ export class GeminiGenerateContentMapper implements InferenceEndpointMapper {
 			]
 		}
 
-		if (inferenceParams.structuredOutput) {
+		if (inferenceRequest.structuredOutput) {
 			config.responseMimeType = "application/json"
-			config.responseSchema = inferenceParams.structuredOutput.schema
+			config.responseSchema = inferenceRequest.structuredOutput.schema
 		}
 
-		if (inferenceParams.reasoningEffort) {
+		if (inferenceRequest.reasoningEffort) {
 			config.thinkingConfig = {
-				thinkingLevel: inferenceParams.reasoningEffort,
+				thinkingLevel: inferenceRequest.reasoningEffort,
 				includeThoughts: true,
 			}
 		}
 
 		const request: any = {
-			model: inferenceParams.model,
+			model: inferenceRequest.model,
 			contents,
 			config,
 		}
 
-		if (inferenceParams.streaming) {
-			request.stream = inferenceParams.streaming
+		if (inferenceRequest.streaming) {
+			request.stream = inferenceRequest.streaming
 		}
 
 		return request
@@ -64,8 +64,8 @@ export class GeminiGenerateContentMapper implements InferenceEndpointMapper {
 		return new InferenceResponse(contextItems, tokenUsage)
 	}
 
-	mapContextItems(inferenceParams: InferenceParams): { contents: any[]; systemInstruction?: string } {
-		const context = inferenceParams.context
+	mapContextItems(inferenceRequest: InferenceRequest): { contents: any[]; systemInstruction?: string } {
+		const context = inferenceRequest.context
 		const contents: any[] = []
 		const system: string[] = []
 		const callNames = new Map<string, string>()

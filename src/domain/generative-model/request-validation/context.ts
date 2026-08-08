@@ -1,4 +1,4 @@
-import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import type { ContextItem } from "@domain/model-context/context-item/context-item"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
@@ -26,8 +26,8 @@ function getContextItemValidationKey(item: ContextItem): string {
 export class ContextValidation implements RequestValidationRule {
 	readonly name = "context"
 
-	isValid(inferenceParams: InferenceParams, model: ModelSpecification): boolean {
-		return inferenceParams.context.items.every((item) =>
+	isValid(inferenceRequest: InferenceRequest, model: ModelSpecification): boolean {
+		return inferenceRequest.context.items.every((item) =>
 			model.supportedContextItemTypes.includes(getContextItemValidationKey(item)),
 		)
 	}

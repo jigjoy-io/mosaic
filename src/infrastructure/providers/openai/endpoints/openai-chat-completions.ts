@@ -2,7 +2,7 @@ import type { InferenceResponse } from "@domain/agentic-environment/inference/re
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import type { Endpoint } from "@domain/generative-model/endpoint"
 import { OpenAIChatCompletionsMapper } from "./openai-chat-completions-mapper"
-import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import OpenAI from "openai"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
@@ -63,27 +63,23 @@ export class OpenAIChatCompletions implements Endpoint {
 		this.extraBody = config.extraBody ?? {}
 	}
 
-	private buildRequest(inferenceParams: InferenceParams): any {
+	private buildRequest(inferenceRequest: InferenceRequest): any {
 		return {
 			...this.extraBody,
-			...this.endpointMapper.toRequest(inferenceParams),
+			...this.endpointMapper.toRequest(inferenceRequest),
 		}
 	}
 
-	async infer(inferenceParams: InferenceParams): Promise<InferenceResponse> {
-		const response = await this.client.chat.completions.create(this.buildRequest(inferenceParams))
+	async infer(inferenceRequest: InferenceRequest): Promise<InferenceResponse> {
+		const response = await this.client.chat.completions.create(this.buildRequest(inferenceRequest))
 
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(inferenceParams: InferenceParams): AsyncIterable<SemanticEvent> {
-		const { signal } = inferenceParams
-		const stream: any = await this.client.chat.completions.create(this.buildRequest(inferenceParams))
+	async *stream(inferenceRequest: InferenceRequest): AsyncIterable<SemanticEvent> {
+		const stream: any = await this.client.chat.completions.create(this.buildRequest(inferenceRequest))
 
 		for await (const event of stream) {
-			if (signal?.aborted) {
-				break
-			}
 			yield event
 		}
 	}

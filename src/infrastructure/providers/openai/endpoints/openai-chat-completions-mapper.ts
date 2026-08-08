@@ -1,4 +1,4 @@
-import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
@@ -13,14 +13,14 @@ import type { ContextItem } from "@domain/model-context/context-item/context-ite
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 
 export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
-	toRequest(inferenceParams: InferenceParams) {
+	toRequest(inferenceRequest: InferenceRequest) {
 		const request: any = {
-			model: inferenceParams.model,
-			messages: this.mapContextItems(inferenceParams),
+			model: inferenceRequest.model,
+			messages: this.mapContextItems(inferenceRequest),
 		}
 
-		if (inferenceParams.tools && inferenceParams.tools.length > 0) {
-			request.tools = inferenceParams.tools.map((tool) => ({
+		if (inferenceRequest.tools && inferenceRequest.tools.length > 0) {
+			request.tools = inferenceRequest.tools.map((tool) => ({
 				type: "function",
 				function: {
 					name: tool.name,
@@ -30,12 +30,12 @@ export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
 			}))
 		}
 
-		if (inferenceParams.reasoningEffort) {
-			request.reasoning_effort = inferenceParams.reasoningEffort
+		if (inferenceRequest.reasoningEffort) {
+			request.reasoning_effort = inferenceRequest.reasoningEffort
 		}
 
-		if (inferenceParams.streaming) {
-			request.stream = inferenceParams.streaming
+		if (inferenceRequest.streaming) {
+			request.stream = inferenceRequest.streaming
 		}
 
 		return request
@@ -47,10 +47,10 @@ export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
 		return new InferenceResponse(contextItems, tokenUsage)
 	}
 
-	mapContextItems(inferenceParams: InferenceParams): any[] {
+	mapContextItems(inferenceRequest: InferenceRequest): any[] {
 		const messages: any[] = []
 
-		for (const item of inferenceParams.context.getItems()) {
+		for (const item of inferenceRequest.context.getItems()) {
 			if (item instanceof DeveloperMessageItem || item instanceof SystemMessageItem) {
 				messages.push({ role: "system", content: item.content.text })
 				continue

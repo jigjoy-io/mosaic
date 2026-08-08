@@ -16,7 +16,7 @@ import { SystemMessageItem } from "@domain/model-context/context-item/client-ite
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { Endpoint } from "@domain/generative-model/endpoint"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { ModelName } from "@domain/generative-model/generative-model"
 import { RuntimeService } from "./application/services/runtime"
 import { defineRuntime } from "@app/use-cases/runtime"
@@ -24,19 +24,6 @@ import { Participant } from "@domain/agentic-environment/participant/participant
 import { createAgent } from "@app/use-cases/create-agent"
 import { createParticipant } from "@app/use-cases/create-participant"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { FunctionCall } from "@app/services/function-call"
-import { InMemoryGenerativeModelRepository } from "@infra/repository/generative-model-repository"
-import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
-import { Inference } from "@app/services/inference"
-import { SendMessage } from "./application/services/send-message"
-
-// Actions
-const sendMessage = new SendMessage()
-const functionCall = new FunctionCall()
-
-const generativeModelRepository = new InMemoryGenerativeModelRepository()
-const requestValidator = new InferenceRequestValidator()
-const inference = new Inference(generativeModelRepository, requestValidator)
 
 export {
 	defineRuntime,
@@ -67,9 +54,6 @@ export {
 	McpToolRegistry,
 	Endpoint,
 	Participant,
-	inference,
-	functionCall,
-	sendMessage,
 	InferenceResponse,
-	InferenceParams,
+	InferenceRequest,
 }

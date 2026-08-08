@@ -1,7 +1,7 @@
 import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
 
 export interface InferenceEndpointMapper {
-	toRequest(inferenceParams: InferenceParams): any
+	toRequest(inferenceRequest: InferenceRequest): any
 	toResponse(response: any): InferenceResponse
 }

@@ -3,7 +3,7 @@ import type { ModelContext } from "@domain/model-context/model-context"
 import type { StructuredOutputFormat } from "@domain/generative-model/request-validation/structured-output"
 import { ModelName } from "@domain/generative-model/generative-model"
 
-export type InferenceParams = {
+export type InferenceRequest = {
 	model: ModelName
 	maxOutputTokens?: number
 	reasoningEffort?: string
@@ -12,5 +12,4 @@ export type InferenceParams = {
 	structuredOutput?: StructuredOutputFormat
 	context: ModelContext
 	callerId: string
-	signal?: AbortSignal
 }

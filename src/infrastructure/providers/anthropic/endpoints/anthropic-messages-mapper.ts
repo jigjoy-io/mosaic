@@ -1,4 +1,4 @@
-import type { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
@@ -14,47 +14,47 @@ import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/gener
 import type Anthropic from "@anthropic-ai/sdk"
 
 export class AnthropicMessagesMapper implements InferenceEndpointMapper {
-	toRequest(inferenceParams: InferenceParams) {
-		const { messages, system } = this.mapContextItems(inferenceParams)
+	toRequest(inferenceRequest: InferenceRequest) {
+		const { messages, system } = this.mapContextItems(inferenceRequest)
 		const outputConfig: any = {}
 
 		const request: any = {
-			model: inferenceParams.model,
+			model: inferenceRequest.model,
 			messages,
 		}
 
-		request.max_tokens = inferenceParams.maxOutputTokens!
+		request.max_tokens = inferenceRequest.maxOutputTokens!
 
 		if (system) {
 			request.system = system
 		}
 
-		if (inferenceParams.tools && inferenceParams.tools.length > 0) {
-			request.tools = inferenceParams.tools.map((tool) => ({
+		if (inferenceRequest.tools && inferenceRequest.tools.length > 0) {
+			request.tools = inferenceRequest.tools.map((tool) => ({
 				name: tool.name,
 				description: tool.description,
 				input_schema: tool.parameters,
 			}))
 		}
 
-		if (inferenceParams.structuredOutput) {
+		if (inferenceRequest.structuredOutput) {
 			outputConfig.format = {
 				type: "json_schema",
-				json_schema: inferenceParams.structuredOutput.schema,
+				json_schema: inferenceRequest.structuredOutput.schema,
 			}
 		}
 
-		if (inferenceParams.reasoningEffort) {
+		if (inferenceRequest.reasoningEffort) {
 			request.thinking = { type: "adaptive" }
-			outputConfig.effort = inferenceParams.reasoningEffort
+			outputConfig.effort = inferenceRequest.reasoningEffort
 		}
 
 		if (Object.keys(outputConfig).length > 0) {
 			request.output_config = outputConfig
 		}
 
-		if (inferenceParams.streaming) {
-			request.stream = inferenceParams.streaming
+		if (inferenceRequest.streaming) {
+			request.stream = inferenceRequest.streaming
 		}
 
 		return request
@@ -79,8 +79,8 @@ export class AnthropicMessagesMapper implements InferenceEndpointMapper {
 		})
 	}
 
-	mapContextItems(inferenceParams: InferenceParams): { messages: any[]; system?: string } {
-		const context = inferenceParams.context
+	mapContextItems(inferenceRequest: InferenceRequest): { messages: any[]; system?: string } {
+		const context = inferenceRequest.context
 		const messages: any[] = []
 		const system: string[] = []
 

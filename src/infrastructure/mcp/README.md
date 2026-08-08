@@ -11,7 +11,7 @@ The provider-native MCP tool (e.g. OpenAI's `{ type: "mcp", server_url }`) is si
 - it is **OpenAI-models-only**, **Responses-API-only**, and runs the tool loop **server-side
   at the provider** (your data flows through them);
 - it therefore **does not work for DeepSeek or any OpenAI-compatible Chat Completions
-  backend**, and each provider that *does* support it (OpenAI vs Anthropic) uses a
+  backend**, and each provider that _does_ support it (OpenAI vs Anthropic) uses a
   different shape.
 
 mozaik is multi-provider (Anthropic / OpenAI / OpenAI-compatible / DeepSeek / Gemini). The
@@ -20,16 +20,16 @@ server's credentials/data **in our process** — is an in-process client. That's
 
 ## The two approaches
 
-| | **In-process client (this PR)** | **Provider-native MCP tool** |
-|---|---|---|
-| Code | a small MCP client + registry in the infra layer | almost none — pass a tool ref |
-| Works on OpenAI (Responses) | ✅ | ✅ |
-| Works on Anthropic | ✅ | ⚠️ different shape, beta connector |
-| Works on **DeepSeek / OpenAI-compatible Chat Completions** | ✅ | ❌ **no native MCP at all** |
-| Works on Gemini | ✅ | ❌ |
-| Where the tool loop runs | our process | the LLM provider's servers |
-| MCP server data / credentials | stay with us | flow through the provider |
-| Per-provider code | none (one path) | one shape per provider |
+|                                                            | **In-process client (this PR)**                  | **Provider-native MCP tool**       |
+| ---------------------------------------------------------- | ------------------------------------------------ | ---------------------------------- |
+| Code                                                       | a small MCP client + registry in the infra layer | almost none — pass a tool ref      |
+| Works on OpenAI (Responses)                                | ✅                                               | ✅                                 |
+| Works on Anthropic                                         | ✅                                               | ⚠️ different shape, beta connector |
+| Works on **DeepSeek / OpenAI-compatible Chat Completions** | ✅                                               | ❌ **no native MCP at all**        |
+| Works on Gemini                                            | ✅                                               | ❌                                 |
+| Where the tool loop runs                                   | our process                                      | the LLM provider's servers         |
+| MCP server data / credentials                              | stay with us                                     | flow through the provider          |
+| Per-provider code                                          | none (one path)                                  | one shape per provider             |
 
 Source (OpenAI's own docs): the remote MCP tool is documented only for the Responses API
 and only for OpenAI models (gpt-5.x); the provider's orchestration connects to the MCP
@@ -41,9 +41,7 @@ MCP tools are exposed as **ordinary `FunctionTool`s** — no new tool type, no c
 provider mapper or to the function-call loop.
 
 ```ts
-const registry = new McpToolRegistry([
-  { url: "https://api.githubcopilot.com/mcp/", authToken: githubToken },
-])
+const registry = new McpToolRegistry([{ url: "https://api.githubcopilot.com/mcp/", authToken: githubToken }])
 const mcpTools = await registry.discoverTools() // FunctionTool[]
 ```
 
@@ -53,15 +51,15 @@ const mcpTools = await registry.discoverTools() // FunctionTool[]
 
 ## How an agent gets these tools
 
-The same way it gets any tool — they go in `InferenceParams.tools`:
+The same way it gets any tool — they go in `InferenceRequest.tools`:
 
 ```ts
 await runInference.execute({
-  model,
-  context,
-  caller,
-  environment,
-  tools: [...localTools, ...mcpTools], // MCP tools are just FunctionTools
+	model,
+	context,
+	caller,
+	environment,
+	tools: [...localTools, ...mcpTools], // MCP tools are just FunctionTools
 })
 ```
 
@@ -82,7 +80,7 @@ Anthropic/OpenAI clients.
 - **Consumer wiring (separate):** pointing the registry at a specific server (e.g. GitHub's
   with a user token) and merging the discovered tools into a participant's tool list. That's
   a caller concern, not part of the core capability.
-- **Possible future optimization (hybrid):** for providers that *do* support native MCP
+- **Possible future optimization (hybrid):** for providers that _do_ support native MCP
   (OpenAI Responses, Anthropic), add a native passthrough so the loop runs provider-side,
   and keep this in-process client as the fallback for DeepSeek / OpenAI-compatible / Gemini.
   Native-where-available + in-process-everywhere-else — additive, no redesign.
