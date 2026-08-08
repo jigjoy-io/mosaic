@@ -1,10 +1,9 @@
 import type { Tool } from "@domain/generative-model/tool"
 import type { ModelContext } from "@domain/model-context/model-context"
 import type { StructuredOutputFormat } from "@domain/generative-model/request-validation/structured-output"
-import { ModelName } from "@domain/generative-model/generative-model"
 
 export type InferenceRequest = {
-	model: ModelName
+	model: string
 	maxOutputTokens?: number
 	reasoningEffort?: string
 	tools?: Tool[]

@@ -17,7 +17,6 @@ import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { Endpoint } from "@domain/generative-model/endpoint"
 import { InferenceRequest } from "@domain/agentic-environment/inference/request"
-import { ModelName } from "@domain/generative-model/generative-model"
 import { RuntimeService } from "./application/services/runtime"
 import { defineRuntime } from "@app/use-cases/runtime"
 import { Participant } from "@domain/agentic-environment/participant/participant"
@@ -33,7 +32,6 @@ export {
 	RuntimeService,
 	ModelContext,
 	ModelContextRepository,
-	ModelName,
 	ContextItem,
 	SemanticEvent,
 	UserMessageItem,

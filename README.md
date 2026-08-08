@@ -7,6 +7,7 @@
 ![npm downloads](https://img.shields.io/npm/dt/@mozaik-ai/core) ![npm downloads weekly](https://img.shields.io/npm/dw/@mozaik-ai/core) ![npm version](https://img.shields.io/npm/v/@mozaik-ai/core)
 
 Mozaik is a TypeScript runtime for non-blocking AI agents that work independently, communicate through semantic events, and coordinate without predefined workflows.
+
 </div>
 
 ---
@@ -146,7 +147,6 @@ import {
 	ModelMessageItem,
 	AgenticEnvironment,
 	ModelContext,
-	ModelName,
 	Tool,
 	runInference,
 	executeFunctionCall,
@@ -165,7 +165,7 @@ export class ReactiveAgent extends BaseParticipant {
 	async onMessage(message: string): Promise<void> {
 		this.context.addContextItem(UserMessageItem.create(message))
 		runInference({
-			model: 'gpt-5.5',
+			model: "gpt-5.5",
 			context: this.context,
 			tools: this.tools,
 			caller: this,
@@ -184,7 +184,7 @@ export class ReactiveAgent extends BaseParticipant {
 	async onFunctionCallOutput(item: FunctionCallOutputItem): Promise<void> {
 		this.context.addContextItem(item)
 		runInference({
-			model: 'gpt-5.5',
+			model: "gpt-5.5",
 			context: this.context,
 			tools: this.tools,
 			caller: this,
