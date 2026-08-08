@@ -1,6 +1,8 @@
 import type { Tool } from "@domain/generative-model/tool"
 import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
+import { FunctionCallRunner } from "@domain/agentic-environment/function-call-runner"
+
 export type FunctionCallParams = {
 	readonly call: FunctionCallItem
 	readonly tool: Tool
@@ -13,7 +15,7 @@ export type FunctionCallOutputParams = {
 	readonly output: string
 }
 
-export class FunctionCallRunner {
+export class DefaultFunctionCallRunner implements FunctionCallRunner {
 	async *run(input: FunctionCallParams): AsyncIterable<SemanticEvent> {
 		const { call, tool, signal, callerId } = input
 		if (signal?.aborted) {

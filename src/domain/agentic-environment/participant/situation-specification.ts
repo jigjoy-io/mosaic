@@ -1,5 +1,12 @@
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
-import { SituationContext } from "./situation"
+import { RuntimeState } from "../runtime-state"
+import { Participant } from "./participant"
+
+export type SituationContext<TEvent extends SemanticEvent = SemanticEvent> = {
+	readonly event: TEvent
+	readonly participant: Participant
+	readonly runtimeState: RuntimeState
+}
 
 export abstract class SituationSpecification<TEvent extends SemanticEvent = SemanticEvent> {
 	abstract readonly conditionId: string
