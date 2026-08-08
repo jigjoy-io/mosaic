@@ -24,18 +24,11 @@ import { Participant } from "@domain/agentic-environment/participant/participant
 import { createAgent } from "@app/use-cases/create-agent"
 import { createParticipant } from "@app/use-cases/create-participant"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { FunctionCall, FunctionCallRequested, FunctionCallCompleted } from "@app/services/function-call"
+import { FunctionCall } from "@app/services/function-call"
 import { InMemoryGenerativeModelRepository } from "@infra/repository/generative-model-repository"
 import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
-import { Inference, InferenceCompleted } from "@app/services/inference"
-import { Interception } from "@domain/agentic-environment/participant/interception"
-import { ParticipantMessageSent, SendMessage } from "./application/services/send-message"
-
-// Specifications
-const functionCallRequested = new FunctionCallRequested()
-const functionCallCompleted = new FunctionCallCompleted()
-const participantMessageSent = new ParticipantMessageSent()
-const inferenceCompleted = new InferenceCompleted()
+import { Inference } from "@app/services/inference"
+import { SendMessage } from "./application/services/send-message"
 
 // Actions
 const sendMessage = new SendMessage()
@@ -74,14 +67,9 @@ export {
 	McpToolRegistry,
 	Endpoint,
 	Participant,
-	Interception,
 	inference,
 	functionCall,
 	sendMessage,
-	functionCallRequested,
-	functionCallCompleted,
-	participantMessageSent,
-	inferenceCompleted,
 	InferenceResponse,
 	InferenceParams,
 }

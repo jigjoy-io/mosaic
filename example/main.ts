@@ -1,7 +1,7 @@
 import { UserMessageSentEvent } from "@domain/agentic-environment/semantic-event/event"
-import { agent } from "./agent/agent"
+import { agent } from "./agent"
 import { EnvironmentState, FreemiumAccount, initializeRuntime } from "./runtime"
-import { user } from "./user/user"
+import { user } from "./user"
 
 const freemiumAccount = FreemiumAccount.init(3)
 const runtimeState = new EnvironmentState(freemiumAccount)
