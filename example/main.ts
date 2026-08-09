@@ -15,10 +15,10 @@ runtime.join(agent)
 
 const userMessage: SemanticEvent = {
 	type: "user.sent.message",
-	producerId: user.getId(),
+	producerId: user.getManifest().id,
 	occurredAt: new Date(),
 	payload: {
-		userId: user.getId(),
+		userId: user.getManifest().id,
 		message: "What is the capital of France?",
 	},
 }

@@ -7,8 +7,8 @@ export class Agent extends Participant {
 	private developerMessage: string
 	private tools: Tool[]
 
-	constructor(id: string, developerMessage: string, tools: Tool[], manifest: ParticipantManifest, memory: Memory) {
-		super(id, manifest)
+	constructor(manifest: ParticipantManifest, developerMessage: string, tools: Tool[], memory: Memory) {
+		super(manifest)
 		this.memory = memory
 		this.developerMessage = developerMessage
 		this.tools = tools
@@ -27,10 +27,10 @@ export class Agent extends Participant {
 	}): Agent {
 		const id = crypto.randomUUID()
 		const memory = Memory.create()
-		const manifest: ParticipantManifest = { name, capabilities, role: "agent" }
+		const manifest: ParticipantManifest = { id, name, capabilities, role: "agent" }
 
 		memory.getContext().addDeveloperMessage(instruction)
-		return new Agent(id, instruction, tools, manifest, memory)
+		return new Agent(manifest, instruction, tools, memory)
 	}
 
 	getTools(): Tool[] {
