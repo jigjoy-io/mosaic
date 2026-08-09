@@ -1,7 +1,16 @@
 import { Agent } from "@domain/agentic-environment/participant/agent"
-import { AgentManifest, AgentManifestParams } from "@domain/agentic-environment/participant/agent-manifest"
+import { Tool } from "@domain/generative-model/tool"
 
-export function createAgent({ manifest }: { manifest: AgentManifestParams }): Agent {
-	const agentManifest = AgentManifest.create(manifest)
-	return Agent.create({ manifest: agentManifest })
+export function createAgent({
+	name,
+	capabilities,
+	instruction,
+	tools,
+}: {
+	name: string
+	capabilities: readonly string[]
+	instruction: string
+	tools: Tool[]
+}): Agent {
+	return Agent.create({ name, capabilities, instruction, tools })
 }

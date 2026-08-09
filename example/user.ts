@@ -1,7 +1,8 @@
-import { createParticipant } from "src"
+import { createHuman } from "src"
 
-const user = createParticipant({
-	name: "User",
+const user = createHuman({
+	name: "Miodrag",
+	capabilities: ["review_code"],
 })
 
 export { user }

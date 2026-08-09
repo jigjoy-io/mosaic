@@ -1,23 +1,25 @@
-import { Memory } from "./memory"
-import { ParticipantManifest } from "./participant-manifest"
+export type ParticipantRole = "agent" | "human"
 
-export class Participant {
-	protected constructor(
-		readonly id: string,
-		readonly manifest: ParticipantManifest,
-		readonly memory: Memory,
-	) {}
+export type ParticipantManifest = {
+	readonly name: string
+	readonly role: ParticipantRole
+	readonly capabilities?: readonly string[]
+}
 
-	getManifest(): ParticipantManifest {
-		return this.manifest
+export abstract class Participant {
+	readonly id: string
+	private manifest: ParticipantManifest
+
+	protected constructor(id: string, manifest: ParticipantManifest) {
+		this.id = id
+		this.manifest = manifest
 	}
 
 	getId(): string {
 		return this.id
 	}
 
-	static create({ manifest }: { manifest: ParticipantManifest }): Participant {
-		const memory = Memory.create()
-		return new Participant(manifest.getName(), manifest, memory)
+	getManifest(): ParticipantManifest {
+		return this.manifest
 	}
 }

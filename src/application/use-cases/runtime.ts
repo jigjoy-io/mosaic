@@ -7,12 +7,12 @@ export function defineRuntime<TRuntimeState extends RuntimeState>() {
 	let runtime: RuntimeService<TRuntimeState> | null = null
 	const processor = new EventProcessor()
 
-	function initializeRuntime(runtimeState: TRuntimeState): RuntimeService<TRuntimeState> {
+	function initializeRuntime(config: { state: TRuntimeState }): RuntimeService<TRuntimeState> {
 		if (runtime) {
 			throw new Error("Runtime already initialized")
 		}
 
-		runtime = new RuntimeService(runtimeState, processor)
+		runtime = new RuntimeService(config.state, processor)
 
 		return runtime
 	}

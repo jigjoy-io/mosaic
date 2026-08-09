@@ -4,6 +4,7 @@ import { FunctionCallOutputItem } from "./context-item/client-item/function-call
 import { ModelMessageItem } from "./context-item/model-item/model-message"
 import { ReasoningItem } from "./context-item/model-item/reasoning"
 import { UserMessageItem } from "./context-item/client-item/user-message"
+import { DeveloperMessageItem } from "./context-item/client-item/developer-message"
 
 export type ModelContextItem = ModelMessageItem | FunctionCallItem | ReasoningItem
 
@@ -23,6 +24,11 @@ export class ModelContext {
 		}
 
 		this.items.push(UserMessageItem.create(message))
+		return this
+	}
+
+	addDeveloperMessage(message: string): ModelContext {
+		this.items.push(DeveloperMessageItem.create(message))
 		return this
 	}
 

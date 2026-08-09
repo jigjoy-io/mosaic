@@ -21,14 +21,14 @@ import { RuntimeService } from "./application/services/runtime"
 import { defineRuntime } from "@app/use-cases/runtime"
 import { Participant } from "@domain/agentic-environment/participant/participant"
 import { createAgent } from "@app/use-cases/create-agent"
-import { createParticipant } from "@app/use-cases/create-participant"
+import { createHuman } from "@app/use-cases/create-human"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 
 export {
 	defineRuntime,
 	RuntimeState,
 	createAgent,
-	createParticipant,
+	createHuman,
 	RuntimeService,
 	ModelContext,
 	ModelContextRepository,
