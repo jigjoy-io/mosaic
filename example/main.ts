@@ -22,4 +22,4 @@ const userMessage: SemanticEvent = {
 		message: "What is the capital of France?",
 	},
 }
-runtime.deliver(userMessage)
+//sruntime.deliver(userMessage)

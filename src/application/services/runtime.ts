@@ -17,10 +17,29 @@ export class RuntimeService<TRuntimeState extends RuntimeState> {
 		this.state.removeParticipant(participant)
 	}
 
-	deliver(event: SemanticEvent): void {
+	private deliver(event: SemanticEvent): void {
 		for (const participant of this.state.getParticipants()) {
 			void this.react(participant, event)
 		}
+	}
+
+	sendMessage(message: string, senderId: string): void {
+		const participant = this.getParticipant(senderId)
+		if (!participant) {
+			throw new Error(`Participant ${senderId} not found`)
+		}
+
+		const userMessage: SemanticEvent = {
+			type: "user.sent.message",
+			producerId: senderId,
+			occurredAt: new Date(),
+			payload: {
+				userId: senderId,
+				message: message,
+			},
+		}
+
+		this.deliver(userMessage)
 	}
 
 	getParticipant(id: string): Participant | undefined {
@@ -32,7 +51,7 @@ export class RuntimeService<TRuntimeState extends RuntimeState> {
 	}
 
 	private async react(consumer: Participant, event: SemanticEvent): Promise<void> {
-		for await (const emittedEvent of this.processor.process(event, consumer)) {
+		for await (const emittedEvent of this.processor.process(event, consumer, this.state)) {
 			this.deliver(emittedEvent)
 		}
 	}
