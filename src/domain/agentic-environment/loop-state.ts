@@ -1,11 +1,11 @@
-import { AgentLoopManager, LoopStateId } from "./agent-loop-manager"
+import { AgentLoop, LoopStateId } from "./agent-loop"
 
 export interface AgentLoopState {
 	id: LoopStateId
-	run(agentLoopManager: AgentLoopManager): void | Promise<void>
+	run(agentLoop: AgentLoop): void | Promise<void>
 }
 
-export class InferenceLoopState implements AgentLoopState {
+export class Inference implements AgentLoopState {
 	public readonly id = "inference"
 	run(): void | Promise<void> {
 		throw new Error("Method not implemented.")

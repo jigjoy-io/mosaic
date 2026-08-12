@@ -1,15 +1,14 @@
 import { InferenceResponse } from "./inference/response"
 import { ModelContext } from "@domain/model-context/model-context"
 
-export type LoopStateId = "message_received" | "inference" | "function_call" | "model_message"
+export type LoopStateId = "inference" | "function_call" | "model_message"
 
 export interface LoopStateDefinition {
 	id: LoopStateId
 }
 
-export class AgentLoopManager {
-	handleMessage(message: string, modelContext: ModelContext) {
-		modelContext.addUserMessage(message)
+export class AgentLoop {
+	start(): LoopStateId {
 		return "inference"
 	}
 

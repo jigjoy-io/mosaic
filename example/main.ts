@@ -1,8 +1,6 @@
-import { join } from "@app/use-cases/join"
 import { agent } from "./agent"
-import { EnvironmentState, FreemiumAccount, initializeRuntime } from "./runtime"
+import { EnvironmentState, FreemiumAccount, initializeRuntime, join, sendMessage } from "./runtime"
 import { user } from "./user"
-import { sendMessage } from "@app/use-cases/send-message"
 
 const freemiumAccount = FreemiumAccount.init(3)
 const config = {

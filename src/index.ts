@@ -17,19 +17,17 @@ import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { Endpoint } from "@domain/generative-model/endpoint"
 import { InferenceRequest } from "@domain/agentic-environment/inference/request"
-import { RuntimeService } from "./application/services/runtime"
-import { defineRuntime } from "@app/use-cases/runtime"
 import { Participant } from "@domain/agentic-environment/participant/participant"
 import { createAgent } from "@app/use-cases/create-agent"
 import { createHuman } from "@app/use-cases/create-human"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
+import { defineRuntime } from "./define-runtime"
 
 export {
 	defineRuntime,
 	RuntimeState,
 	createAgent,
 	createHuman,
-	RuntimeService,
 	ModelContext,
 	ModelContextRepository,
 	ContextItem,
