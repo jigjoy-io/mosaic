@@ -1,5 +1,5 @@
 import { Participant, ParticipantManifest } from "./participant"
-import { SituationHandler } from "./situation-handler"
+import { SituationHandler } from "../situation/situation-handler"
 
 export class Human extends Participant {
 	constructor(manifest: ParticipantManifest, handlers: SituationHandler[]) {

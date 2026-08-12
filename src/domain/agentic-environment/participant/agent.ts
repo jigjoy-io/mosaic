@@ -1,7 +1,7 @@
 import { Memory } from "./memory"
 import { Participant, ParticipantManifest } from "./participant"
 import { Tool } from "@domain/generative-model/tool"
-import { SituationHandler } from "./situation-handler"
+import { SituationHandler } from "../situation/situation-handler"
 
 export class Agent extends Participant {
 	private memory: Memory

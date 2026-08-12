@@ -1,21 +1,11 @@
-import { InferenceRunner } from "@app/services/inference-runner"
-import { supportedModels } from "@app/services/models"
 import { RuntimeService } from "@app/services/runtime"
 import { Participant } from "@domain/agentic-environment/participant/participant"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 import { EventProcessor } from "@domain/agentic-environment/semantic-event/event-processor"
-import {
-	defaultRequestValidationRules,
-	InferenceRequestValidator,
-} from "@domain/generative-model/request-validation/inference-request-validator"
 
 export function defineRuntime<TRuntimeState extends RuntimeState>() {
 	let runtime: RuntimeService<TRuntimeState> | null = null
 	const processor = new EventProcessor()
-	const inferenceRunner = new InferenceRunner(
-		supportedModels,
-		new InferenceRequestValidator(defaultRequestValidationRules),
-	)
 
 	function initializeRuntime(config: { state: TRuntimeState }): RuntimeService<TRuntimeState> {
 		if (runtime) {

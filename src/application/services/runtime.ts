@@ -17,29 +17,10 @@ export class RuntimeService<TRuntimeState extends RuntimeState> {
 		this.state.removeParticipant(participant)
 	}
 
-	private deliver(event: SemanticEvent): void {
+	deliver(event: SemanticEvent): void {
 		for (const participant of this.state.getParticipants()) {
 			void this.react(participant, event)
 		}
-	}
-
-	sendMessage(message: string, senderId: string): void {
-		const participant = this.getParticipant(senderId)
-		if (!participant) {
-			throw new Error(`Participant ${senderId} not found`)
-		}
-
-		const userMessage: SemanticEvent = {
-			type: "user.sent.message",
-			producerId: senderId,
-			occurredAt: new Date(),
-			payload: {
-				userId: senderId,
-				message: message,
-			},
-		}
-
-		this.deliver(userMessage)
 	}
 
 	getParticipant(id: string): Participant | undefined {

@@ -1,5 +1,5 @@
 import { SemanticEvent } from "../semantic-event/event"
-import { SituationHandler } from "./situation-handler"
+import { SituationHandler } from "../situation/situation-handler"
 
 export type ParticipantRole = "agent" | "human"
 
@@ -17,10 +17,6 @@ export abstract class Participant {
 	protected constructor(manifest: ParticipantManifest, handlers: SituationHandler[]) {
 		this.manifest = manifest
 		this.handlers = handlers
-	}
-
-	getManifest(): ParticipantManifest {
-		return this.manifest
 	}
 
 	getHandlers(): SituationHandler[] {

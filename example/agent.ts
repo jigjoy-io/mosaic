@@ -5,6 +5,7 @@ const agent = createAgent({
 	capabilities: [],
 	instruction: "You are a helpful agent that can review code.",
 	tools: [],
+	handlers: [],
 })
 
 export { agent }

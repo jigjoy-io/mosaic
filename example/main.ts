@@ -1,25 +1,17 @@
-import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
+import { join } from "@app/use-cases/join"
 import { agent } from "./agent"
 import { EnvironmentState, FreemiumAccount, initializeRuntime } from "./runtime"
 import { user } from "./user"
+import { sendMessage } from "@app/use-cases/send-message"
 
 const freemiumAccount = FreemiumAccount.init(3)
 const config = {
 	state: new EnvironmentState(freemiumAccount),
 }
 
-const runtime = initializeRuntime(config)
+initializeRuntime(config)
 
-runtime.join(user)
-runtime.join(agent)
+join(user)
+join(agent)
 
-const userMessage: SemanticEvent = {
-	type: "user.sent.message",
-	producerId: user.getManifest().id,
-	occurredAt: new Date(),
-	payload: {
-		userId: user.getManifest().id,
-		message: "What is the capital of France?",
-	},
-}
-//sruntime.deliver(userMessage)
+sendMessage("Hello, how are you?", user.manifest.id)
