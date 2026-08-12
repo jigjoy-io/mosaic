@@ -11,12 +11,20 @@ export type ParticipantManifest = {
 }
 
 export abstract class Participant {
-	readonly manifest: ParticipantManifest
+	private readonly manifest: ParticipantManifest
 	private handlers: SituationHandler[]
 
 	protected constructor(manifest: ParticipantManifest, handlers: SituationHandler[]) {
 		this.manifest = manifest
 		this.handlers = handlers
+	}
+
+	getManifest(): ParticipantManifest {
+		return this.manifest
+	}
+
+	getId(): string {
+		return this.manifest.id
 	}
 
 	getHandlers(): SituationHandler[] {

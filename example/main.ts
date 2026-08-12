@@ -14,4 +14,4 @@ initializeRuntime(config)
 join(user)
 join(agent)
 
-sendMessage("Hello, how are you?", user.manifest.id)
+sendMessage("Hello, how are you?", user.getId())

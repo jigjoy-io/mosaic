@@ -12,7 +12,7 @@ export abstract class RuntimeState {
 	}
 
 	getParticipant(id: string): Participant | undefined {
-		return this.participants.find((p) => p.manifest.id === id)
+		return this.participants.find((p) => p.getId() === id)
 	}
 
 	getParticipants(): readonly Participant[] {
