@@ -1,26 +1,39 @@
+import { InferenceRunner } from "@app/services/inference-runner"
 import { RuntimeService } from "@app/services/runtime"
 import { AgentLoop } from "@domain/agentic-environment/agent-loop"
 import { InferenceRequest } from "@domain/agentic-environment/inference/request"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 
+async function handleLoop(agentLoop: AgentLoop, inferenceRequest: InferenceRequest, inferenceRunner: InferenceRunner) {
+	let loopStateId = agentLoop.stateId
+	while (loopStateId !== "model_message") {
+		switch (loopStateId) {
+			case "inference":
+				if (inferenceRequest.streaming) {
+					const stream = await inferenceRunner.streamInference(inferenceRequest)
+					for await (const event of stream) {
+						//loopStateId = agentLoop.handleStreamChunk(event)
+					}
+				} else {
+					const response = await inferenceRunner.runInference(inferenceRequest)
+					loopStateId = agentLoop.handleInferenceResponse(response)
+				}
+				break
+			case "function_call":
+				// TODO: HANDLE FUNCTION CALL
+				break
+		}
+	}
+}
+
 export function createStartLoop<TRuntimeState extends RuntimeState>(
 	resolveRuntime: () => RuntimeService<TRuntimeState>,
 ) {
-	return function startLoop(inferenceRequest: InferenceRequest) {
+	return function startLoop(message: string, inferenceRequest: InferenceRequest) {
 		const runtime = resolveRuntime()
-		const agentLoop = new AgentLoop()
+		const agentLoop = AgentLoop.create(message, inferenceRequest.context)
 
-		const loopStateId = agentLoop.start()
-
-		while (loopStateId !== "model_message") {
-			switch (loopStateId) {
-				case "inference":
-					// TODO: SEND INFERENCE REQUEST
-					break
-				case "function_call":
-					// TODO: HANDLE FUNCTION CALL
-					break
-			}
-		}
+		const inferenceRunner = runtime.getInferenceRunner()
+		handleLoop(agentLoop, inferenceRequest, inferenceRunner)
 	}
 }

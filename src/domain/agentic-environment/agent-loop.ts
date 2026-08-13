@@ -1,30 +1,63 @@
 import { InferenceResponse } from "./inference/response"
 import { ModelContext } from "@domain/model-context/model-context"
 
-export type LoopStateId = "inference" | "function_call" | "model_message"
+export type LoopStateId = "inference" | "function_call" | "model_message" | "idle"
 
 export interface LoopStateDefinition {
 	id: LoopStateId
 }
 
 export class AgentLoop {
-	start(): LoopStateId {
-		return "inference"
+	id: string
+	stateId: LoopStateId
+	modelContext: ModelContext
+
+	private constructor({
+		id,
+		stateId,
+		modelContext,
+	}: {
+		id: string
+		stateId: LoopStateId
+		modelContext: ModelContext
+	}) {
+		this.id = id
+		this.stateId = stateId
+		this.modelContext = modelContext
 	}
 
-	handleInferenceResponse(response: InferenceResponse, modelContext: ModelContext) {
-		modelContext.applyModelOutput(response.contextItems)
+	handleMessage(message: string) {
+		this.modelContext.addUserMessage(message)
+		this.stateId = "idle"
+	}
+
+	start() {
+		this.stateId = "inference"
+	}
+
+	handleInferenceResponse(response: InferenceResponse) {
+		this.modelContext.applyModelOutput(response.contextItems)
 		if (response.contextItems.some((item) => item.getType() === "function_call")) {
-			return "function_call"
+			this.stateId = "function_call"
 		} else if (response.contextItems.some((item) => item.getType() === "model_message")) {
-			return "model_message"
+			this.stateId = "model_message"
 		} else {
 			throw new Error("Invalid response")
 		}
+		return this.stateId
 	}
 
-	handleFunctionCallOutput(output: string, modelContext: ModelContext) {
-		modelContext.addFunctionCallOutput(output)
-		return "inference"
+	handleFunctionCallOutput(output: string) {
+		this.modelContext.addFunctionCallOutput(output)
+		this.stateId = "inference"
+	}
+
+	static rehydrate(id: string, stateId: LoopStateId, modelContext: ModelContext): AgentLoop {
+		return new AgentLoop({ id, stateId, modelContext })
+	}
+
+	static create(message: string, modelContext: ModelContext): AgentLoop {
+		modelContext.addUserMessage(message)
+		return new AgentLoop({ id: crypto.randomUUID(), stateId: "idle", modelContext })
 	}
 }
