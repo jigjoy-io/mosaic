@@ -1,5 +1,6 @@
 import { InferenceResponse } from "./inference/response"
 import { ModelContext } from "@domain/model-context/model-context"
+import { SemanticEvent } from "./semantic-event/event"
 
 export type LoopStateId = "inference" | "function_call" | "model_message" | "idle"
 
@@ -33,6 +34,11 @@ export class AgentLoop {
 
 	start() {
 		this.stateId = "inference"
+	}
+
+	handleStreamChunk(event: SemanticEvent) {
+		//this.modelContext.applyModelOutput(event.contextItems)
+		this.stateId = "idle"
 	}
 
 	handleInferenceResponse(response: InferenceResponse) {
