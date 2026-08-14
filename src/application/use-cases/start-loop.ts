@@ -29,10 +29,8 @@ async function handleLoop(agentLoop: AgentLoop, inferenceRequest: InferenceReque
 export function createStartLoop<TRuntimeState extends RuntimeState>(
 	resolveRuntime: () => RuntimeService<TRuntimeState>,
 ) {
-	return function startLoop(message: string, inferenceRequest: InferenceRequest) {
+	return function startLoop(agentLoop: AgentLoop, inferenceRequest: InferenceRequest) {
 		const runtime = resolveRuntime()
-		const agentLoop = AgentLoop.create(message, inferenceRequest.context)
-
 		const inferenceRunner = runtime.getInferenceRunner()
 		handleLoop(agentLoop, inferenceRequest, inferenceRunner)
 	}

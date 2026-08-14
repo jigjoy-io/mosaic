@@ -22,12 +22,14 @@ import { createAgent } from "@app/use-cases/create-agent"
 import { createHuman } from "@app/use-cases/create-human"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 import { defineRuntime } from "./define-runtime"
+import { createLoop } from "@app/use-cases/create-loop"
 
 export {
 	defineRuntime,
 	RuntimeState,
 	createAgent,
 	createHuman,
+	createLoop,
 	ModelContext,
 	ModelContextRepository,
 	ContextItem,

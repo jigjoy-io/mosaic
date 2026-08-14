@@ -11,19 +11,23 @@ export interface LoopStateDefinition {
 export class AgentLoop {
 	id: string
 	stateId: LoopStateId
+	agentId: string
 	modelContext: ModelContext
 
 	private constructor({
 		id,
 		stateId,
+		agentId,
 		modelContext,
 	}: {
 		id: string
 		stateId: LoopStateId
+		agentId: string
 		modelContext: ModelContext
 	}) {
 		this.id = id
 		this.stateId = stateId
+		this.agentId = agentId
 		this.modelContext = modelContext
 	}
 
@@ -58,12 +62,12 @@ export class AgentLoop {
 		this.stateId = "inference"
 	}
 
-	static rehydrate(id: string, stateId: LoopStateId, modelContext: ModelContext): AgentLoop {
-		return new AgentLoop({ id, stateId, modelContext })
+	static rehydrate(id: string, stateId: LoopStateId, agentId: string, modelContext: ModelContext): AgentLoop {
+		return new AgentLoop({ id, stateId, agentId, modelContext })
 	}
 
-	static create(message: string, modelContext: ModelContext): AgentLoop {
+	static create(message: string, agentId: string, modelContext: ModelContext): AgentLoop {
 		modelContext.addUserMessage(message)
-		return new AgentLoop({ id: crypto.randomUUID(), stateId: "idle", modelContext })
+		return new AgentLoop({ id: crypto.randomUUID(), stateId: "idle", agentId, modelContext })
 	}
 }
