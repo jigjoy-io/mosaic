@@ -1,21 +1,25 @@
 import { Participant } from "./participant/participant"
 
 export abstract class RuntimeState {
-	participants: readonly Participant[] = []
+	participants: Map<string, Participant> = new Map()
 
 	addParticipant(participant: Participant): void {
-		this.participants = [...this.participants, participant]
+		const isExists = this.participants.get(participant.getId())
+
+		if (isExists) return
+
+		this.participants.set(participant.getId(), participant)
 	}
 
 	removeParticipant(participant: Participant): void {
-		this.participants = this.participants.filter((p) => p !== participant)
+		this.participants.delete(participant.getId())
 	}
 
 	getParticipant(id: string): Participant | undefined {
-		return this.participants.find((p) => p.getId() === id)
+		return this.participants.get(id)
 	}
 
 	getParticipants(): readonly Participant[] {
-		return this.participants
+		return [...this.participants.values()]
 	}
 }
