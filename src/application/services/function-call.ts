@@ -1,6 +1,5 @@
 import type { Tool } from "@domain/generative-model/tool"
 import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { FunctionCallRunner } from "@domain/agentic-environment/function-call-runner"
 
 export type FunctionCallParams = {
@@ -12,27 +11,30 @@ export type FunctionCallParams = {
 
 export type FunctionCallOutputParams = {
 	readonly callId: string
-	readonly output: string
+	readonly message: string
 }
 
 export class DefaultFunctionCallRunner implements FunctionCallRunner {
-	async *run(input: FunctionCallParams): AsyncIterable<SemanticEvent> {
-		const { call, tool, signal, callerId } = input
-		if (signal?.aborted) {
-			return
-		}
+	async run(input: FunctionCallParams): Promise<FunctionCallOutputParams> {
+		const { call, tool } = input
 
-		if (!tool) throw new Error(`Unknown tool: ${call.name}`)
+		if (!tool)
+			return {
+				callId: call.callId,
+				message: `Unknown tool: ${call.name}`,
+			}
 
-		const result = await tool.invoke(JSON.parse(call.args))
-		yield {
-			type: "function.call.output",
-			producerId: callerId,
-			occurredAt: new Date(),
-			payload: {
-				functionId: call.callId,
-				result: JSON.stringify(result),
-			},
+		try {
+			const result = await tool.invoke(JSON.parse(call.args))
+			return {
+				callId: call.callId,
+				message: JSON.stringify(result),
+			}
+		} catch (error) {
+			return {
+				callId: call.callId,
+				message: `Error calling tool: ${error}`,
+			}
 		}
 	}
 }

@@ -1,6 +1,6 @@
 import type { FunctionCallParams } from "@app/services/function-call"
-import { SemanticEvent } from "./semantic-event/event"
+import { FunctionCallOutputParams } from "@app/services/function-call"
 
 export interface FunctionCallRunner {
-	run(input: FunctionCallParams): AsyncIterable<SemanticEvent>
+	run(input: FunctionCallParams): Promise<FunctionCallOutputParams>
 }

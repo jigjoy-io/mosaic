@@ -3,12 +3,14 @@ import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 import { EventProcessor } from "@domain/agentic-environment/semantic-event/event-processor"
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { InferenceRunner } from "./inference-runner"
+import { FunctionCallRunner } from "@domain/agentic-environment/function-call-runner"
 
 export class RuntimeService<TRuntimeState extends RuntimeState> {
 	constructor(
 		public readonly state: TRuntimeState,
 		private readonly processor: EventProcessor,
 		private readonly inferenceRunner: InferenceRunner,
+		private readonly functionCallRunner: FunctionCallRunner,
 	) {}
 
 	join(participant: Participant): void {
@@ -35,6 +37,10 @@ export class RuntimeService<TRuntimeState extends RuntimeState> {
 
 	getInferenceRunner(): InferenceRunner {
 		return this.inferenceRunner
+	}
+
+	getFunctionCallRunner(): FunctionCallRunner {
+		return this.functionCallRunner
 	}
 
 	private async react(consumer: Participant, event: SemanticEvent): Promise<void> {

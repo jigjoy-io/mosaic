@@ -1,28 +1,99 @@
-import { AgentLoop, LoopStateId } from "./agent-loop"
+import { FunctionCallOutputParams, FunctionCallParams } from "@app/services/function-call"
+import { LoopStateId } from "./agent-loop"
+import { FunctionCallRunner } from "./function-call-runner"
+import { InferenceRequest } from "./inference/request"
+import { InferenceResponse } from "./inference/response"
+import { InferenceRunner } from "@app/services/inference-runner"
+import { ContextItem } from "@domain/model-context/context-item/context-item"
+import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
+import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 
-export interface AgentLoopState {
-	id: LoopStateId
-	run(agentLoop: AgentLoop): void | Promise<void>
+export type MessageReceivedParams = {
+	message: string
+}
+export type StateParams = MessageReceivedParams | FunctionCallParams | InferenceRequest | InferenceResponse
+
+export type OutputParams = FunctionCallOutputParams | InferenceResponse
+
+export interface LoopState {
+	run(params: StateParams): Promise<LoopStateResult>
 }
 
-export class Inference implements AgentLoopState {
-	public readonly id = "inference"
-	run(): void | Promise<void> {
-		throw new Error("Method not implemented.")
+export type NextState = {
+	stateId: LoopStateId
+	params: StateParams
+}
+
+export interface LoopStateResult {
+	stateId: LoopStateId
+	contextItems: ContextItem[]
+}
+
+export class MessageReceived implements LoopState {
+	async run(params: MessageReceivedParams): Promise<LoopStateResult> {
+		return {
+			stateId: "message_received",
+			contextItems: [UserMessageItem.create(params.message)],
+		}
 	}
 }
 
-export class FunctionCall implements AgentLoopState {
+export class FunctionCall implements LoopState {
 	public readonly id = "function_call"
-	run(): void | Promise<void> {
-		throw new Error("Method not implemented.")
+
+	constructor(private readonly functionCallRunner: FunctionCallRunner) {}
+
+	async run(params: FunctionCallParams): Promise<LoopStateResult> {
+		const functionCallOutput = await this.functionCallRunner.run(params)
+
+		return {
+			stateId: "function_call",
+			contextItems: [FunctionCallOutputItem.create(params.call.callId, functionCallOutput.message)],
+		}
 	}
 }
 
-export class ModelMessage implements AgentLoopState {
+export class InferenceCall implements LoopState {
+	constructor(private readonly inferenceRunner: InferenceRunner) {}
+
+	async run(params: InferenceRequest): Promise<LoopStateResult> {
+		const response = await this.inferenceRunner.runInference(params)
+		return {
+			stateId: "inference",
+			contextItems: response.contextItems,
+		}
+	}
+}
+
+export class InferenceStream implements LoopState {
+	public readonly id = "inference_stream"
+
+	constructor(private readonly inferenceRunner: InferenceRunner) {}
+
+	async run(params: InferenceRequest): Promise<LoopStateResult> {
+		const stream = await this.inferenceRunner.streamInference(params)
+
+		let lastEvent: any = null
+		for await (const event of stream) {
+			lastEvent = event
+		}
+
+		const inferenceResponse = lastEvent as InferenceResponse
+
+		return {
+			stateId: "inference_stream",
+			contextItems: inferenceResponse.contextItems,
+		}
+	}
+}
+
+export class ModelMessage implements LoopState {
 	public readonly id = "model_message"
 
-	run(): void | Promise<void> {
-		throw new Error("Method not implemented.")
+	async run(params: InferenceResponse): Promise<LoopStateResult> {
+		return {
+			stateId: "model_message",
+			contextItems: params.contextItems,
+		}
 	}
 }

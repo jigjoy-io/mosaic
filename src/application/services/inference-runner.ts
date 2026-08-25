@@ -12,7 +12,7 @@ export class InferenceRunner {
 		private readonly requestValidator: InferenceRequestValidator,
 	) {}
 
-	async *run(input: InferenceRequest): AsyncIterable<SemanticEvent | InferenceResponse> {
+	async runInference(input: InferenceRequest): Promise<InferenceResponse> {
 		const generativeModel = this.supportedModels.find((model) => model.specification.name === input.model)
 		if (!generativeModel) {
 			throw new Error(`Unsupported model: ${input.model}`)
@@ -20,11 +20,17 @@ export class InferenceRunner {
 
 		this.requestValidator.validate(input, generativeModel.specification)
 
-		if (input.streaming) {
-			yield* generativeModel.endpoint.stream(input)
-		} else {
-			const response = generativeModel.endpoint.infer(input)
-			yield response
+		return generativeModel.endpoint.infer(input)
+	}
+
+	async streamInference(input: InferenceRequest) {
+		const generativeModel = this.supportedModels.find((model) => model.specification.name === input.model)
+		if (!generativeModel) {
+			throw new Error(`Unsupported model: ${input.model}`)
 		}
+
+		this.requestValidator.validate(input, generativeModel.specification)
+
+		return generativeModel.endpoint.stream(input)
 	}
 }
