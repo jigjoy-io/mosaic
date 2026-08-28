@@ -1,40 +1,15 @@
-import type { Tool } from "@domain/generative-model/tool"
-import type { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { FunctionCallRunner } from "@domain/agentic-environment/function-call-runner"
-
-export type FunctionCallParams = {
-	readonly call: FunctionCallItem
-	readonly tool: Tool
-	readonly signal?: AbortSignal
-	readonly callerId: string
-}
-
-export type FunctionCallOutputParams = {
-	readonly callId: string
-	readonly message: string
-}
+import { FunctionCallRunner } from "@domain/agentic-environment/loop/states/function-call"
+import { Tool } from "@domain/generative-model/tool"
+import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
+import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 
 export class DefaultFunctionCallRunner implements FunctionCallRunner {
-	async run(input: FunctionCallParams): Promise<FunctionCallOutputParams> {
-		const { call, tool } = input
-
-		if (!tool)
-			return {
-				callId: call.callId,
-				message: `Unknown tool: ${call.name}`,
-			}
-
+	async run(input: FunctionCallItem, tool: Tool): Promise<FunctionCallOutputItem> {
 		try {
-			const result = await tool.invoke(JSON.parse(call.args))
-			return {
-				callId: call.callId,
-				message: JSON.stringify(result),
-			}
+			const result = await tool.invoke(JSON.parse(input.args))
+			return FunctionCallOutputItem.create(input.callId, JSON.stringify(result))
 		} catch (error) {
-			return {
-				callId: call.callId,
-				message: `Error calling tool: ${error}`,
-			}
+			return FunctionCallOutputItem.create(input.callId, `Error calling tool: ${error}`)
 		}
 	}
 }

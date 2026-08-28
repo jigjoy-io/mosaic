@@ -1,18 +1,20 @@
-import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
-import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
-import type { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
+import type {
+	InferenceInput,
+	InferenceOutput,
+	InferenceRunner,
+} from "@domain/agentic-environment/loop/states/inference"
+import type { InferenceInputValidator } from "@domain/generative-model/request-validation/inference-request-validator"
 import { GenerativeModel } from "@domain/generative-model/generative-model"
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 
 export type InferenceCompletedParams = { answer: string; producerId: string; price?: number }
 
-export class InferenceRunner {
+export class DefaultInferenceRunner implements InferenceRunner {
 	constructor(
 		private readonly supportedModels: GenerativeModel[],
-		private readonly requestValidator: InferenceRequestValidator,
+		private readonly requestValidator: InferenceInputValidator,
 	) {}
 
-	async runInference(input: InferenceRequest): Promise<InferenceResponse> {
+	async run(input: InferenceInput): Promise<InferenceOutput> {
 		const generativeModel = this.supportedModels.find((model) => model.specification.name === input.model)
 		if (!generativeModel) {
 			throw new Error(`Unsupported model: ${input.model}`)
@@ -20,10 +22,10 @@ export class InferenceRunner {
 
 		this.requestValidator.validate(input, generativeModel.specification)
 
-		return generativeModel.endpoint.infer(input)
+		return await generativeModel.endpoint.infer(input)
 	}
 
-	async streamInference(input: InferenceRequest) {
+	async streamInference(input: InferenceInput) {
 		const generativeModel = this.supportedModels.find((model) => model.specification.name === input.model)
 		if (!generativeModel) {
 			throw new Error(`Unsupported model: ${input.model}`)
@@ -31,6 +33,6 @@ export class InferenceRunner {
 
 		this.requestValidator.validate(input, generativeModel.specification)
 
-		return generativeModel.endpoint.stream(input)
+		return await generativeModel.endpoint.stream(input)
 	}
 }

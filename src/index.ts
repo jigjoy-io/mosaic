@@ -14,22 +14,19 @@ import { McpClient, type McpServerConfig, type McpToolSpec } from "@infra/mcp/mc
 import { McpToolRegistry } from "@infra/mcp/mcp-tool-registry"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { Endpoint } from "@domain/generative-model/endpoint"
-import { InferenceRequest } from "@domain/agentic-environment/inference/request"
+import { InferenceInput, InferenceOutput } from "@domain/agentic-environment/loop/states/inference"
 import { Participant } from "@domain/agentic-environment/participant/participant"
 import { createAgent } from "@app/use-cases/create-agent"
 import { createHuman } from "@app/use-cases/create-human"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 import { defineRuntime } from "./define-runtime"
-import { createLoop } from "@app/use-cases/create-loop"
 
 export {
 	defineRuntime,
 	RuntimeState,
 	createAgent,
 	createHuman,
-	createLoop,
 	ModelContext,
 	ModelContextRepository,
 	ContextItem,
@@ -52,6 +49,6 @@ export {
 	McpToolRegistry,
 	Endpoint,
 	Participant,
-	InferenceResponse,
-	InferenceRequest,
+	InferenceOutput,
+	InferenceInput,
 }

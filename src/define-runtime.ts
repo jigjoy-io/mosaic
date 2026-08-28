@@ -5,11 +5,13 @@ import { EventProcessor } from "@domain/agentic-environment/semantic-event/event
 import { createJoin } from "./application/use-cases/join"
 import { createLeave } from "./application/use-cases/leave"
 import { createSendMessage } from "./application/use-cases/send-message"
-import { createStartLoop } from "@app/use-cases/start-loop"
-import { InferenceRunner } from "@app/services/inference-runner"
+import { createStartLoop } from "@app/use-cases/run-loop"
+import { InferenceRunner } from "@domain/agentic-environment/loop/states/inference"
 import { supportedModels } from "@app/services/models"
 import { GenerativeModel } from "@domain/generative-model/generative-model"
-import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
+import { InferenceInputValidator } from "@domain/generative-model/request-validation/inference-request-validator"
+import { DefaultInferenceRunner } from "@app/services/inference-runner"
+import { DefaultFunctionCallRunner } from "@app/services/function-call"
 
 export type InferenceRunnerConfig = {
 	supportedModels: GenerativeModel[]
@@ -30,12 +32,14 @@ export function defineRuntime<TRuntimeState extends RuntimeState>() {
 
 		const inferenceRunner =
 			config.inferenceRunnerConfig?.runner ??
-			new InferenceRunner(
+			new DefaultInferenceRunner(
 				config.inferenceRunnerConfig?.supportedModels ?? supportedModels,
-				new InferenceRequestValidator(),
+				new InferenceInputValidator(),
 			)
 
-		runtime = new RuntimeService(config.state, processor, inferenceRunner)
+		const functionCallRunner = new DefaultFunctionCallRunner()
+
+		runtime = new RuntimeService(config.state, processor, inferenceRunner, functionCallRunner)
 
 		return runtime
 	}

@@ -1,10 +1,9 @@
-import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
-import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import type { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
+import type { InferenceInput, InferenceOutput } from "@domain/agentic-environment/loop/states/inference"
 import type { InferenceEndpointMapper } from "./inference-endpoint-mapper"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 
 export interface Endpoint {
 	endpointMapper: InferenceEndpointMapper
-	infer(requestParams: InferenceRequest): Promise<InferenceResponse>
-	stream(requestParams: InferenceRequest): AsyncIterable<SemanticEvent>
+	infer(requestParams: InferenceInput): Promise<InferenceOutput>
+	stream(requestParams: InferenceInput): AsyncIterable<SemanticEvent>
 }

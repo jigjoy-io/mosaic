@@ -1,7 +1,7 @@
 import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import type { Endpoint } from "@domain/generative-model/endpoint"
-import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
+import type { InferenceInput } from "@domain/agentic-environment/loop/states/inference"
 import { AnthropicMessagesMapper } from "./anthropic-messages-mapper"
 import Anthropic from "@anthropic-ai/sdk"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
@@ -28,15 +28,15 @@ export class AnthropicMessages implements Endpoint {
 		this.client = new Anthropic({ baseURL: config.baseURL, apiKey: config.apiKey })
 	}
 
-	async infer(inferenceRequest: InferenceRequest): Promise<InferenceResponse> {
-		const request = this.endpointMapper.toRequest(inferenceRequest)
+	async infer(inferenceInput: InferenceInput): Promise<InferenceResponse> {
+		const request = this.endpointMapper.toRequest(inferenceInput)
 		const response = await this.client.messages.create(request)
 
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(inferenceRequest: InferenceRequest): AsyncIterable<SemanticEvent> {
-		const request = this.endpointMapper.toRequest(inferenceRequest)
+	async *stream(inferenceInput: InferenceInput): AsyncIterable<SemanticEvent> {
+		const request = this.endpointMapper.toRequest(inferenceInput)
 		const stream: any = await this.client.messages.create(request)
 
 		for await (const event of stream) {

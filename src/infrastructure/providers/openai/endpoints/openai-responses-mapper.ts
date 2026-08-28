@@ -1,4 +1,4 @@
-import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
+import type { InferenceInput, InferenceItem } from "@domain/agentic-environment/loop/states/inference"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
@@ -8,20 +8,20 @@ import { FunctionCallItem } from "@domain/model-context/context-item/model-item/
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { SummaryText } from "@domain/model-context/context-item/item-content/summary-text"
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
+import { InferenceOutput } from "@domain/agentic-environment/loop/states/inference"
 import type { ContextItem } from "@domain/model-context/context-item/context-item"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import type OpenAI from "openai"
 
 export class OpenAIResponsesMapper implements InferenceEndpointMapper {
-	toRequest(inferenceRequest: InferenceRequest): any {
+	toRequest(inferenceInput: InferenceInput): any {
 		const request: any = {
-			model: inferenceRequest.model,
-			input: this.mapContextItems(inferenceRequest),
+			model: inferenceInput.model,
+			input: this.mapContextItems(inferenceInput),
 		}
 
-		if (inferenceRequest.tools && inferenceRequest.tools.length > 0) {
-			request.tools = inferenceRequest.tools.map((tool) => ({
+		if (inferenceInput.tools && inferenceInput.tools.length > 0) {
+			request.tools = inferenceInput.tools.map((tool) => ({
 				type: tool.type,
 				name: tool.name,
 				description: tool.description,
@@ -29,14 +29,14 @@ export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 			}))
 		}
 
-		if (inferenceRequest.reasoningEffort) {
+		if (inferenceInput.reasoningEffort) {
 			request.reasoning = {
-				effort: inferenceRequest.reasoningEffort,
+				effort: inferenceInput.reasoningEffort,
 			}
 		}
 
-		if (inferenceRequest.structuredOutput) {
-			const format = inferenceRequest.structuredOutput
+		if (inferenceInput.structuredOutput) {
+			const format = inferenceInput.structuredOutput
 			request.text = {
 				format: {
 					type: "json_schema",
@@ -47,23 +47,17 @@ export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 			}
 		}
 
-		if (inferenceRequest.streaming) {
-			request.stream = inferenceRequest.streaming
+		if (inferenceInput.streaming) {
+			request.stream = inferenceInput.streaming
 		}
 
 		return request
 	}
 
-	toResponse(response: any): InferenceResponse {
-		const contextItems = this.extractContextItems(response)
-		const tokenUsage = this.extractTokenUsage(response)
-		return new InferenceResponse(contextItems, tokenUsage)
-	}
-
-	mapContextItems(inferenceRequest: InferenceRequest): any[] {
+	mapContextItems(inferenceInput: InferenceInput): any[] {
 		const input: any[] = []
 
-		for (const item of inferenceRequest.context.getItems()) {
+		for (const item of inferenceInput.context.getItems()) {
 			if (
 				item instanceof DeveloperMessageItem ||
 				item instanceof SystemMessageItem ||
@@ -133,8 +127,8 @@ export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 		)
 	}
 
-	extractContextItems(response: any): ContextItem[] {
-		const items: ContextItem[] = []
+	toResponse(response: any): InferenceOutput {
+		const items: InferenceItem[] = []
 
 		for (const item of response.output ?? []) {
 			if (item.type === "message" && item.role === "assistant") {
@@ -167,6 +161,9 @@ export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 			}
 		}
 
-		return items
+		return {
+			items,
+			rowResponse: response,
+		}
 	}
 }

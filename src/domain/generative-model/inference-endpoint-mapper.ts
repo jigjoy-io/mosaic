@@ -1,7 +1,6 @@
-import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import type { InferenceRequest } from "@domain/agentic-environment/inference/request"
+import type { InferenceInput, InferenceOutput } from "@domain/agentic-environment/loop/states/inference"
 
 export interface InferenceEndpointMapper {
-	toRequest(inferenceRequest: InferenceRequest): any
-	toResponse(response: any): InferenceResponse
+	toRequest(inferenceInput: InferenceInput): any
+	toResponse(response: any): InferenceOutput
 }
