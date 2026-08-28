@@ -14,12 +14,11 @@ import {
 	ModelMessageToIdleRule,
 } from "@domain/agentic-environment/loop/transition-rule"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { ModelContext } from "@domain/model-context/model-context"
 
 export function createStartLoop<TRuntimeState extends RuntimeState>(
 	resolveRuntime: () => RuntimeService<TRuntimeState>,
 ) {
-	return function startLoop(inferenceInput: InferenceInput) {
+	return function runLoop(message: string, inferenceInput: InferenceInput) {
 		const runtime = resolveRuntime()
 		const inferenceRunner = runtime.getInferenceRunner()
 		const functionCallRunner = runtime.getFunctionCallRunner()
@@ -43,14 +42,8 @@ export function createStartLoop<TRuntimeState extends RuntimeState>(
 		const agentLoop = new AgentLoop(stateExecutor, transitionResolver)
 
 		agentLoop.run({
-			content: "What is the weather in Novi Sad?",
-			input: {
-				model: "gpt-4o-mini",
-				maxOutputTokens: 100,
-				reasoningEffort: "high",
-				streaming: true,
-				context: ModelContext.create(),
-			},
+			content: message,
+			input: inferenceInput,
 		})
 	}
 }

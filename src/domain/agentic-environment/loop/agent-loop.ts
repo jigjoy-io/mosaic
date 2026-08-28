@@ -8,10 +8,10 @@ export class AgentLoop {
 		private readonly transitionResolver: TransitionResolver,
 	) {}
 
-	async run(message: ReceivedMessage): Promise<void> {
+	async run(input: ReceivedMessage): Promise<void> {
 		let transition: LoopTransition = {
 			nextStateId: "message_received",
-			input: message,
+			input: input.message,
 		}
 
 		while (transition.nextStateId !== "idle") {
