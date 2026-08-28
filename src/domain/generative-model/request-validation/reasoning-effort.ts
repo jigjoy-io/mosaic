@@ -1,4 +1,4 @@
-import type { InferenceInput } from "@domain/agentic-environment/loop/states/inference"
+import type { InferenceInput } from "@app/states/inference"
 import type { RequestValidationRule } from "./rule"
 import type { ModelSpecification } from "../generative-model"
 

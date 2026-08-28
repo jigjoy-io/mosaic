@@ -2,8 +2,8 @@ import { Participant } from "@domain/agentic-environment/participant/participant
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 import { EventProcessor } from "@domain/agentic-environment/semantic-event/event-processor"
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
-import { InferenceRunner } from "@domain/agentic-environment/loop/states/inference"
-import { FunctionCallRunner } from "@domain/agentic-environment/loop/states/function-call"
+import { InferenceRunner } from "@app/states/inference"
+import { FunctionCallRunner } from "@app/states/function-call"
 
 export class RuntimeService<TRuntimeState extends RuntimeState> {
 	constructor(
@@ -21,7 +21,7 @@ export class RuntimeService<TRuntimeState extends RuntimeState> {
 		this.state.removeParticipant(participant)
 	}
 
-	deliver(event: SemanticEvent): void {
+	publish(event: SemanticEvent): void {
 		for (const participant of this.state.getParticipants()) {
 			void this.react(participant, event)
 		}
@@ -45,7 +45,7 @@ export class RuntimeService<TRuntimeState extends RuntimeState> {
 
 	private async react(consumer: Participant, event: SemanticEvent): Promise<void> {
 		for await (const emittedEvent of this.processor.process(event, consumer, this.state)) {
-			this.deliver(emittedEvent)
+			this.publish(emittedEvent)
 		}
 	}
 }

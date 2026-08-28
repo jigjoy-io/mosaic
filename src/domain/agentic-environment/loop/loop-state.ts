@@ -1,7 +1,8 @@
-import { InferenceInput, InferenceOutput } from "./states/inference"
+import { InferenceInput, InferenceOutput } from "../../../application/states/inference"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
-import { FunctionCallParams } from "@domain/agentic-environment/loop/states/function-call"
+import { FunctionCallParams } from "@app/states/function-call"
+import { SemanticEvent } from "../semantic-event/event"
 
 export type LoopStateId = "message_received" | "inference" | "function_call" | "model_message" | "idle"
 
@@ -55,6 +56,40 @@ export type ExecutableLoopStateId = Exclude<LoopStateId, "idle">
 // State execution
 // ============================================================
 
+export type LoopStateStartedPayload<TStateId extends ExecutableLoopStateId> = {
+	stateId: TStateId
+	input: LoopStateContract[TStateId]["input"]
+}
+
+export type LoopStateCompletedPayload<TStateId extends ExecutableLoopStateId> = {
+	stateId: TStateId
+	output: LoopStateContract[TStateId]["output"]
+}
+
+export interface LoopVisitor {
+	visitMessageReceivedStarted(input: ReceivedMessage): void
+
+	visitMessageReceivedCompleted(output: InferenceInput): void
+
+	visitInferenceStarted(input: InferenceInput): void
+
+	//visitInferenceEvent(event: InferenceStreamItem): void
+
+	visitInferenceCompleted(output: InferenceOutput): void
+
+	visitFunctionCallStarted(input: FunctionCallParams): void
+
+	//visitFunctionCallEvent(event: FunctionCallStreamItem): void
+
+	visitFunctionCallCompleted(output: FunctionCallOutputItem): void
+}
+
+export interface LoopState<TInput, TOutput> {
+	readonly id: LoopStateId
+
+	run(input: TInput, visitor: LoopVisitor): Promise<TOutput>
+}
+
 export type LoopStateExecution<TStateId extends ExecutableLoopStateId = ExecutableLoopStateId> = {
 	[K in TStateId]: {
 		stateId: K
@@ -62,12 +97,6 @@ export type LoopStateExecution<TStateId extends ExecutableLoopStateId = Executab
 		output: LoopStateContract[K]["output"]
 	}
 }[TStateId]
-
-export interface LoopState<TStateId extends ExecutableLoopStateId> {
-	readonly id: TStateId
-
-	run(input: LoopStateContract[TStateId]["input"]): Promise<LoopStateExecution<TStateId>>
-}
 
 // ============================================================
 // Loop transition
@@ -78,4 +107,12 @@ export type LoopTransition<TStateId extends LoopStateId = LoopStateId> = {
 		nextStateId: K
 		input: LoopStateContract[K]["input"]
 	}
+}[TStateId]
+
+export type LoopStateStartedEvent<TStateId extends ExecutableLoopStateId = ExecutableLoopStateId> = {
+	[K in TStateId]: SemanticEvent<"loop.state.started", LoopStateStartedPayload<K>>
+}[TStateId]
+
+export type LoopStateCompletedEvent<TStateId extends ExecutableLoopStateId = ExecutableLoopStateId> = {
+	[K in TStateId]: SemanticEvent<"loop.state.completed", LoopStateCompletedPayload<K>>
 }[TStateId]

@@ -1,8 +1,8 @@
-import { ExecutableLoopStateId, LoopStateExecution, LoopTransition } from "./loop-state"
-import { FunctionCallState } from "./states/function-call"
-import { InferenceState } from "./states/inference"
-import { MessageReceivedState } from "./states/message-received"
-import { ModelMessageState } from "./states/model-message"
+import { ExecutableLoopStateId, LoopStateExecution, LoopTransition, LoopVisitor } from "./loop-state"
+import { FunctionCallState } from "@app/states/function-call"
+import { InferenceState } from "@app/states/inference"
+import { MessageReceivedState } from "@app/states/message-received"
+import { ModelMessageState } from "@app/states/model-message"
 
 export class LoopStateExecutor {
 	constructor(
@@ -12,29 +12,41 @@ export class LoopStateExecutor {
 		private readonly modelMessageState: ModelMessageState,
 	) {}
 
-	execute(transition: LoopTransition<"message_received">): Promise<LoopStateExecution<"message_received">>
+	execute(
+		transition: LoopTransition<"message_received">,
+		loopVisitor: LoopVisitor,
+	): Promise<LoopStateExecution<"message_received">>
 
-	execute(transition: LoopTransition<"inference">): Promise<LoopStateExecution<"inference">>
+	execute(transition: LoopTransition<"inference">, loopVisitor: LoopVisitor): Promise<LoopStateExecution<"inference">>
 
-	execute(transition: LoopTransition<"function_call">): Promise<LoopStateExecution<"function_call">>
+	execute(
+		transition: LoopTransition<"function_call">,
+		loopVisitor: LoopVisitor,
+	): Promise<LoopStateExecution<"function_call">>
 
-	execute(transition: LoopTransition<"model_message">): Promise<LoopStateExecution<"model_message">>
+	execute(
+		transition: LoopTransition<"model_message">,
+		loopVisitor: LoopVisitor,
+	): Promise<LoopStateExecution<"model_message">>
 
-	execute(transition: LoopTransition<ExecutableLoopStateId>): Promise<LoopStateExecution>
+	execute(transition: LoopTransition<ExecutableLoopStateId>, loopVisitor: LoopVisitor): Promise<LoopStateExecution>
 
-	execute(transition: LoopTransition<ExecutableLoopStateId>): Promise<LoopStateExecution> {
+	async execute(
+		transition: LoopTransition<ExecutableLoopStateId>,
+		loopVisitor: LoopVisitor,
+	): Promise<LoopStateExecution> {
 		switch (transition.nextStateId) {
 			case "message_received":
-				return this.messageReceivedState.run(transition.input)
+				return await this.messageReceivedState.run(transition.input, loopVisitor)
 
 			case "inference":
-				return this.inferenceState.run(transition.input)
+				return await this.inferenceState.run(transition.input, loopVisitor)
 
 			case "function_call":
-				return this.functionCallState.run(transition.input)
+				return await this.functionCallState.run(transition.input, loopVisitor)
 
 			case "model_message":
-				return this.modelMessageState.run(transition.input)
+				return await this.modelMessageState.run(transition.input, loopVisitor)
 		}
 	}
 }

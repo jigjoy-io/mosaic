@@ -2,7 +2,7 @@ import type { InferenceResponse } from "@domain/agentic-environment/inference/re
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { GoogleGenAI } from "@google/genai"
 import type { Endpoint } from "@domain/generative-model/endpoint"
-import type { InferenceInput } from "@domain/agentic-environment/loop/states/inference"
+import type { InferenceInput } from "@app/states/inference"
 import { GeminiGenerateContentMapper } from "./gemini-generate-content-mapper"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 

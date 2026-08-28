@@ -1,4 +1,4 @@
-import { LoopState, LoopStateExecution } from "../loop-state"
+import { LoopState, LoopStateExecution, LoopVisitor } from "../../domain/agentic-environment/loop/loop-state"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
@@ -28,14 +28,17 @@ export interface InferenceRunner {
 	run(request: InferenceInput): Promise<InferenceOutput>
 }
 
-export class InferenceState implements LoopState<"inference"> {
+export class InferenceState implements LoopState<InferenceInput, LoopStateExecution<"inference">> {
 	readonly id = "inference"
 
 	constructor(private readonly inferenceRunner: InferenceRunner) {}
 
-	async run(input: InferenceInput): Promise<LoopStateExecution<"inference">> {
+	async run(input: InferenceInput, loopVisitor: LoopVisitor): Promise<LoopStateExecution<"inference">> {
+		loopVisitor.visitInferenceStarted(input)
+
 		const output = await this.inferenceRunner.run(input)
 
+		loopVisitor.visitInferenceCompleted(output)
 		return {
 			stateId: this.id,
 			input,
