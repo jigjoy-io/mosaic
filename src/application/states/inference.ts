@@ -1,4 +1,4 @@
-import { LoopState, LoopStateExecution, LoopVisitor } from "../../domain/agentic-environment/loop/loop-state"
+import { LoopState, LoopStateExecution } from "@domain/agentic-environment/loop/loop-state"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
@@ -6,6 +6,7 @@ import { FunctionCallItem } from "@domain/model-context/context-item/model-item/
 import type { Tool } from "@domain/generative-model/tool"
 import type { ModelContext } from "@domain/model-context/model-context"
 import type { StructuredOutputFormat } from "@domain/generative-model/request-validation/structured-output"
+import { LoopVisitor } from "@domain/agentic-environment/loop/loop-visitor"
 
 export type InferenceInput = {
 	model: string

@@ -1,9 +1,5 @@
-import {
-	LoopState,
-	LoopStateExecution,
-	LoopVisitor,
-	ModelMessageParams,
-} from "../../domain/agentic-environment/loop/loop-state"
+import { LoopState, LoopStateExecution, ModelMessageParams } from "@domain/agentic-environment/loop/loop-state"
+import { LoopVisitor } from "@domain/agentic-environment/loop/loop-visitor"
 
 export class ModelMessageState implements LoopState<ModelMessageParams, LoopStateExecution<"model_message">> {
 	readonly id = "model_message"

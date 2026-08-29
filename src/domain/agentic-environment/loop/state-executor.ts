@@ -1,4 +1,5 @@
-import { ExecutableLoopStateId, LoopStateExecution, LoopTransition, LoopVisitor } from "./loop-state"
+import { ExecutableLoopStateId, LoopStateExecution, LoopTransition } from "./loop-state"
+import { LoopVisitor } from "./loop-visitor"
 import { FunctionCallState } from "@app/states/function-call"
 import { InferenceState } from "@app/states/inference"
 import { MessageReceivedState } from "@app/states/message-received"

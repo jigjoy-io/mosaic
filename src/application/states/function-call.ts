@@ -1,8 +1,9 @@
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { LoopState, LoopStateExecution, LoopVisitor } from "@domain/agentic-environment/loop/loop-state"
+import { LoopState, LoopStateExecution } from "@domain/agentic-environment/loop/loop-state"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { InferenceInput } from "./inference"
 import { Tool } from "@domain/generative-model/tool"
+import { LoopVisitor } from "@domain/agentic-environment/loop/loop-visitor"
 
 export interface FunctionCallRunner {
 	run(call: FunctionCallItem, tool: Tool): Promise<FunctionCallOutputItem>

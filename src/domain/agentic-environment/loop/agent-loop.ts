@@ -1,4 +1,5 @@
-import { LoopVisitor, LoopTransition, ReceivedMessage } from "./loop-state"
+import { LoopTransition, ReceivedMessage } from "./loop-state"
+import { LoopVisitor } from "./loop-visitor"
 import { LoopStateExecutor } from "./state-executor"
 import { TransitionResolver } from "./transition-resolver"
 

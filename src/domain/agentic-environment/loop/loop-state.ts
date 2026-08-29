@@ -3,6 +3,7 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { FunctionCallParams } from "@app/states/function-call"
 import { SemanticEvent } from "../semantic-event/event"
+import { LoopVisitor } from "./loop-visitor"
 
 export type LoopStateId = "message_received" | "inference" | "function_call" | "model_message" | "idle"
 
@@ -64,24 +65,6 @@ export type LoopStateStartedPayload<TStateId extends ExecutableLoopStateId> = {
 export type LoopStateCompletedPayload<TStateId extends ExecutableLoopStateId> = {
 	stateId: TStateId
 	output: LoopStateContract[TStateId]["output"]
-}
-
-export interface LoopVisitor {
-	visitMessageReceivedStarted(input: ReceivedMessage): void
-
-	visitMessageReceivedCompleted(output: InferenceInput): void
-
-	visitInferenceStarted(input: InferenceInput): void
-
-	//visitInferenceEvent(event: InferenceStreamItem): void
-
-	visitInferenceCompleted(output: InferenceOutput): void
-
-	visitFunctionCallStarted(input: FunctionCallParams): void
-
-	//visitFunctionCallEvent(event: FunctionCallStreamItem): void
-
-	visitFunctionCallCompleted(output: FunctionCallOutputItem): void
 }
 
 export interface LoopState<TInput, TOutput> {
