@@ -78,7 +78,7 @@ export class InferenceToModelMessageRule implements LoopTransitionRule {
 		return {
 			nextStateId: "model_message",
 			input: {
-				message: modelMessageItem,
+				answer: modelMessageItem,
 			},
 		}
 	}

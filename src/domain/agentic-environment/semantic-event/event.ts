@@ -30,3 +30,9 @@ export class MessageSentEvent extends SemanticEvent<"message.sent", { message: s
 		return SemanticEvent.create("message.sent", producerId, { message })
 	}
 }
+
+export class ModelAnswerEvent extends SemanticEvent<"model.answer", { answer: string }> {
+	static init(producerId: string, answer: string): ModelAnswerEvent {
+		return ModelAnswerEvent.create("model.answer", producerId, { answer })
+	}
+}

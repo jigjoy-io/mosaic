@@ -1,5 +1,5 @@
 import { InferenceInput, InferenceOutput } from "@app/states/inference"
-import { ReceivedMessage } from "./loop-state"
+import { ModelMessageParams, ReceivedMessage } from "./loop-state"
 import { LoopVisitor } from "./loop-visitor"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { FunctionCallParams } from "@app/states/function-call"
@@ -12,10 +12,12 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 		private readonly agentId: string,
 		private readonly runtime: RuntimeService<RuntimeState>,
 	) {}
+
 	visitMessageReceivedStarted(input: ReceivedMessage): void {
 		console.log("Visiting message received started: ", input)
 		this.publish("message_received.started", input)
 	}
+
 	visitMessageReceivedCompleted(output: InferenceInput): void {
 		console.log("Visiting message received completed: ", output)
 		this.publish("message_received.completed", output)
@@ -44,6 +46,11 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 	visitFunctionCallCompleted(output: FunctionCallOutputItem): void {
 		console.log("Visiting function call completed: ", output)
 		this.publish("function_call.completed", output)
+	}
+
+	visitModelAnswer(input: ModelMessageParams): void {
+		console.log("Visiting model answer: ", input.answer)
+		this.publish("model.answer", input)
 	}
 
 	private publish<TPayload>(type: string, payload: TPayload): void {

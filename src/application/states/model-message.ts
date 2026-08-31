@@ -5,7 +5,7 @@ export class ModelMessageState implements LoopState<ModelMessageParams, LoopStat
 	readonly id = "model_message"
 
 	async run(input: ModelMessageParams, loopVisitor: LoopVisitor): Promise<LoopStateExecution<"model_message">> {
-		console.log(input.message.content)
+		loopVisitor.visitModelAnswer(input)
 		return {
 			stateId: this.id,
 			input,

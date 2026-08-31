@@ -17,7 +17,7 @@ export interface FunctionCallExecutionOutput {
 }
 
 export interface ModelMessageParams {
-	message: ModelMessageItem
+	answer: ModelMessageItem
 }
 
 // ============================================================
