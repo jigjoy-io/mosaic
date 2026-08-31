@@ -5,7 +5,7 @@ import { EventProcessor } from "@domain/agentic-environment/semantic-event/event
 import { createJoin } from "./application/use-cases/join"
 import { createLeave } from "./application/use-cases/leave"
 import { createSendMessage } from "./application/use-cases/send-message"
-import { createStartLoop } from "@app/use-cases/run-loop"
+import { createRunLoop } from "@app/use-cases/run-loop"
 import { InferenceRunner } from "@app/states/inference"
 import { supportedModels } from "@app/services/models"
 import { GenerativeModel } from "@domain/generative-model/generative-model"
@@ -69,7 +69,7 @@ export function defineRuntime<TRuntimeState extends RuntimeState>() {
 	const join = createJoin(resolveRuntime)
 	const leave = createLeave(resolveRuntime)
 	const sendMessage = createSendMessage(resolveRuntime)
-	const startLoop = createStartLoop(resolveRuntime)
+	const runLoop = createRunLoop(resolveRuntime)
 
 	return {
 		initializeRuntime,
@@ -78,6 +78,6 @@ export function defineRuntime<TRuntimeState extends RuntimeState>() {
 		join,
 		leave,
 		sendMessage,
-		startLoop,
+		runLoop,
 	}
 }

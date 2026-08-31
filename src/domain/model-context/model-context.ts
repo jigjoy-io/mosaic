@@ -23,6 +23,11 @@ export class ModelContext {
 		return this
 	}
 
+	addItem(item: ContextItem): ModelContext {
+		this.items.push(item)
+		return this
+	}
+
 	static create(): ModelContext {
 		const id = crypto.randomUUID()
 		return new ModelContext(id, [])

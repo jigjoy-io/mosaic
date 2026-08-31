@@ -1,4 +1,3 @@
-import { RuntimeState } from "../runtime-state"
 import { SemanticEvent } from "../semantic-event/event"
 import { Participant } from "../participant/participant"
 import { SituationSpecification } from "./situation-specification"
@@ -11,11 +10,8 @@ export interface SituationHandler {
 export type SituationContext<TEvent extends SemanticEvent = SemanticEvent> = {
 	readonly event: TEvent
 	readonly participant: Participant
-	readonly state: RuntimeState
 }
 
 export interface SituationProcessor {
-	id: string
-	name: string
-	apply(context: SituationContext): AsyncIterable<SemanticEvent>
+	apply(context: SituationContext): void | Promise<void>
 }

@@ -15,5 +15,5 @@ export function createAgent({
 	tools: Tool[]
 	handlers: SituationHandler[]
 }): Agent {
-	return Agent.create({ name, capabilities, instruction, tools, handlers })
+	return Agent.create({ name, instruction, capabilities, tools, handlers })
 }

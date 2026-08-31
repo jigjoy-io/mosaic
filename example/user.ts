@@ -2,7 +2,7 @@ import { createHuman } from "src"
 
 const user = createHuman({
 	name: "Miodrag",
-	capabilities: ["review_code"],
+	capabilities: ["make_investment_decision"],
 	handlers: [],
 })
 

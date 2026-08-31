@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { agent } from "./agent"
 import { EnvironmentState, FreemiumAccount, initializeRuntime, join, sendMessage } from "./runtime"
 import { user } from "./user"
@@ -12,4 +13,4 @@ initializeRuntime(config)
 join(user)
 join(agent)
 
-sendMessage("Hello, how are you?", user.getId())
+sendMessage("Can you tell me more about yourself?", user.getId())

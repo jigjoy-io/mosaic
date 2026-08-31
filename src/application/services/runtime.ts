@@ -23,7 +23,7 @@ export class RuntimeService<TRuntimeState extends RuntimeState> {
 
 	publish(event: SemanticEvent): void {
 		for (const participant of this.state.getParticipants()) {
-			void this.react(participant, event)
+			this.processor.process(event, participant)
 		}
 	}
 
@@ -41,11 +41,5 @@ export class RuntimeService<TRuntimeState extends RuntimeState> {
 
 	getFunctionCallRunner(): FunctionCallRunner {
 		return this.functionCallRunner
-	}
-
-	private async react(consumer: Participant, event: SemanticEvent): Promise<void> {
-		for await (const emittedEvent of this.processor.process(event, consumer, this.state)) {
-			this.publish(emittedEvent)
-		}
 	}
 }

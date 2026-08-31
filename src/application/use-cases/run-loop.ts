@@ -16,9 +16,7 @@ import {
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 import { EventPublisherLoopVisitor } from "@domain/agentic-environment/loop/event-publisher-visitor"
 
-export function createStartLoop<TRuntimeState extends RuntimeState>(
-	resolveRuntime: () => RuntimeService<TRuntimeState>,
-) {
+export function createRunLoop<TRuntimeState extends RuntimeState>(resolveRuntime: () => RuntimeService<TRuntimeState>) {
 	return function runLoop(agentId: string, message: string, inferenceInput: InferenceInput) {
 		const runtime = resolveRuntime()
 		const inferenceRunner = runtime.getInferenceRunner()

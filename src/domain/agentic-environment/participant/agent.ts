@@ -2,6 +2,7 @@ import { Memory } from "./memory"
 import { Participant, ParticipantManifest } from "./participant"
 import { Tool } from "@domain/generative-model/tool"
 import { SituationHandler } from "../situation/situation-handler"
+import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
 
 export class Agent extends Participant {
 	private memory: Memory
@@ -22,9 +23,9 @@ export class Agent extends Participant {
 	}
 
 	static create({
+		name,
 		instruction,
 		tools,
-		name,
 		capabilities,
 		handlers,
 	}: {
@@ -38,7 +39,8 @@ export class Agent extends Participant {
 		const memory = Memory.create()
 		const manifest: ParticipantManifest = { id, name, capabilities, role: "agent" }
 
-		memory.getContext().addDeveloperMessage(instruction)
+		const developerMessage = DeveloperMessageItem.create(instruction)
+		memory.getContext().addItem(developerMessage)
 		return new Agent(manifest, instruction, tools, memory, handlers)
 	}
 

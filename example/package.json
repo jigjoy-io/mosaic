@@ -1,0 +1,16 @@
+{
+	"name": "example",
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {
+		"start": "tsx main.ts",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"dotenv": "^17.4.2",
+		"tsx": "^4.23.13",
+		"typescript": "^7.0.2"
+	}
+}
