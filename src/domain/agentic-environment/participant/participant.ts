@@ -1,4 +1,3 @@
-import { SemanticEvent } from "../semantic-event/event"
 import { SituationHandler } from "../situation/situation-handler"
 
 export type ParticipantRole = "agent" | "human"
@@ -29,5 +28,9 @@ export abstract class Participant {
 
 	getHandlers(): SituationHandler[] {
 		return this.handlers
+	}
+
+	setHandlers(handlers: SituationHandler[]): void {
+		this.handlers = handlers
 	}
 }
