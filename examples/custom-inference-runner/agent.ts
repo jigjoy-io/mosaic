@@ -21,7 +21,7 @@ export class InferenceProcessor implements SituationProcessor {
 		const { message } = event.payload as { message: string }
 
 		const inferenceInput: InferenceInput = {
-			model: "mock-model",
+			model: "grok",
 			context: agent.getMemory().getContext(),
 			tools: agent.getTools(),
 		}
