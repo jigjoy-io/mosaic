@@ -21,6 +21,11 @@ import { createAgent } from "@app/use-cases/create-agent"
 import { createHuman } from "@app/use-cases/create-human"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 import { defineRuntime } from "./define-runtime"
+import { supportedModels } from "@app/services/models"
+import { OpenAIResponses } from "@infra/providers/openai/endpoints/openai-responses"
+import { OpenAIChatCompletions } from "@infra/providers/openai/endpoints/openai-chat-completions"
+import { AnthropicMessages } from "@infra/providers/anthropic/endpoints/anthropic-messages"
+import { GeminiGenerateContent } from "@infra/providers/gemini/endpoints/gemini-generate-content"
 
 export {
 	defineRuntime,
@@ -48,6 +53,11 @@ export {
 	type McpToolSpec,
 	McpToolRegistry,
 	Endpoint,
+	supportedModels,
+	OpenAIResponses,
+	OpenAIChatCompletions,
+	AnthropicMessages,
+	GeminiGenerateContent,
 	Participant,
 	InferenceOutput,
 	InferenceInput,
