@@ -12,6 +12,7 @@ import { GenerativeModel } from "@domain/generative-model/generative-model"
 import { InferenceInputValidator } from "@domain/generative-model/request-validation/inference-request-validator"
 import { DefaultInferenceRunner } from "@app/services/inference-runner"
 import { DefaultFunctionCallRunner } from "@app/services/function-call"
+import { createSendEvent } from "@app/use-cases/send-event"
 
 export type InferenceRunnerConfig = {
 	supportedModels: GenerativeModel[]
@@ -69,6 +70,7 @@ export function defineRuntime<TRuntimeState extends RuntimeState>() {
 	const join = createJoin(resolveRuntime)
 	const leave = createLeave(resolveRuntime)
 	const sendMessage = createSendMessage(resolveRuntime)
+	const sendEvent = createSendEvent(resolveRuntime)
 	const runLoop = createRunLoop(resolveRuntime)
 
 	return {
@@ -78,6 +80,7 @@ export function defineRuntime<TRuntimeState extends RuntimeState>() {
 		join,
 		leave,
 		sendMessage,
+		sendEvent,
 		runLoop,
 	}
 }

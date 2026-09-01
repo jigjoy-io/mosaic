@@ -43,5 +43,5 @@ export class EnvironmentState extends RuntimeState {
 	}
 }
 
-export const { initializeRuntime, resolveRuntime, resolveParticipant, join, leave, sendMessage, runLoop } =
+export const { initializeRuntime, resolveRuntime, resolveParticipant, join, leave, sendMessage, sendEvent, runLoop } =
 	defineRuntime<EnvironmentState>()
