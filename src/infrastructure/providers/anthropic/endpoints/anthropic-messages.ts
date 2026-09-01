@@ -1,7 +1,6 @@
-import type { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import type { Endpoint } from "@domain/generative-model/endpoint"
-import type { InferenceInput } from "@app/states/inference"
+import type { InferenceInput, InferenceOutput } from "@app/states/inference"
 import { AnthropicMessagesMapper } from "./anthropic-messages-mapper"
 import Anthropic from "@anthropic-ai/sdk"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
@@ -28,7 +27,7 @@ export class AnthropicMessages implements Endpoint {
 		this.client = new Anthropic({ baseURL: config.baseURL, apiKey: config.apiKey })
 	}
 
-	async infer(inferenceInput: InferenceInput): Promise<InferenceResponse> {
+	async infer(inferenceInput: InferenceInput): Promise<InferenceOutput> {
 		const request = this.endpointMapper.toRequest(inferenceInput)
 		const response = await this.client.messages.create(request)
 
