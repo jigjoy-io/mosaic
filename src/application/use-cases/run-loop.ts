@@ -3,7 +3,7 @@ import { AgentLoop } from "@domain/agentic-environment/loop/agent-loop"
 import { LoopStateExecutor } from "@domain/agentic-environment/loop/state-executor"
 import { FunctionCallState } from "@app/states/function-call"
 import { InferenceInput, InferenceState } from "@app/states/inference"
-import { MessageReceivedState } from "@app/states/message-received"
+import { ContextPreparationState } from "@app/states/context-preparation"
 import { ModelMessageState } from "@app/states/model-message"
 import { TransitionResolver } from "@domain/agentic-environment/loop/transition-resolver"
 import {
@@ -32,7 +32,7 @@ export function createRunLoop<TRuntimeState extends RuntimeState>(resolveRuntime
 		])
 
 		const stateExecutor = new LoopStateExecutor(
-			new MessageReceivedState(),
+			new ContextPreparationState(),
 			new InferenceState(inferenceRunner),
 			new FunctionCallState(functionCallRunner),
 			new ModelMessageState(),

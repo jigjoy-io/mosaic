@@ -5,7 +5,7 @@ import { FunctionCallParams } from "@app/states/function-call"
 import { SemanticEvent } from "../semantic-event/event"
 import { LoopVisitor } from "./loop-visitor"
 
-export type LoopStateId = "message_received" | "inference" | "function_call" | "model_message" | "idle"
+export type LoopStateId = "context_preparation" | "inference" | "function_call" | "model_message" | "idle"
 
 export type ReceivedMessage = {
 	content: string
@@ -25,7 +25,7 @@ export interface ModelMessageParams {
 // ============================================================
 
 export interface LoopStateContract {
-	message_received: {
+	context_preparation: {
 		input: ReceivedMessage
 		output: InferenceInput
 	}

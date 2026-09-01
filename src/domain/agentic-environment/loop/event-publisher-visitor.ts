@@ -13,14 +13,14 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 		private readonly runtime: RuntimeService<RuntimeState>,
 	) {}
 
-	visitMessageReceivedStarted(input: ReceivedMessage): void {
+	visitContextPreparationStarted(input: ReceivedMessage): void {
 		console.log("Visiting message received started: ", input)
-		this.publish("message_received.started", input)
+		this.publish("context_preparation.started", input)
 	}
 
-	visitMessageReceivedCompleted(output: InferenceInput): void {
+	visitContextPreparationCompleted(output: InferenceInput): void {
 		console.log("Visiting message received completed: ", output)
-		this.publish("message_received.completed", output)
+		this.publish("context_preparation.completed", output)
 	}
 
 	visitInferenceStarted(input: InferenceInput): void {

@@ -12,7 +12,7 @@ export class AgentLoop {
 
 	async run(message: ReceivedMessage): Promise<void> {
 		let transition: LoopTransition = {
-			nextStateId: "message_received",
+			nextStateId: "context_preparation",
 			input: message,
 		}
 

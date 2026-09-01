@@ -3,11 +3,11 @@ import { UserMessageItem } from "@domain/model-context/context-item/client-item/
 import { LoopState, LoopStateExecution, ReceivedMessage } from "@domain/agentic-environment/loop/loop-state"
 import { LoopVisitor } from "@domain/agentic-environment/loop/loop-visitor"
 
-export class MessageReceivedState implements LoopState<ReceivedMessage, LoopStateExecution<"message_received">> {
-	readonly id = "message_received"
+export class ContextPreparationState implements LoopState<ReceivedMessage, LoopStateExecution<"context_preparation">> {
+	readonly id = "context_preparation"
 
-	async run(input: ReceivedMessage, loopVisitor: LoopVisitor): Promise<LoopStateExecution<"message_received">> {
-		loopVisitor.visitMessageReceivedStarted(input)
+	async run(input: ReceivedMessage, loopVisitor: LoopVisitor): Promise<LoopStateExecution<"context_preparation">> {
+		loopVisitor.visitContextPreparationStarted(input)
 
 		const userMessage = UserMessageItem.create(input.content)
 
@@ -16,7 +16,7 @@ export class MessageReceivedState implements LoopState<ReceivedMessage, LoopStat
 			context: input.input.context.addContextItems([userMessage]),
 		}
 
-		loopVisitor.visitMessageReceivedCompleted(output)
+		loopVisitor.visitContextPreparationCompleted(output)
 		return {
 			stateId: this.id,
 			input,

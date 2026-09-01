@@ -19,8 +19,8 @@ export class MessageReceivedToInferenceRule implements LoopTransitionRule {
 	readonly specification = new MessageReceivedSpecification()
 
 	createTransition(execution: LoopStateExecution): LoopTransition<"inference"> {
-		if (execution.stateId !== "message_received") {
-			throw new Error("Expected message_received execution")
+		if (execution.stateId !== "context_preparation") {
+			throw new Error("Expected context_preparation execution")
 		}
 
 		return {
