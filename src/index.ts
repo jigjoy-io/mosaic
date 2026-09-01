@@ -26,6 +26,14 @@ import { OpenAIResponses } from "@infra/providers/openai/endpoints/openai-respon
 import { OpenAIChatCompletions } from "@infra/providers/openai/endpoints/openai-chat-completions"
 import { AnthropicMessages } from "@infra/providers/anthropic/endpoints/anthropic-messages"
 import { GeminiGenerateContent } from "@infra/providers/gemini/endpoints/gemini-generate-content"
+import { Agent } from "@domain/agentic-environment/participant/agent"
+import { Human } from "@domain/agentic-environment/participant/human"
+import {
+	SituationContext,
+	SituationHandler,
+	SituationProcessor,
+} from "@domain/agentic-environment/situation/situation-handler"
+import { SituationSpecification } from "@domain/agentic-environment/situation/situation-specification"
 
 export {
 	defineRuntime,
@@ -59,6 +67,12 @@ export {
 	AnthropicMessages,
 	GeminiGenerateContent,
 	Participant,
+	Agent,
+	Human,
+	SituationHandler,
+	SituationProcessor,
+	SituationSpecification,
+	SituationContext,
 	InferenceOutput,
 	InferenceInput,
 	InferenceRunner,
