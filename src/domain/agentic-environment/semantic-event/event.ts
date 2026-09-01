@@ -1,3 +1,5 @@
+import { ParticipantManifest } from "../participant/participant"
+
 export class SemanticEvent<TType extends string = string, TPayload = unknown> {
 	readonly type: TType
 	readonly producerId: string
@@ -21,9 +23,17 @@ export class SemanticEvent<TType extends string = string, TPayload = unknown> {
 	}
 }
 
-export type AgentJoinedEvent = SemanticEvent<"agent.joined", { agentId: string }>
+export class ParticipantJoinedEvent extends SemanticEvent<"participant.joined", ParticipantManifest> {
+	static init(manifest: ParticipantManifest): ParticipantJoinedEvent {
+		return SemanticEvent.create("participant.joined", manifest.id, manifest)
+	}
+}
 
-export type UserJoinedEvent = SemanticEvent<"user.joined", { userId: string }>
+export class ParticipantLeftEvent extends SemanticEvent<"participant.left", ParticipantManifest> {
+	static init(manifest: ParticipantManifest): ParticipantLeftEvent {
+		return SemanticEvent.create("participant.left", manifest.id, manifest)
+	}
+}
 
 export class MessageSentEvent extends SemanticEvent<"message.sent", { message: string }> {
 	static init(producerId: string, message: string): MessageSentEvent {
