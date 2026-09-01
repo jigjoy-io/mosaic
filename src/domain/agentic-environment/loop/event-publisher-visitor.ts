@@ -14,17 +14,14 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 	) {}
 
 	visitContextPreparationStarted(input: ReceivedMessage): void {
-		console.log("Visiting message received started: ", input)
 		this.publish("context_preparation.started", input)
 	}
 
 	visitContextPreparationCompleted(output: InferenceInput): void {
-		console.log("Visiting message received completed: ", output)
 		this.publish("context_preparation.completed", output)
 	}
 
 	visitInferenceStarted(input: InferenceInput): void {
-		console.log("Visiting inference started: ", input)
 		this.publish("inference.started", input)
 	}
 
@@ -33,22 +30,18 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 	}
 
 	visitInferenceCompleted(output: InferenceOutput): void {
-		console.log("Visiting inference completed: ", output)
 		this.publish("inference.completed", output)
 	}
 
 	visitFunctionCallStarted(input: FunctionCallParams): void {
-		console.log("Visiting function call started: ", input)
 		this.publish("function_call.started", input)
 	}
 
 	visitFunctionCallCompleted(output: FunctionCallOutputItem): void {
-		console.log("Visiting function call completed: ", output)
 		this.publish("function_call.completed", output)
 	}
 
 	visitModelAnswer(input: ModelMessageParams): void {
-		console.log("Visiting model answer: ", input.answer)
 		this.publish("model.answer", input)
 	}
 
