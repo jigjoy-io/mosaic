@@ -18,7 +18,11 @@ export class FremiumSpecification extends SituationSpecification {
 		const numberOfTry = runtime.state.freemiumAccount.getNumberOfTry()
 		const maxNumberOfTry = runtime.state.freemiumAccount.getMaxNumberOfTry()
 
-		return event.type === "message.sent" && numberOfTry < maxNumberOfTry
+		if (event.type === "message.sent" && numberOfTry >= maxNumberOfTry) {
+			throw new Error("Freemium account limit reached")
+		}
+
+		return true
 	}
 }
 
