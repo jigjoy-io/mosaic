@@ -34,6 +34,7 @@ import {
 	SituationProcessor,
 } from "@domain/agentic-environment/situation/situation-handler"
 import { SituationSpecification } from "@domain/agentic-environment/situation/situation-specification"
+import { DefaultInferenceRunner } from "@app/services/inference-runner"
 
 export {
 	defineRuntime,
@@ -76,5 +77,6 @@ export {
 	InferenceOutput,
 	InferenceInput,
 	InferenceRunner,
+	DefaultInferenceRunner,
 	InferenceRunnerConfig,
 }
