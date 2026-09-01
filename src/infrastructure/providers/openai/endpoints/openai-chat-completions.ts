@@ -46,7 +46,8 @@ export interface OpenAICompatibleConfig {
  */
 export class OpenAIChatCompletions implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
-	private readonly client: OpenAI
+	private _client?: OpenAI
+	private readonly clientConfig: OpenAICompatibleConfig
 	private readonly extraBody: Record<string, unknown>
 
 	constructor(
@@ -54,13 +55,17 @@ export class OpenAIChatCompletions implements Endpoint {
 		config: OpenAICompatibleConfig = {},
 	) {
 		this.endpointMapper = endpointMapper
+		this.clientConfig = config
+		this.extraBody = config.extraBody ?? {}
+	}
+
+	private get client(): OpenAI {
 		// Passing `undefined` for baseURL/apiKey lets the SDK fall back
 		// to OPENAI_BASE_URL / OPENAI_API_KEY from the environment.
-		this.client = new OpenAI({
-			baseURL: config.baseURL,
-			apiKey: config.apiKey,
-		})
-		this.extraBody = config.extraBody ?? {}
+		return (this._client ??= new OpenAI({
+			baseURL: this.clientConfig.baseURL,
+			apiKey: this.clientConfig.apiKey,
+		}))
 	}
 
 	private buildRequest(inferenceInput: InferenceInput): any {

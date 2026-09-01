@@ -17,14 +17,22 @@ export interface AnthropicConnectionConfig {
  */
 export class AnthropicMessages implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
-	private readonly client: Anthropic
+	private _client?: Anthropic
+	private readonly clientConfig: AnthropicConnectionConfig
 
 	constructor(
 		endpointMapper: InferenceEndpointMapper = new AnthropicMessagesMapper(),
 		config: AnthropicConnectionConfig = {},
 	) {
 		this.endpointMapper = endpointMapper
-		this.client = new Anthropic({ baseURL: config.baseURL, apiKey: config.apiKey })
+		this.clientConfig = config
+	}
+
+	private get client(): Anthropic {
+		return (this._client ??= new Anthropic({
+			baseURL: this.clientConfig.baseURL,
+			apiKey: this.clientConfig.apiKey,
+		}))
 	}
 
 	async infer(inferenceInput: InferenceInput): Promise<InferenceOutput> {

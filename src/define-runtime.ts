@@ -15,8 +15,8 @@ import { DefaultFunctionCallRunner } from "@app/services/function-call"
 import { createSendEvent } from "@app/use-cases/send-event"
 
 export type InferenceRunnerConfig = {
-	supportedModels: GenerativeModel[]
-	runner: InferenceRunner
+	supportedModels?: GenerativeModel[]
+	runner?: InferenceRunner
 }
 
 export function defineRuntime<TRuntimeState extends RuntimeState>() {

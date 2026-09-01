@@ -8,11 +8,14 @@ import type { InferenceEndpointMapper } from "@domain/generative-model/inference
 
 export class OpenAIResponses implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
-	private readonly client: OpenAI
+	private _client?: OpenAI
 
 	constructor(endpointMapper: InferenceEndpointMapper = new OpenAIResponsesMapper()) {
 		this.endpointMapper = endpointMapper
-		this.client = new OpenAI()
+	}
+
+	private get client(): OpenAI {
+		return (this._client ??= new OpenAI())
 	}
 
 	async infer(inferenceInput: InferenceInput): Promise<InferenceOutput> {

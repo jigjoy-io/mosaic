@@ -20,17 +20,22 @@ export interface GeminiConnectionConfig {
  */
 export class GeminiGenerateContent implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
-	private readonly client: GoogleGenAI
+	private _client?: GoogleGenAI
+	private readonly clientConfig: GeminiConnectionConfig
 
 	constructor(
 		endpointMapper: InferenceEndpointMapper = new GeminiGenerateContentMapper(),
 		config: GeminiConnectionConfig = {},
 	) {
 		this.endpointMapper = endpointMapper
-		this.client = new GoogleGenAI({
-			apiKey: config.apiKey ?? process.env.GEMINI_API_KEY,
-			...(config.baseURL ? { httpOptions: { baseUrl: config.baseURL } } : {}),
-		})
+		this.clientConfig = config
+	}
+
+	private get client(): GoogleGenAI {
+		return (this._client ??= new GoogleGenAI({
+			apiKey: this.clientConfig.apiKey ?? process.env.GEMINI_API_KEY,
+			...(this.clientConfig.baseURL ? { httpOptions: { baseUrl: this.clientConfig.baseURL } } : {}),
+		}))
 	}
 
 	async infer(inferenceInput: InferenceInput): Promise<InferenceOutput> {

@@ -15,12 +15,12 @@ import { McpToolRegistry } from "@infra/mcp/mcp-tool-registry"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { Endpoint } from "@domain/generative-model/endpoint"
-import { InferenceInput, InferenceOutput } from "@app/states/inference"
+import { InferenceInput, InferenceOutput, InferenceRunner } from "@app/states/inference"
 import { Participant } from "@domain/agentic-environment/participant/participant"
 import { createAgent } from "@app/use-cases/create-agent"
 import { createHuman } from "@app/use-cases/create-human"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { defineRuntime } from "./define-runtime"
+import { defineRuntime, type InferenceRunnerConfig } from "./define-runtime"
 import { supportedModels } from "@app/services/models"
 import { OpenAIResponses } from "@infra/providers/openai/endpoints/openai-responses"
 import { OpenAIChatCompletions } from "@infra/providers/openai/endpoints/openai-chat-completions"
@@ -61,4 +61,6 @@ export {
 	Participant,
 	InferenceOutput,
 	InferenceInput,
+	InferenceRunner,
+	InferenceRunnerConfig,
 }

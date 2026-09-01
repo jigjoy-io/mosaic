@@ -9,7 +9,8 @@
 		"tool-calling": "tsx tool-calling/main.ts",
 		"structured-output": "tsx structured-output/main.ts",
 		"reasoning-effort": "tsx reasoning-effort/main.ts",
-		"mcp": "tsx mcp/main.ts"
+		"mcp": "tsx mcp/main.ts",
+		"custom-inference-runner": "tsx custom-inference-runner/main.ts"
 	},
 	"author": "",
 	"license": "ISC",
