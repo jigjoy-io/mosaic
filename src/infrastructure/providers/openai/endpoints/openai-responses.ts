@@ -24,10 +24,30 @@ export class OpenAIResponses implements Endpoint {
 
 	async *stream(inferenceInput: InferenceInput): AsyncIterable<SemanticEvent> {
 		const request = this.endpointMapper.toRequest(inferenceInput)
-		const response: any = await this.client.responses.create(request)
+		const stream: any = await this.client.responses.create({ ...request, stream: true })
 
-		for await (const event of response) {
+		// Only the terminal `response.completed` event carries the assembled
+		// response; the deltas before it cannot be mapped to an InferenceOutput.
+		let completedResponse: any = undefined
+		for await (const event of stream) {
+			if (event.type === "response.completed") {
+				completedResponse = event.response
+			}
+
 			yield event
+		}
+
+		if (!completedResponse) {
+			throw new Error("Stream ended without a completed response")
+		}
+
+		const output = this.endpointMapper.toResponse(completedResponse)
+
+		yield {
+			type: "inference.output",
+			payload: output,
+			occurredAt: new Date(),
+			producerId: inferenceInput.model,
 		}
 	}
 }

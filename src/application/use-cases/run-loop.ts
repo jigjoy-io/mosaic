@@ -10,11 +10,12 @@ import {
 	FunctionCallToInferenceRule,
 	InferenceToFunctionCallRule,
 	InferenceToModelMessageRule,
-	MessageReceivedToInferenceRule,
+	ContextPreparationToInferenceRule,
 	ModelMessageToIdleRule,
 } from "@domain/agentic-environment/loop/transition-rule"
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 import { EventPublisherLoopVisitor } from "@domain/agentic-environment/loop/event-publisher-visitor"
+import { InferenceStreamingState } from "@app/states/inference-streaming"
 
 export function createRunLoop<TRuntimeState extends RuntimeState>(resolveRuntime: () => RuntimeService<TRuntimeState>) {
 	return function runLoop(agentId: string, message: string, inferenceInput: InferenceInput) {
@@ -24,7 +25,7 @@ export function createRunLoop<TRuntimeState extends RuntimeState>(resolveRuntime
 
 		const transitionResolver = new TransitionResolver([
 			// High-priority interception rules would go first.
-			new MessageReceivedToInferenceRule(),
+			new ContextPreparationToInferenceRule(),
 			new InferenceToFunctionCallRule(),
 			new InferenceToModelMessageRule(),
 			new FunctionCallToInferenceRule(),
@@ -34,6 +35,7 @@ export function createRunLoop<TRuntimeState extends RuntimeState>(resolveRuntime
 		const stateExecutor = new LoopStateExecutor(
 			new ContextPreparationState(),
 			new InferenceState(inferenceRunner),
+			new InferenceStreamingState(inferenceRunner),
 			new FunctionCallState(functionCallRunner),
 			new ModelMessageState(),
 		)

@@ -77,10 +77,19 @@ export class OpenAIChatCompletions implements Endpoint {
 	}
 
 	async *stream(inferenceInput: InferenceInput): AsyncIterable<SemanticEvent> {
-		const stream: any = await this.client.chat.completions.create(this.buildRequest(inferenceInput))
+		const stream = this.client.chat.completions.stream(this.buildRequest(inferenceInput))
 
-		for await (const event of stream) {
-			yield event
+		for await (const chunk of stream) {
+			yield chunk as unknown as SemanticEvent
+		}
+
+		const output = this.endpointMapper.toResponse(await stream.finalChatCompletion())
+
+		yield {
+			type: "inference.output",
+			payload: output,
+			occurredAt: new Date(),
+			producerId: inferenceInput.model,
 		}
 	}
 }

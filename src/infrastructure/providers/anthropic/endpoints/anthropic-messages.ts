@@ -36,10 +36,19 @@ export class AnthropicMessages implements Endpoint {
 
 	async *stream(inferenceInput: InferenceInput): AsyncIterable<SemanticEvent> {
 		const request = this.endpointMapper.toRequest(inferenceInput)
-		const stream: any = await this.client.messages.create(request)
+		const stream = this.client.messages.stream(request)
 
 		for await (const event of stream) {
-			yield event
+			yield event as unknown as SemanticEvent
+		}
+
+		const output = this.endpointMapper.toResponse(await stream.finalMessage())
+
+		yield {
+			type: "inference.output",
+			producerId: request.model,
+			occurredAt: new Date(),
+			payload: output,
 		}
 	}
 }

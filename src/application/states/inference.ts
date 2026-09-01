@@ -7,6 +7,7 @@ import type { Tool } from "@domain/generative-model/tool"
 import type { ModelContext } from "@domain/model-context/model-context"
 import type { StructuredOutputFormat } from "@domain/generative-model/request-validation/structured-output"
 import { LoopVisitor } from "@domain/agentic-environment/loop/loop-visitor"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 
 export type InferenceInput = {
 	model: string
@@ -27,6 +28,7 @@ export type InferenceOutput = {
 
 export interface InferenceRunner {
 	run(request: InferenceInput): Promise<InferenceOutput>
+	stream(request: InferenceInput): AsyncGenerator<SemanticEvent>
 }
 
 export class InferenceState implements LoopState<InferenceInput, LoopStateExecution<"inference">> {

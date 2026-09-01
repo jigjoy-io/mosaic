@@ -4,11 +4,13 @@ import { FunctionCallState } from "@app/states/function-call"
 import { InferenceState } from "@app/states/inference"
 import { ContextPreparationState } from "@app/states/context-preparation"
 import { ModelMessageState } from "@app/states/model-message"
+import { InferenceStreamingState } from "@app/states/inference-streaming"
 
 export class LoopStateExecutor {
 	constructor(
 		private readonly contextPreparationState: ContextPreparationState,
 		private readonly inferenceState: InferenceState,
+		private readonly inferenceStreamingState: InferenceStreamingState,
 		private readonly functionCallState: FunctionCallState,
 		private readonly modelMessageState: ModelMessageState,
 	) {}
@@ -42,6 +44,9 @@ export class LoopStateExecutor {
 
 			case "inference":
 				return await this.inferenceState.run(transition.input, loopVisitor)
+
+			case "inference_streaming":
+				return await this.inferenceStreamingState.run(transition.input, loopVisitor)
 
 			case "function_call":
 				return await this.functionCallState.run(transition.input, loopVisitor)

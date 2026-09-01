@@ -15,16 +15,18 @@ export interface LoopTransitionRule {
 	createTransition(execution: LoopStateExecution): LoopTransition
 }
 
-export class MessageReceivedToInferenceRule implements LoopTransitionRule {
+export class ContextPreparationToInferenceRule implements LoopTransitionRule {
 	readonly specification = new MessageReceivedSpecification()
 
-	createTransition(execution: LoopStateExecution): LoopTransition<"inference"> {
+	createTransition(execution: LoopStateExecution): LoopTransition<"inference" | "inference_streaming"> {
 		if (execution.stateId !== "context_preparation") {
 			throw new Error("Expected context_preparation execution")
 		}
 
+		const nextStateId = execution.output.streaming ? "inference_streaming" : "inference"
+
 		return {
-			nextStateId: "inference",
+			nextStateId,
 			input: execution.output,
 		}
 	}
@@ -35,7 +37,7 @@ export class InferenceToFunctionCallRule implements LoopTransitionRule {
 
 	createTransition(execution: LoopStateExecution): LoopTransition<"function_call"> {
 		if (
-			execution.stateId !== "inference" ||
+			(execution.stateId !== "inference" && execution.stateId !== "inference_streaming") ||
 			!execution.output.items.some((item) => item.type === "function_call")
 		) {
 			throw new Error("Expected inference function-call output")
@@ -62,7 +64,7 @@ export class InferenceToModelMessageRule implements LoopTransitionRule {
 
 	createTransition(execution: LoopStateExecution): LoopTransition<"model_message"> {
 		if (
-			execution.stateId !== "inference" ||
+			(execution.stateId !== "inference" && execution.stateId !== "inference_streaming") ||
 			!execution.output.items.some((item) => item.type === "message" && item.role === "assistant")
 		) {
 			throw new Error("Expected inference model-message output")
@@ -87,7 +89,7 @@ export class InferenceToModelMessageRule implements LoopTransitionRule {
 export class FunctionCallToInferenceRule implements LoopTransitionRule {
 	readonly specification = new FunctionCallCompletedSpecification()
 
-	createTransition(execution: LoopStateExecution): LoopTransition<"inference"> {
+	createTransition(execution: LoopStateExecution): LoopTransition<"inference" | "inference_streaming"> {
 		if (execution.stateId !== "function_call") {
 			throw new Error("Expected function_call execution")
 		}
@@ -97,7 +99,7 @@ export class FunctionCallToInferenceRule implements LoopTransitionRule {
 		previousRequest.context.addContextItems([execution.input.call, execution.output.item])
 
 		return {
-			nextStateId: "inference",
+			nextStateId: previousRequest.streaming ? "inference_streaming" : "inference",
 			input: {
 				...previousRequest,
 			},

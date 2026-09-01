@@ -1,10 +1,11 @@
 {
-	"name": "example",
+	"name": "mozaik-examples",
 	"version": "1.0.0",
 	"type": "module",
+	"private": true,
 	"scripts": {
-		"start": "tsx main.ts",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"basic-agent": "tsx basic-agent/main.ts",
+		"streaming-agent": "tsx streaming-agent/main.ts"
 	},
 	"author": "",
 	"license": "ISC",

@@ -2,10 +2,15 @@ import { InferenceInput, InferenceOutput } from "../../../application/states/inf
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { FunctionCallParams } from "@app/states/function-call"
-import { SemanticEvent } from "../semantic-event/event"
 import { LoopVisitor } from "./loop-visitor"
 
-export type LoopStateId = "context_preparation" | "inference" | "function_call" | "model_message" | "idle"
+export type LoopStateId =
+	| "context_preparation"
+	| "inference"
+	| "inference_streaming"
+	| "function_call"
+	| "model_message"
+	| "idle"
 
 export type ReceivedMessage = {
 	content: string
@@ -35,6 +40,11 @@ export interface LoopStateContract {
 		output: InferenceOutput
 	}
 
+	inference_streaming: {
+		input: InferenceInput
+		output: InferenceOutput
+	}
+
 	function_call: {
 		input: FunctionCallParams
 		output: FunctionCallExecutionOutput
@@ -56,16 +66,6 @@ export type ExecutableLoopStateId = Exclude<LoopStateId, "idle">
 // ============================================================
 // State execution
 // ============================================================
-
-export type LoopStateStartedPayload<TStateId extends ExecutableLoopStateId> = {
-	stateId: TStateId
-	input: LoopStateContract[TStateId]["input"]
-}
-
-export type LoopStateCompletedPayload<TStateId extends ExecutableLoopStateId> = {
-	stateId: TStateId
-	output: LoopStateContract[TStateId]["output"]
-}
 
 export interface LoopState<TInput, TOutput> {
 	readonly id: LoopStateId
@@ -90,12 +90,4 @@ export type LoopTransition<TStateId extends LoopStateId = LoopStateId> = {
 		nextStateId: K
 		input: LoopStateContract[K]["input"]
 	}
-}[TStateId]
-
-export type LoopStateStartedEvent<TStateId extends ExecutableLoopStateId = ExecutableLoopStateId> = {
-	[K in TStateId]: SemanticEvent<"loop.state.started", LoopStateStartedPayload<K>>
-}[TStateId]
-
-export type LoopStateCompletedEvent<TStateId extends ExecutableLoopStateId = ExecutableLoopStateId> = {
-	[K in TStateId]: SemanticEvent<"loop.state.completed", LoopStateCompletedPayload<K>>
 }[TStateId]

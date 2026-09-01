@@ -29,7 +29,6 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 	}
 
 	visitInferenceEvent(event: SemanticEvent): void {
-		console.log("Visiting inference event: ", event)
 		this.publish("inference.stream", event)
 	}
 

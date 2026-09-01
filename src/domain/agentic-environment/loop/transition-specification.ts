@@ -44,16 +44,23 @@ export class MessageReceivedSpecification implements TransitionSpecification {
 	}
 }
 
+type InferenceExecution = Extract<LoopStateExecution, { stateId: "inference" | "inference_streaming" }>
+
+/** Buffered and streaming inference produce the same output, so both satisfy the inference specifications. */
+function isInferenceExecution(execution: LoopStateExecution): execution is InferenceExecution {
+	return execution.stateId === "inference" || execution.stateId === "inference_streaming"
+}
+
 export class InferenceProducedFunctionCallSpecification implements TransitionSpecification {
 	isSatisfiedBy(execution: LoopStateExecution): boolean {
-		return execution.stateId === "inference" && execution.output.items.some((item) => item.type === "function_call")
+		return isInferenceExecution(execution) && execution.output.items.some((item) => item.type === "function_call")
 	}
 }
 
 export class InferenceProducedModelMessageSpecification implements TransitionSpecification {
 	isSatisfiedBy(execution: LoopStateExecution): boolean {
 		return (
-			execution.stateId === "inference" &&
+			isInferenceExecution(execution) &&
 			execution.output.items.some((item) => item.type === "message" && item.role === "assistant")
 		)
 	}

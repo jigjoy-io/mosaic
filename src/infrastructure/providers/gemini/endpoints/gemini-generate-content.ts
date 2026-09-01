@@ -44,8 +44,23 @@ export class GeminiGenerateContent implements Endpoint {
 		const request = this.endpointMapper.toRequest(inferenceInput)
 		const stream: any = await this.client.models.generateContentStream(request)
 
+		let lastEvent: SemanticEvent | undefined = undefined
 		for await (const chunk of stream) {
+			lastEvent = chunk
 			yield chunk
+		}
+
+		if (!lastEvent) {
+			throw new Error("Last event not found")
+		}
+
+		const output = this.endpointMapper.toResponse(lastEvent)
+
+		yield {
+			type: "inference.output",
+			producerId: request.model,
+			occurredAt: new Date(),
+			payload: output,
 		}
 	}
 }

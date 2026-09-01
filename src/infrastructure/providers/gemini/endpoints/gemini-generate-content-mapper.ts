@@ -5,7 +5,6 @@ import { DeveloperMessageItem } from "@domain/model-context/context-item/client-
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
 import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
-import type { ContextItem } from "@domain/model-context/context-item/context-item"
 import { InputText } from "@domain/model-context/context-item/item-content/input-text"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
