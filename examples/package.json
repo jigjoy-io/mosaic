@@ -4,8 +4,12 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"basic-agent": "tsx basic-agent/main.ts",
-		"streaming-agent": "tsx streaming-agent/main.ts"
+		"basic": "tsx basic/main.ts",
+		"streaming": "tsx streaming/main.ts",
+		"tool-calling": "tsx tool-calling/main.ts",
+		"structured-output": "tsx structured-output/main.ts",
+		"reasoning-effort": "tsx reasoning-effort/main.ts",
+		"mcp": "tsx mcp/main.ts"
 	},
 	"author": "",
 	"license": "ISC",
