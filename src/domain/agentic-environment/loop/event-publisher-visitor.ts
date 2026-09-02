@@ -62,6 +62,8 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 		const event = new SemanticEvent(type, this.agentId, new Date(), payload)
 		this.runtime.publish(event)
 
-		this.cloud.send(event)
+		if (this.cloud.enabled) {
+			this.cloud.send(event)
+		}
 	}
 }
