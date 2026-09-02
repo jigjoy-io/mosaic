@@ -100,7 +100,7 @@ export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
 		const items: InferenceItem[] = []
 		const message = response.choices?.[0]?.message
 		if (!message) {
-			return { items: [], rowResponse: response }
+			return { items: [], tokenUsage: this.extractTokenUsage(response), rowResponse: response }
 		}
 
 		if (message.reasoning_content) {
@@ -127,6 +127,6 @@ export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
 			)
 		}
 
-		return { items, rowResponse: response }
+		return { items, tokenUsage: this.extractTokenUsage(response), rowResponse: response }
 	}
 }

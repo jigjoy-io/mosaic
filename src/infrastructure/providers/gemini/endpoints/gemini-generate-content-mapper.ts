@@ -170,6 +170,6 @@ export class GeminiGenerateContentMapper implements InferenceEndpointMapper {
 			}
 		}
 
-		return { items, rowResponse: response }
+		return { items, tokenUsage: this.extractTokenUsage(response), rowResponse: response }
 	}
 }

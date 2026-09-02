@@ -8,7 +8,6 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { InputText } from "@domain/model-context/context-item/item-content/input-text"
-import type { ContextItem } from "@domain/model-context/context-item/context-item"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import type Anthropic from "@anthropic-ai/sdk"
 
@@ -177,6 +176,6 @@ export class AnthropicMessagesMapper implements InferenceEndpointMapper {
 			}
 		}
 
-		return { items, rowResponse: response }
+		return { items, tokenUsage: this.extractTokenUsage(response), rowResponse: response }
 	}
 }

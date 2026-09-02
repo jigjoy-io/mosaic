@@ -9,7 +9,6 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
 import { SummaryText } from "@domain/model-context/context-item/item-content/summary-text"
 import { InferenceOutput } from "@app/states/inference"
-import type { ContextItem } from "@domain/model-context/context-item/context-item"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import type OpenAI from "openai"
 
@@ -163,6 +162,7 @@ export class OpenAIResponsesMapper implements InferenceEndpointMapper {
 
 		return {
 			items,
+			tokenUsage: this.extractTokenUsage(response),
 			rowResponse: response,
 		}
 	}

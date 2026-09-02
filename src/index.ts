@@ -36,6 +36,7 @@ import {
 import { SituationSpecification } from "@domain/agentic-environment/situation/situation-specification"
 import { DefaultInferenceRunner } from "@app/services/inference-runner"
 import { InterceptionHandler } from "@domain/agentic-environment/loop/agent-loop"
+import { ExecutableLoopStateId, LoopStateExecution, LoopTransition } from "@domain/agentic-environment/loop/loop-state"
 
 export {
 	defineRuntime,
@@ -76,6 +77,9 @@ export {
 	SituationSpecification,
 	SituationContext,
 	InterceptionHandler,
+	LoopStateExecution,
+	LoopTransition,
+	ExecutableLoopStateId,
 	InferenceOutput,
 	InferenceInput,
 	InferenceRunner,
