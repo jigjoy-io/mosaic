@@ -1,14 +1,22 @@
 <div align="center">
 <h1>Mozaik</h1>
-<p>TypeScript runtime for concurrent AI agents</p>
-
-<img width="150" height="150" alt="mozaik-avatar-dark" src="https://github.com/user-attachments/assets/e832c359-0581-42f7-96f3-d6e221c5af95" />
+<p>Mozaik is a TypeScript runtime for interoperable AI agents.</p>
 
 ![npm downloads](https://img.shields.io/npm/dt/@mozaik-ai/core) ![npm downloads weekly](https://img.shields.io/npm/dw/@mozaik-ai/core) ![npm version](https://img.shields.io/npm/v/@mozaik-ai/core)
 
-Mozaik is a TypeScript runtime for non-blocking AI agents that work independently, communicate through semantic events, and coordinate without predefined workflows.
+<img width="1254" height="1254" alt="agent-interoperability" src="https://github.com/user-attachments/assets/4b24bf27-afe2-4520-a396-5c46da6dab17" />
 
 </div>
+
+## Agent Interoperability
+
+Our main goal is to unlock agent interoperability across projects, so Mozaik is built around three core attributes:
+
+- **Concurrency** - Agents work independently without blocking one another.
+- **Awareness** - Agents understand other participants, events, and their shared environment.
+- **Adaptivity** - Agents change their behavior based on runtime state and emerging needs.
+
+Together, these capabilities free AI agents from specific harnesses, allowing them to work across projects - so every newly created agent adds value to the entire ecosystem.
 
 ---
 
