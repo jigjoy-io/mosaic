@@ -14,10 +14,10 @@
   resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.28.6.tgz"
   integrity sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==
 
-"@esbuild/darwin-arm64@0.27.2":
+"@esbuild/linux-x64@0.27.2":
   version "0.27.2"
-  resolved "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.27.2.tgz"
-  integrity sha512-davCD2Zc80nzDVRwXTcQP/28fiJbcOwvdolL0sOiOsbwBa72kegmVU0Wrh1MYrbuCL98Omp5dVhQFWRKR2ZAlg==
+  resolved "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.27.2.tgz"
+  integrity sha512-uwp2Tip5aPmH+NRUwTcfLb+W32WXjpFejTIOWZFw/v7/KnpCDKG66u4DLcurQpiYTiYwQ9B7KOeMJvLCu/OvbA==
 
 "@eslint-community/eslint-utils@^4.8.0", "@eslint-community/eslint-utils@^4.9.1":
   version "4.9.1"
@@ -179,6 +179,11 @@
     zod "^3.25 || ^4.0"
     zod-to-json-schema "^3.25.1"
 
+"@mozaik-ai/cloud-sdk@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.npmjs.org/@mozaik-ai/cloud-sdk/-/cloud-sdk-0.0.2.tgz"
+  integrity sha512-7OyydOajCMWKKNpIPgOLfr+awdrE/1+9DhYzy1Teh8NGmgFXnoz8Ojosh4A5nL/zk+vjfjjAWoShdKhrhdw2Zw==
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.npmjs.org/@pkgjs/parseargs/-/parseargs-0.11.0.tgz"
@@ -236,10 +241,15 @@
   resolved "https://registry.npmjs.org/@protobufjs/utf8/-/utf8-1.1.1.tgz"
   integrity sha512-oOAWABowe8EAbMyWKM0tYDKi8Yaox52D+HWZhAIJqQXbqe0xI/GV7FhLWqlEKreMkfDjshR5FKgi3mnle0h6Eg==
 
-"@rollup/rollup-darwin-arm64@4.59.0":
+"@rollup/rollup-linux-x64-gnu@4.59.0":
   version "4.59.0"
-  resolved "https://registry.npmjs.org/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.59.0.tgz"
-  integrity sha512-W2Psnbh1J8ZJw0xKAd8zdNgF9HRLkdWwwdWqubSVk0pUuQkoHnv7rx4GiF9rT4t5DIZGAsConRE3AxCdJ4m8rg==
+  resolved "https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.59.0.tgz"
+  integrity sha512-3AHmtQq/ppNuUspKAlvA8HtLybkDflkMuLK4DPo77DfthRb71V84/c4MlWJXixZz4uruIH4uaa07IqoAkG64fg==
+
+"@rollup/rollup-linux-x64-musl@4.59.0":
+  version "4.59.0"
+  resolved "https://registry.npmjs.org/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.59.0.tgz"
+  integrity sha512-2UdiwS/9cTAx7qIUZB/fWtToJwvt0Vbo0zmnYt7ED35KPg13Q0ym1g442THLC7VyI6JfYTP4PiSOWyoMdV2/xg==
 
 "@rsbuild/core@^2.0.6":
   version "2.0.8"
@@ -249,10 +259,15 @@
     "@rspack/core" "~2.0.5"
     "@swc/helpers" "^0.5.23"
 
-"@rspack/binding-darwin-arm64@2.0.5":
+"@rspack/binding-linux-x64-gnu@2.0.5":
   version "2.0.5"
-  resolved "https://registry.npmjs.org/@rspack/binding-darwin-arm64/-/binding-darwin-arm64-2.0.5.tgz"
-  integrity sha512-++wjLQjQ20GcR0DwbzQmVXg9qy4XCX5NlfSzkzj2icHoDxr3KkrXhyVrQkdWuNG6l/bQrGLPnvLEAqkroC2Y7A==
+  resolved "https://registry.npmjs.org/@rspack/binding-linux-x64-gnu/-/binding-linux-x64-gnu-2.0.5.tgz"
+  integrity sha512-241wqE132jh+/U/pn97qUPV4KpIy4bSrTH0tqfzQCocgw+8hrUj02GqNG+3MXVC3qtwaQeJFYgEBy3TqFKsrIQ==
+
+"@rspack/binding-linux-x64-musl@2.0.5":
+  version "2.0.5"
+  resolved "https://registry.npmjs.org/@rspack/binding-linux-x64-musl/-/binding-linux-x64-musl-2.0.5.tgz"
+  integrity sha512-BhaXZD064Lci3Kia0kLDAb4TyxO2C+0UidMlj44e8+ctasxIfFZgnrhCJrhTFHAtOiAwqhU3FHun2UuxPqX0Eg==
 
 "@rspack/binding@2.0.5":
   version "2.0.5"
@@ -1116,11 +1131,6 @@ fresh@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/fresh/-/fresh-2.0.0.tgz"
   integrity sha512-Rx/WycZ60HOaqLKAi6cHRKKI7zxWbJ31MhntmtwMoaTeF7XFH9hhBp8vITaMidfljRQ6eYWCKkaTK+ykVJHP2A==
-
-fsevents@~2.3.2:
-  version "2.3.3"
-  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
-  integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
 function-bind@^1.1.2:
   version "1.1.2"
@@ -2227,7 +2237,7 @@ ts-interface-checker@^0.1.9:
   resolved "https://registry.npmjs.org/ts-interface-checker/-/ts-interface-checker-0.1.13.tgz"
   integrity sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==
 
-tslib@^2.4.0, tslib@^2.8.0:
+tslib@^2.8.0:
   version "2.8.1"
   resolved "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz"
   integrity sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==

@@ -6,13 +6,17 @@ import { FunctionCallParams } from "@app/states/function-call"
 import { RuntimeService } from "@app/services/runtime"
 import { RuntimeState } from "../runtime-state"
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
+import { CloudClient, createCloudClient } from "@mozaik-ai/cloud-sdk"
 
 export class EventPublisherLoopVisitor implements LoopVisitor {
+	private readonly cloud: CloudClient
 	constructor(
 		private readonly agentId: string,
 		private readonly loopId: string,
 		private readonly runtime: RuntimeService<RuntimeState>,
-	) {}
+	) {
+		this.cloud = createCloudClient()
+	}
 
 	visitContextUpdateStarted(input: ReceivedMessage): void {
 		this.publish("context_update.started", { ...input, loopId: this.loopId })
@@ -55,11 +59,9 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 	}
 
 	private publish<TPayload>(type: string, payload: TPayload): void {
-		this.runtime.publish({
-			type,
-			producerId: this.agentId,
-			occurredAt: new Date(),
-			payload: { ...payload, loopId: this.loopId },
-		})
+		const event = new SemanticEvent(type, this.agentId, new Date(), payload)
+		this.runtime.publish(event)
+
+		this.cloud.send(event)
 	}
 }
