@@ -16,7 +16,7 @@ import {
 import { RuntimeState } from "@domain/agentic-environment/runtime-state"
 import { EventPublisherLoopVisitor } from "@domain/agentic-environment/loop/event-publisher-visitor"
 import { InferenceStreamingState } from "@app/states/inference-streaming"
-import { InterceptionHandler } from "@domain/agentic-environment/loop/agent-loop"
+import { InterceptionHandler } from "@domain/agentic-environment/loop/interception"
 
 export function createRunLoop<TRuntimeState extends RuntimeState>(resolveRuntime: () => RuntimeService<TRuntimeState>) {
 	return function runLoop(

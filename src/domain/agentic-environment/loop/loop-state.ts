@@ -3,6 +3,7 @@ import { ModelMessageItem } from "@domain/model-context/context-item/model-item/
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { FunctionCallParams } from "@app/states/function-call"
 import { LoopVisitor } from "./loop-visitor"
+import { InterceptionOutput, InterceptionParams } from "./interception"
 
 export type LoopStateId =
 	| "context_update"
@@ -66,25 +67,8 @@ export interface LoopStateContract {
 	}
 }
 
-export type InterceptionOutput =
-	| {
-			type: "continue"
-			transition: LoopTransition
-	  }
-	| {
-			type: "pause"
-			pendingTransition: LoopTransition
-	  }
-	| {
-			type: "stop"
-			reason?: string
-	  }
-
-export interface InterceptionParams {
-	pendingTransition: LoopTransition
-}
-
 export type ExecutableLoopStateId = Exclude<LoopStateId, "idle">
+export type ExecutableTransition = LoopTransition<ExecutableLoopStateId>
 
 // ============================================================
 // State execution

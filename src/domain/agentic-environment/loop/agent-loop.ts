@@ -1,12 +1,8 @@
-import { ExecutableLoopStateId, LoopTransition, ReceivedMessage } from "./loop-state"
+import { InterceptionHandler } from "./interception"
+import { LoopTransition, ReceivedMessage } from "./loop-state"
 import { LoopVisitor } from "./loop-visitor"
 import { LoopStateExecutor } from "./state-executor"
 import { TransitionResolver } from "./transition-resolver"
-
-export interface InterceptionHandler {
-	isSatisfiedBy(transition: LoopTransition<ExecutableLoopStateId>): boolean
-	handle(transition: LoopTransition<ExecutableLoopStateId>): Promise<LoopTransition<ExecutableLoopStateId>>
-}
 
 export class AgentLoop {
 	private constructor(
