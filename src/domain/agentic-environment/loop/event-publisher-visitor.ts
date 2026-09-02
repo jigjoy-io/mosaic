@@ -1,5 +1,5 @@
 import { InferenceInput, InferenceOutput } from "@app/states/inference"
-import { ModelMessageParams, ReceivedMessage } from "./loop-state"
+import { LoopTransition, ModelMessageParams, ReceivedMessage } from "./loop-state"
 import { LoopVisitor } from "./loop-visitor"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { FunctionCallParams } from "@app/states/function-call"
@@ -10,15 +10,16 @@ import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 export class EventPublisherLoopVisitor implements LoopVisitor {
 	constructor(
 		private readonly agentId: string,
+		private readonly loopId: string,
 		private readonly runtime: RuntimeService<RuntimeState>,
 	) {}
 
-	visitContextPreparationStarted(input: ReceivedMessage): void {
-		this.publish("context_preparation.started", input)
+	visitContextUpdateStarted(input: ReceivedMessage): void {
+		this.publish("context_update.started", { ...input, loopId: this.loopId })
 	}
 
-	visitContextPreparationCompleted(output: InferenceInput): void {
-		this.publish("context_preparation.completed", output)
+	visitContextUpdateCompleted(output: InferenceInput): void {
+		this.publish("context_update.completed", { ...output, loopId: this.loopId })
 	}
 
 	visitInferenceStarted(input: InferenceInput): void {
@@ -45,12 +46,20 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 		this.publish("model.answer", input)
 	}
 
+	visitInterceptionStarted(transition: LoopTransition): void {
+		this.publish("interception.started", transition)
+	}
+
+	visitInterceptionFinished(transition: LoopTransition): void {
+		this.publish("interception.finished", transition)
+	}
+
 	private publish<TPayload>(type: string, payload: TPayload): void {
 		this.runtime.publish({
 			type,
 			producerId: this.agentId,
 			occurredAt: new Date(),
-			payload,
+			payload: { ...payload, loopId: this.loopId },
 		})
 	}
 }

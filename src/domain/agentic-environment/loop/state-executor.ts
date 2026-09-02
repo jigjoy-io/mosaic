@@ -2,13 +2,13 @@ import { ExecutableLoopStateId, LoopStateExecution, LoopTransition } from "./loo
 import { LoopVisitor } from "./loop-visitor"
 import { FunctionCallState } from "@app/states/function-call"
 import { InferenceState } from "@app/states/inference"
-import { ContextPreparationState } from "@app/states/context-preparation"
+import { ContextUpdateState } from "@app/states/context-update"
 import { ModelMessageState } from "@app/states/model-message"
 import { InferenceStreamingState } from "@app/states/inference-streaming"
 
 export class LoopStateExecutor {
 	constructor(
-		private readonly contextPreparationState: ContextPreparationState,
+		private readonly contextUpdateState: ContextUpdateState,
 		private readonly inferenceState: InferenceState,
 		private readonly inferenceStreamingState: InferenceStreamingState,
 		private readonly functionCallState: FunctionCallState,
@@ -16,9 +16,9 @@ export class LoopStateExecutor {
 	) {}
 
 	execute(
-		transition: LoopTransition<"context_preparation">,
+		transition: LoopTransition<"context_update">,
 		loopVisitor: LoopVisitor,
-	): Promise<LoopStateExecution<"context_preparation">>
+	): Promise<LoopStateExecution<"context_update">>
 
 	execute(transition: LoopTransition<"inference">, loopVisitor: LoopVisitor): Promise<LoopStateExecution<"inference">>
 
@@ -39,8 +39,8 @@ export class LoopStateExecutor {
 		loopVisitor: LoopVisitor,
 	): Promise<LoopStateExecution> {
 		switch (transition.nextStateId) {
-			case "context_preparation":
-				return await this.contextPreparationState.run(transition.input, loopVisitor)
+			case "context_update":
+				return await this.contextUpdateState.run(transition.input, loopVisitor)
 
 			case "inference":
 				return await this.inferenceState.run(transition.input, loopVisitor)

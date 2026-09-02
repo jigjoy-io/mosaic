@@ -3,23 +3,49 @@ import { LoopVisitor } from "./loop-visitor"
 import { LoopStateExecutor } from "./state-executor"
 import { TransitionResolver } from "./transition-resolver"
 
+export interface InterceptionHandler {
+	isSatisfiedBy(transition: LoopTransition): boolean
+	handle(transition: LoopTransition): Promise<LoopTransition>
+}
+
 export class AgentLoop {
-	constructor(
+	private constructor(
+		private readonly loopId: string,
 		private readonly stateExecutor: LoopStateExecutor,
 		private readonly transitionResolver: TransitionResolver,
-		private readonly loopVisitor: LoopVisitor,
+		private readonly interceptionHandler: InterceptionHandler,
 	) {}
 
-	async run(message: ReceivedMessage): Promise<void> {
+	async run(message: ReceivedMessage, loopVisitor: LoopVisitor): Promise<void> {
 		let transition: LoopTransition = {
-			nextStateId: "context_preparation",
+			nextStateId: "context_update",
 			input: message,
 		}
 
 		while (transition.nextStateId !== "idle") {
-			const execution = await this.stateExecutor.execute(transition, this.loopVisitor)
+			const isInterceptionSatisfied = this.interceptionHandler.isSatisfiedBy(transition)
 
-			transition = this.transitionResolver.resolve(execution)
+			if (isInterceptionSatisfied) {
+				loopVisitor.visitInterceptionStarted(transition)
+				transition = await this.interceptionHandler.handle(transition)
+				loopVisitor.visitInterceptionFinished(transition)
+			} else {
+				const execution = await this.stateExecutor.execute(transition, loopVisitor)
+				transition = this.transitionResolver.resolve(execution)
+			}
 		}
+	}
+
+	getLoopId(): string {
+		return this.loopId
+	}
+
+	static create(
+		stateExecutor: LoopStateExecutor,
+		transitionResolver: TransitionResolver,
+		interceptionHandler: InterceptionHandler,
+	): AgentLoop {
+		const loopId = crypto.randomUUID()
+		return new AgentLoop(loopId, stateExecutor, transitionResolver, interceptionHandler)
 	}
 }

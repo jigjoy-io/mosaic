@@ -5,7 +5,7 @@ import { FunctionCallParams } from "@app/states/function-call"
 import { LoopVisitor } from "./loop-visitor"
 
 export type LoopStateId =
-	| "context_preparation"
+	| "context_update"
 	| "inference"
 	| "inference_streaming"
 	| "function_call"
@@ -30,7 +30,7 @@ export interface ModelMessageParams {
 // ============================================================
 
 export interface LoopStateContract {
-	context_preparation: {
+	context_update: {
 		input: ReceivedMessage
 		output: InferenceInput
 	}
@@ -55,10 +55,33 @@ export interface LoopStateContract {
 		output: void
 	}
 
+	interception: {
+		input: InterceptionParams
+		output: InterceptionOutput
+	}
+
 	idle: {
 		input: undefined
 		output: void
 	}
+}
+
+export type InterceptionOutput =
+	| {
+			type: "continue"
+			transition: LoopTransition
+	  }
+	| {
+			type: "pause"
+			pendingTransition: LoopTransition
+	  }
+	| {
+			type: "stop"
+			reason?: string
+	  }
+
+export interface InterceptionParams {
+	pendingTransition: LoopTransition
 }
 
 export type ExecutableLoopStateId = Exclude<LoopStateId, "idle">
