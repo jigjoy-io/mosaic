@@ -55,318 +55,372 @@ DeepSeek models run through the OpenAI-compatible chat-completions endpoint, so 
 
 ---
 
-## The agentic environment
+## Table of contents
 
-`AgenticEnvironment` is where everything happens. `Participant`s `join()` it, and from that moment on they can **listen to messages and events** flowing through the environment by overriding any of the handlers below:
+- [Runtime](#runtime)
+- [Runtime state](#runtime-state)
+- [Participants](#participants)
+- [Concurrent agents](#concurrent-agents)
+- [Semantic events](#semantic-events)
+- [Situation handlers](#situation-handlers)
+- [The agent loop](#the-agent-loop)
+- [Interception](#interception)
+- [Examples](#examples)
+- [Made with Mozaik](#made-with-mozaik)
+- [Contributing](#contributing)
 
-| Handler                        | Triggered when…                                        |
-| ------------------------------ | ------------------------------------------------------ |
-| `onJoined`                     | this participant joins an environment                  |
-| `onLeft`                       | this participant leaves an environment                 |
-| `onParticipantJoined`          | another participant joins the same environment         |
-| `onParticipantLeft`            | another participant leaves the same environment        |
-| `onMessage`                    | any participant sends a message                        |
-| `onFunctionCall`               | its own inference returns a function call              |
-| `onExternalFunctionCall`       | another agent's inference returns a function call      |
-| `onFunctionCallOutput`         | its own function call runner returns a result          |
-| `onExternalFunctionCallOutput` | another agent's function call runner returns a result  |
-| `onReasoning`                  | its own inference returns a reasoning item             |
-| `onExternalReasoning`          | another agent's inference returns a reasoning item     |
-| `onModelMessage`               | its own inference returns an assistant message         |
-| `onExternalModelMessage`       | another agent's inference returns an assistant message |
-| `onInternalEvent`              | its own inference emits a semantic stream event        |
-| `onExternalEvent`              | another participant emits a semantic stream event      |
-| `onError`                      | one of its own handlers throws                         |
-| `onParticipantError`           | another participant's handler throws                   |
+---
 
-Every handler defaults to a no-op on `BaseParticipant` — override only the ones you care about.
+## Runtime
+
+The **runtime** is the shared space where participants meet, events are published, and agent loops run. Create one with `defineRuntime`, then call `initializeRuntime` once with a `RuntimeState`:
+
+```ts
+import { defineRuntime, RuntimeState } from "@mozaik-ai/core"
+
+class AppState extends RuntimeState {}
+
+const { initializeRuntime, resolveRuntime, resolveParticipant, join, leave, sendMessage, sendEvent, runLoop } =
+	defineRuntime<AppState>()
+
+initializeRuntime({ state: new AppState() })
+```
+
+`defineRuntime` returns the functions you use for the rest of the session. They are **not** top-level package exports — keep them in module scope (or re-export them yourself):
+
+| Function | Role |
+| -------- | ---- |
+| `initializeRuntime({ state, inferenceRunnerConfig? })` | Create the runtime. Throws if called twice. |
+| `resolveRuntime()` | The initialized runtime (including `.state`). |
+| `resolveParticipant(id)` | Look up a joined participant by id. |
+| `join(participant)` / `leave(participant)` | Membership. |
+| `sendMessage(message, senderId)` | Publish a `message.sent` event. |
+| `sendEvent(event, senderId)` | Publish any `SemanticEvent`. |
+| `runLoop(agentId, message, inferenceInput, interceptionHandler?)` | Start an agent loop. |
+
+Calling `initializeRuntime` a second time throws `"Runtime already initialized"`. Calling any of the other functions before `initializeRuntime` throws `"Runtime not initialized"`.
+
+---
+
+## Runtime state
+
+**Runtime state** is the typed store every participant shares. `RuntimeState` already holds the participant registry (`participants: Map<string, Participant>`). Subclass it for anything the team needs to share — an active goal, a work queue, a transcript buffer:
+
+```ts
+import { defineRuntime, RuntimeState } from "@mozaik-ai/core"
+
+class AppState extends RuntimeState {
+	activeGoal?: string
+}
+
+const { initializeRuntime, resolveRuntime } = defineRuntime<AppState>()
+
+initializeRuntime({ state: new AppState() })
+
+resolveRuntime().state.activeGoal = "ship the runtime docs"
+```
+
+Participants read and write this object from situation processors (and from an `InterceptionHandler`). There is no second hidden store.
+
+---
+
+## Participants
+
+A **participant** is anyone who can join the runtime. Mozaik ships two factories:
+
+| Role | Factory | What it carries |
+| ---- | ------- | --------------- |
+| **Human** | `createHuman({ name, capabilities, handlers })` | A manifest and situation handlers. Typically calls `sendMessage`. |
+| **Agent** | `createAgent({ name, capabilities, instruction, tools, handlers })` | Manifest, handlers, an instruction, tools, and memory (`agent.getMemory().getContext()`). Typically starts thinking with `runLoop`. |
+| **Observer** | Either factory, handlers only | Never calls `sendMessage` or `runLoop` — only reacts. |
+
+Every participant has a **manifest** (`id`, `name`, `role`, `capabilities`) and a list of **situation handlers**. Identity is the manifest; behavior is the handlers you register — not method overrides on a base class.
+
+```ts
+import { createAgent, createHuman } from "@mozaik-ai/core"
+
+const human = createHuman({ name: "User", capabilities: [], handlers: [] })
+
+const agent = createAgent({
+	name: "Assistant",
+	capabilities: ["inference"],
+	instruction: "You are a helpful teammate.",
+	tools: [],
+	handlers: [],
+})
+```
+
+The role is which functions a participant calls and which specifications it registers. A critic that only watches `model.answer` from others is still just a participant.
+
+---
+
+## Concurrent agents
+
+Several participants can be joined at the same time. Membership is runtime state, and every membership change is an event:
 
 ```mermaid
 flowchart LR
-    Human[Participant] -->|"sendMessage(env, text, caller)"| Env(("AgenticEnvironment"))
-    Agent[Participant] -->|"runInference / executeFunctionCall"| Env
-    Observer[Participant] -->|join| Env
-    Env -->|"onMessage / onExternal*"| Human
-    Env -->|"onFunctionCall / onReasoning / …"| Agent
-    Env -->|"onExternal*"| Observer
-    Env -->|"onJoined / onLeft / onParticipant*"| All
+    joinFn["join(participant)"] --> add["RuntimeState.addParticipant"]
+    add --> joined["publish participant.joined"]
+    leaveFn["leave(participant)"] --> remove["RuntimeState.removeParticipant"]
+    remove --> left["publish participant.left"]
+    joined --> all["every joined participant"]
+    left --> remaining["remaining participants"]
 ```
+
+- `join(participant)` adds the participant to `RuntimeState` and publishes `participant.joined`. Joining an id that is already present is a no-op.
+- `leave(participant)` removes them and publishes `participant.left` to whoever is still joined.
+- Each `runLoop(agentId, ...)` creates a new loop with its own `loopId` and does **not** await it. Two agents can think, call tools, and answer at the same time.
+- Events from any loop fan out to **every** joined participant. A slow processor is not a barrier: the runtime does not await `processor.apply`.
+- Shared mutable data lives on your `RuntimeState` subclass. Situation processors (and interception) are how participants adapt to it.
+
+```ts
+const observer = createHuman({ name: "Observer", capabilities: [], handlers: [] })
+
+join(human)
+join(agent)
+join(observer)
+
+sendMessage("Hello", human.getId())
+
+leave(observer)
+```
+
+An agent can wait until a collaborator has joined (`participant.joined`) before calling `runLoop`, or clean up shared state when someone leaves (`participant.left`).
 
 ---
 
-## Non-blocking participants
+## Semantic events
 
-A participant is any subclass of `Participant`. Use `BaseParticipant` as a base when you only want to override a few handlers — every handler it defines is a no-op. The _role_ (human, agent, observer) is just which capability functions a participant calls and which handlers it overrides:
+The runtime is an event bus. Everything interesting is a **`SemanticEvent`**:
 
-| Role     | How to build it                                                             |
-| -------- | --------------------------------------------------------------------------- |
-| Human    | A participant that calls `sendMessage(environment, text, caller)`           |
-| Agent    | A participant that calls `runInference(...)` and `executeFunctionCall(...)` |
-| Observer | A participant that only overrides handlers and never runs inference         |
+| Field | Meaning |
+| ----- | ------- |
+| `type` | String name of the event (`"message.sent"`, `"inference.completed"`, …). |
+| `producerId` | Id of the participant that caused it. |
+| `occurredAt` | When it was created. |
+| `payload` | Typed data for that event. |
 
-```ts
-import {
-	AgenticEnvironment,
-	BaseParticipant,
-	ModelContext,
-	UserMessageItem,
-	runInference,
-	sendMessage,
-} from "@mozaik-ai/core"
+`publish` delivers every event to every joined participant. There is no built-in “internal vs external” split — a situation specification filters on `event.type` and on `event.producerId` versus `participant.getId()`.
 
-const environment = new AgenticEnvironment()
+Participants never poll. Custom events go through `sendEvent(event, senderId)` with any `type` string.
 
-const human = new BaseParticipant()
+### Lifecycle and messaging
 
-class Agent extends BaseParticipant {
-	private readonly context = ModelContext.create("demo")
+| Event | Published when | Payload |
+| ----- | -------------- | ------- |
+| `participant.joined` | `join(participant)` | Participant manifest (`id`, `name`, `role`, `capabilities`) |
+| `participant.left` | `leave(participant)` | Participant manifest |
+| `message.sent` | `sendMessage(message, senderId)` | `{ message: string }` |
+| _custom_ | `sendEvent(event, senderId)` | Whatever you put on the event |
 
-	async onMessage(message: string): Promise<void> {
-		this.context.addContextItem(UserMessageItem.create(message))
-		runInference({ model: "gpt-5.4", context: this.context, caller: this, environment })
-	}
-}
+### Agent loop
 
-const agent = new Agent()
-const observer = new BaseParticipant()
+Producer is the agent whose loop is running:
 
-human.join(environment)
-agent.join(environment)
-observer.join(environment)
+| Event | Published when | Payload |
+| ----- | -------------- | ------- |
+| `context_update.started` | The loop begins appending the user message | Received message plus `loopId` |
+| `context_update.completed` | Context is ready for inference | `InferenceInput` plus `loopId` |
+| `inference.started` | The model call begins | `InferenceInput` |
+| `inference.stream` | Each streaming chunk (only when `streaming: true`) | The inner provider event |
+| `inference.completed` | The model call finished | `InferenceOutput` (`items`, `tokenUsage`, `rowResponse`) |
+| `function_call.started` | A tool is about to run | `{ call, inferenceInput }` |
+| `function_call.completed` | The tool returned | `FunctionCallOutputItem` |
+| `model.answer` | The assistant message is committed | `{ answer: ModelMessageItem }` |
+| `interception.started` | An `InterceptionHandler` matched a transition | The pending `LoopTransition` |
+| `interception.finished` | The handler returned (possibly rewritten) | The transition that will execute |
 
-sendMessage(environment, "Hello", human)
-```
+### Streaming
 
-Participants react as soon as they `join()` agentic environment. The environment fans every item out to every subscriber synchronously and without awaiting them, so a slow listener never blocks producers or other listeners.
+Pass `streaming: true` on the `InferenceInput` you give `runLoop`. The loop takes the `inference_streaming` path and publishes each provider chunk as `inference.stream` (the inner event is the payload). Requesting streaming for a model whose specification has `supportsStreaming: false` fails validation before the API is called.
 
 ---
 
-## Reactive agent
+## Situation handlers
 
-A reactive agent extends `BaseParticipant` and overrides the handlers it wants to react on. Each handler is already a no-op in the base class, so only the relevant ones need bodies. Capabilities are the free functions `runInference` and `executeFunctionCall` — the participant passes itself as `caller`:
+Participants **react** by registering situation handlers. The runtime publishes events; a handler is a pair of “when” and “then”:
+
+- **`SituationSpecification`** — `isSatisfiedBy({ event, participant })`. Compose with `.and()`, `.or()`, and `.not()`.
+- **`SituationProcessor`** — `apply(context)` is the reaction: `runLoop`, `sendMessage`, mutate runtime state, log, persist, …
+
+```mermaid
+flowchart LR
+    Human[Participant] -->|"sendMessage(text, senderId)"| Runtime(("Runtime"))
+    Agent[Participant] -->|"runLoop"| Runtime
+    Observer[Participant] -->|join| Runtime
+    Runtime -->|"SemanticEvent"| Human
+    Runtime -->|"SemanticEvent"| Agent
+    Runtime -->|"SemanticEvent"| Observer
+```
+
+Fan-out is synchronous and does not await processors, so a slow listener never blocks producers or other listeners. Participants start receiving events as soon as they `join()`.
+
+There are no built-in specifications — write the ones you need. Self versus others is a filter on `producerId`, not a second handler API.
 
 ```ts
 import {
-	BaseParticipant,
-	UserMessageItem,
-	FunctionCallItem,
-	FunctionCallOutputItem,
-	ReasoningItem,
-	ModelMessageItem,
-	AgenticEnvironment,
-	ModelContext,
-	Tool,
-	runInference,
-	executeFunctionCall,
+	defineRuntime,
+	RuntimeState,
+	createAgent,
+	createHuman,
+	SituationSpecification,
+	Agent,
+	type SituationHandler,
+	type SituationContext,
 } from "@mozaik-ai/core"
 
-export class ReactiveAgent extends BaseParticipant {
-	constructor(
-		private readonly environment: AgenticEnvironment,
-		private readonly context: ModelContext,
-		private readonly tools: Tool[] = [],
-	) {
-		super()
-	}
+class AppState extends RuntimeState {}
 
-	// A message from a human (or any other participant) → record it and think.
-	async onMessage(message: string): Promise<void> {
-		this.context.addContextItem(UserMessageItem.create(message))
-		runInference({
-			model: "gpt-5.5",
-			context: this.context,
-			tools: this.tools,
-			caller: this,
-			environment: this.environment,
-		})
-	}
+const { initializeRuntime, join, sendMessage, runLoop } = defineRuntime<AppState>()
 
-	// The agent just produced a function call → execute it.
-	async onFunctionCall(item: FunctionCallItem): Promise<void> {
-		this.context.addContextItem(item)
-		const tool = this.tools.find((t) => t.name === item.name)
-		if (tool) executeFunctionCall(this.environment, item, tool, this)
-	}
+initializeRuntime({ state: new AppState() })
 
-	// The tool just produced an output → feed it back and run inference again.
-	async onFunctionCallOutput(item: FunctionCallOutputItem): Promise<void> {
-		this.context.addContextItem(item)
-		runInference({
-			model: "gpt-5.5",
-			context: this.context,
-			tools: this.tools,
-			caller: this,
-			environment: this.environment,
-		})
-	}
-
-	// Keep the local context in sync with model-emitted reasoning and replies.
-	async onReasoning(item: ReasoningItem): Promise<void> {
-		this.context.addContextItem(item)
-	}
-
-	async onModelMessage(item: ModelMessageItem): Promise<void> {
-		this.context.addContextItem(item)
+class WhenOthersSendAMessage extends SituationSpecification {
+	isSatisfiedBy({ event, participant }: SituationContext): boolean {
+		return event.type === "message.sent" && event.producerId !== participant.getId()
 	}
 }
+
+const thinkOnMessage: SituationHandler = {
+	specification: new WhenOthersSendAMessage(),
+	processor: {
+		apply({ event, participant }) {
+			if (!(participant instanceof Agent)) return
+			const { message } = event.payload as { message: string }
+			runLoop(participant.getId(), message, {
+				model: "gpt-5.5",
+				context: participant.getMemory().getContext(),
+				tools: participant.getTools(),
+			})
+		},
+	},
+}
+
+const agent = createAgent({
+	name: "Assistant",
+	capabilities: ["inference"],
+	instruction: "You are a helpful teammate.",
+	tools: [],
+	handlers: [thinkOnMessage],
+})
+
+const human = createHuman({ name: "User", capabilities: [], handlers: [] })
+
+join(human)
+join(agent)
+
+sendMessage("Hello", human.getId())
+```
+
+An observer is the same pattern with processors that only take side actions:
+
+```ts
+class WhenModelAnswers extends SituationSpecification {
+	isSatisfiedBy({ event }: SituationContext): boolean {
+		return event.type === "model.answer"
+	}
+}
+
+const transcript: SituationHandler = {
+	specification: new WhenModelAnswers(),
+	processor: {
+		apply({ event }) {
+			console.log("[model.answer]", event.producerId, event.payload)
+		},
+	},
+}
+
+const observer = createHuman({ name: "Transcript", capabilities: [], handlers: [transcript] })
+join(observer)
 ```
 
 Three things to note:
 
-1. The split between self handlers and `onExternal*` handlers means a participant can encode "act on my own outputs" separately from "observe others", without inspecting `source` by hand.
-2. The agent never `await`s its capability calls inside the handlers — `runInference` and `executeFunctionCall` are fire-and-forget (they return `void`), so the environment keeps delivering events while inference and tool execution run in the background.
-3. Behaviors compose by **reaction**, not orchestration. Add a second agent that overrides `onExternalModelMessage` and you get a critique loop. Add a `TranscriptLogger` and you get a UI stream. Neither change touches the existing participants.
+1. “Act on my own outputs” versus “observe others” is a specification filter on `event.producerId` versus `participant.getId()` — not a separate `onExternal*` API.
+2. Do not `await` `runLoop` or `sendMessage` inside a processor. They return `void` and keep running in the background while the runtime keeps delivering events.
+3. Behaviors compose by **reaction**, not orchestration. Add a second agent whose spec matches `model.answer` and you get a critique loop. Add a transcript observer and you get a UI stream. Neither change touches the existing participants.
 
 ---
 
-## Streaming and semantic events
+## The agent loop
 
-When inference runs with streaming enabled (`streaming: true` on the `runInference` params, for a model that supports it), the runner does not wait for the full response. As the provider emits chunks, the endpoint yields **`SemanticEvent`** items (`type` + `data`) and the environment delivers each one to **every** joined participant immediately — the same fan-out as messages and context items. Participants react in real time by overriding the stream handlers; no participant needs to poll or share a callback.
+`runLoop(agentId, message, inferenceInput, interceptionHandler?)` drives one agent turn as a state machine. It starts at `context_update` and runs until `idle`. Tool execution and the follow-up inference live inside the loop — you do not call a separate function-call runner.
 
-The producing participant receives `onInternalEvent`; everyone else receives `onExternalEvent(source, event)`:
+Each step: optionally intercept the pending transition, execute the state, then resolve the next transition.
+
+```mermaid
+flowchart TD
+    Start([runLoop]) --> CU[context_update]
+    CU -->|streaming true| INF_S[inference_streaming]
+    CU -->|else| INF[inference]
+    INF -->|function_call item| FC[function_call]
+    INF -->|assistant message| MM[model_message]
+    INF_S -->|function_call item| FC
+    INF_S -->|assistant message| MM
+    FC -->|streaming true| INF_S
+    FC -->|else| INF
+    MM --> Idle[idle]
+```
+
+| State | What it does |
+| ----- | ------------ |
+| `context_update` | Appends the user message to the agent's context. |
+| `inference` | Calls the model and waits for the full response. |
+| `inference_streaming` | Same call, streaming; each chunk is published as `inference.stream`. |
+| `function_call` | Runs the matching tool, writes the call and output back into context, then returns to inference. |
+| `model_message` | Publishes `model.answer`, then the loop goes `idle`. |
+
+Transitions use the first matching rule. If inference returns both a function call and an assistant message, the function-call rule wins. After a tool finishes, the loop goes back to `inference` or `inference_streaming` (it does not re-run `context_update`).
+
+The cycle around every state:
+
+```mermaid
+flowchart LR
+    T[pending transition] --> I{"InterceptionHandler isSatisfiedBy?"}
+    I -->|yes| H["handle transition"]
+    H --> E[execute state]
+    I -->|no| E
+    E --> R[resolve next transition]
+    R --> T
+```
+
+`runLoop` is fire-and-forget. Each invocation gets a unique `loopId`, so concurrent agents (or two loops on the same agent) do not share a cursor.
+
+---
+
+## Interception
+
+An **`InterceptionHandler`** inspects or rewrites a loop transition **before** that state runs. Pass it as the optional fourth argument to `runLoop`:
 
 ```ts
-import { BaseParticipant, Participant, SemanticEvent } from "@mozaik-ai/core"
+interface InterceptionHandler {
+	isSatisfiedBy(transition: ExecutableTransition): boolean
+	handle(transition: ExecutableTransition): Promise<ExecutableTransition>
+}
+```
 
-// Agent that runs streaming inference — can observe its own stream chunks.
-export class StreamingAgent extends BaseParticipant {
-	async onInternalEvent(event: SemanticEvent<unknown>): Promise<void> {
-		if (event.type === "response.output_text.delta") {
-			// e.g. keep a local buffer of partial output
+When `isSatisfiedBy` is true, the loop publishes `interception.started`, awaits `handle` (which may change `nextStateId` and `input`), publishes `interception.finished`, then executes the returned transition.
+
+```ts
+import { type InterceptionHandler } from "@mozaik-ai/core"
+
+const inspectFunctionCalls: InterceptionHandler = {
+	isSatisfiedBy(transition) {
+		return transition.nextStateId === "function_call"
+	},
+	async handle(transition) {
+		if (transition.nextStateId === "function_call") {
+			console.log("about to call", transition.input.call.name)
 		}
-	}
+		return transition
+	},
 }
 
-// Any other participant — UI, logger, second agent — reacts to another's stream.
-export class LiveTranscript extends BaseParticipant {
-	async onExternalEvent(source: Participant, event: SemanticEvent<unknown>): Promise<void> {
-		if (event.type === "response.output_text.delta") {
-			const { delta } = event.data as { delta: string }
-			process.stdout.write(delta)
-		}
-	}
-}
+runLoop(agent.getId(), message, inferenceInput, inspectFunctionCalls)
 ```
 
-Enable streaming by passing `streaming: true` to `runInference`:
-
-```ts
-runInference({ model: "gpt-5.4", context, caller: this, environment, streaming: true })
-```
-
-Requesting streaming for a model whose specification has `supportsStreaming: false` fails request validation before the API is called.
-
----
-
-## Lifecycle hooks
-
-Every participant receives lifecycle notifications when it or others join/leave an environment:
-
-```ts
-export class TeamAgent extends BaseParticipant {
-	// Called when this participant joins an environment.
-	onJoined(): void {
-		console.log("I joined the environment")
-	}
-
-	// Called when this participant leaves an environment.
-	onLeft(): void {
-		console.log("I left the environment")
-	}
-
-	// Called when another participant joins the same environment.
-	onParticipantJoined(participant: Participant): void {
-		console.log(`${participant.constructor.name} joined`)
-	}
-
-	// Called when another participant leaves the same environment.
-	onParticipantLeft(participant: Participant): void {
-		console.log(`${participant.constructor.name} left`)
-	}
-}
-```
-
-This lets participants react to membership changes — for example, an agent could start inference only after a required collaborator has joined, or clean up shared state when someone leaves.
-
----
-
-## Reacting to external events
-
-Participants can listen to external events and react by overriding methods like `onMessage`, `onExternalFunctionCall`, `onExternalFunctionCallOutput`, `onExternalReasoning`, and `onExternalModelMessage`.
-
-### Selective listening
-
-By default a participant reacts to events from every other participant. To scope a participant so it only reacts to specific participant _types_, populate its `listens` list with those classes. When `listens` is non-empty, the environment only delivers external events whose source is an instance of one of the listed classes:
-
-```ts
-import { BaseParticipant } from "@mozaik-ai/core"
-
-export class Critic extends BaseParticipant {
-	// Only react to events produced by Writer participants.
-	protected listens = [Writer]
-}
-```
-
----
-
-## Error handling
-
-When any handler throws, the environment catches it and routes it as an `AgenticError` instead of crashing the run. The participant whose handler threw receives `onError(error)`; every other participant receives `onParticipantError(source, error)`. After its own `onError`, the failing participant is marked inactive in that environment so it stops receiving further events.
-
-```ts
-import { BaseParticipant, Participant, AgenticError } from "@mozaik-ai/core"
-
-export class ResilientAgent extends BaseParticipant {
-	onError(error: AgenticError): void {
-		console.error("my handler threw:", error.message)
-	}
-
-	onParticipantError(source: Participant, error: AgenticError): void {
-		console.warn(`${source.constructor.name} failed:`, error.message)
-	}
-}
-```
-
-`AgenticError` carries the originating participant (`getSource()`) and environment (`getEnvironment()`).
-
----
-
-## Passive observer
-
-You can create observers that don't run inference themselves but watch what's happening in the conversation and take side actions (logging, metrics, persistence, etc.). Subclass `BaseParticipant` and override only the handlers you care about — everything else stays a no-op:
-
-```ts
-import {
-	BaseParticipant,
-	Participant,
-	FunctionCallItem,
-	FunctionCallOutputItem,
-	ReasoningItem,
-	ModelMessageItem,
-} from "@mozaik-ai/core"
-
-export class TranscriptLogger extends BaseParticipant {
-	async onMessage(message: string): Promise<void> {
-		console.log("[message]", message)
-	}
-
-	async onExternalFunctionCall(source: Participant, item: FunctionCallItem): Promise<void> {
-		console.log(`[${source.constructor.name}] function_call`, item)
-	}
-
-	async onExternalFunctionCallOutput(source: Participant, item: FunctionCallOutputItem): Promise<void> {
-		console.log(`[${source.constructor.name}] function_call_output`, item)
-	}
-
-	async onExternalReasoning(source: Participant, item: ReasoningItem): Promise<void> {
-		console.log(`[${source.constructor.name}] reasoning`, item)
-	}
-
-	async onExternalModelMessage(source: Participant, item: ModelMessageItem): Promise<void> {
-		console.log(`[${source.constructor.name}] model_message`, item)
-	}
-}
-```
+Use this for policy, logging, or rewriting the next state (for example, swapping a tool call’s input) without putting that logic inside the agent’s situation handlers.
 
 ---
 
