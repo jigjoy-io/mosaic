@@ -367,20 +367,6 @@ flowchart TD
 | `function_call`       | Runs the matching tool, writes the call and output back into context, then returns to inference. |
 | `model_message`       | Publishes `model.answer`, then the loop goes `idle`.                                             |
 
-Transitions use the first matching rule. If inference returns both a function call and an assistant message, the function-call rule wins. After a tool finishes, the loop goes back to `inference` (it does not re-run `context_update`).
-
-The cycle around every state:
-
-```mermaid
-flowchart LR
-    T[pending transition] --> I{"InterceptionHandler isSatisfiedBy?"}
-    I -->|yes| H["handle transition"]
-    H --> E[execute state]
-    I -->|no| E
-    E --> R[resolve next transition]
-    R --> T
-```
-
 `runLoop` is fire-and-forget. Each invocation gets a unique `loopId`, so concurrent agents (or two loops on the same agent) do not share a cursor.
 
 ---
