@@ -4,7 +4,7 @@
 
 ![npm downloads](https://img.shields.io/npm/dt/@mozaik-ai/core) ![npm downloads weekly](https://img.shields.io/npm/dw/@mozaik-ai/core) ![npm version](https://img.shields.io/npm/v/@mozaik-ai/core)
 
-<img width="1254" height="1254" alt="agent-interoperability" src="https://github.com/user-attachments/assets/4b24bf27-afe2-4520-a396-5c46da6dab17" />
+<img width="512" height="512" alt="agent-interoperability" src="https://github.com/user-attachments/assets/4b24bf27-afe2-4520-a396-5c46da6dab17" />
 
 </div>
 
