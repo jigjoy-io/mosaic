@@ -13,7 +13,7 @@ export class AgentLoop {
 		private readonly loopId: string,
 		private readonly stateExecutor: LoopStateExecutor,
 		private readonly transitionResolver: TransitionResolver,
-		private readonly interceptionHandler: InterceptionHandler,
+		private readonly interceptionHandler?: InterceptionHandler,
 	) {}
 
 	async run(message: ReceivedMessage, loopVisitor: LoopVisitor): Promise<void> {
@@ -23,9 +23,9 @@ export class AgentLoop {
 		}
 
 		while (transition.nextStateId !== "idle") {
-			const isInterceptionSatisfied = this.interceptionHandler.isSatisfiedBy(transition)
+			const isInterceptionSatisfied = this.interceptionHandler?.isSatisfiedBy(transition)
 
-			if (isInterceptionSatisfied) {
+			if (isInterceptionSatisfied && this.interceptionHandler) {
 				loopVisitor.visitInterceptionStarted(transition)
 				transition = await this.interceptionHandler.handle(transition)
 				loopVisitor.visitInterceptionFinished(transition)
@@ -43,7 +43,7 @@ export class AgentLoop {
 	static create(
 		stateExecutor: LoopStateExecutor,
 		transitionResolver: TransitionResolver,
-		interceptionHandler: InterceptionHandler,
+		interceptionHandler?: InterceptionHandler,
 	): AgentLoop {
 		const loopId = crypto.randomUUID()
 		return new AgentLoop(loopId, stateExecutor, transitionResolver, interceptionHandler)

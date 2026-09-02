@@ -23,7 +23,7 @@ export function createRunLoop<TRuntimeState extends RuntimeState>(resolveRuntime
 		agentId: string,
 		message: string,
 		inferenceInput: InferenceInput,
-		interceptionHandler: InterceptionHandler,
+		interceptionHandler?: InterceptionHandler,
 	) {
 		const runtime = resolveRuntime()
 		const inferenceRunner = runtime.getInferenceRunner()

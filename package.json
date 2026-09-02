@@ -1,6 +1,6 @@
 {
 	"name": "@mozaik-ai/core",
-	"version": "4.0.0-beta.9",
+	"version": "4.0.0-beta.10",
 	"description": "A TypeScript framework for building reactive agents",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
