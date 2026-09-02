@@ -402,7 +402,7 @@ const inspectFunctionCalls: InterceptionHandler = {
 runLoop(agent.getId(), message, inferenceInput, inspectFunctionCalls)
 ```
 
-Use this for policy, logging, or rewriting the next state (for example, swapping a tool call’s input) without putting that logic inside the agent’s situation handlers.
+Use it to steer loop execution by rewriting the next state — for example, swapping a tool call’s input — without putting that logic inside the agent’s situation handlers. That is how you keep a human in the loop, or another agent, to control what runs next.
 
 ---
 
