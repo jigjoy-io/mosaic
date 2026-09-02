@@ -88,15 +88,15 @@ initializeRuntime({ state: new AppState() })
 
 `defineRuntime` returns the functions you use for the rest of the session. They are **not** top-level package exports — keep them in module scope (or re-export them yourself):
 
-| Function | Role |
-| -------- | ---- |
-| `initializeRuntime({ state, inferenceRunnerConfig? })` | Create the runtime. Throws if called twice. |
-| `resolveRuntime()` | The initialized runtime (including `.state`). |
-| `resolveParticipant(id)` | Look up a joined participant by id. |
-| `join(participant)` / `leave(participant)` | Membership. |
-| `sendMessage(message, senderId)` | Publish a `message.sent` event. |
-| `sendEvent(event, senderId)` | Publish any `SemanticEvent`. |
-| `runLoop(agentId, message, inferenceInput, interceptionHandler?)` | Start an agent loop. |
+| Function                                                          | Role                                          |
+| ----------------------------------------------------------------- | --------------------------------------------- |
+| `initializeRuntime({ state, inferenceRunnerConfig? })`            | Create the runtime. Throws if called twice.   |
+| `resolveRuntime()`                                                | The initialized runtime (including `.state`). |
+| `resolveParticipant(id)`                                          | Look up a joined participant by id.           |
+| `join(participant)` / `leave(participant)`                        | Membership.                                   |
+| `sendMessage(message, senderId)`                                  | Publish a `message.sent` event.               |
+| `sendEvent(event, senderId)`                                      | Publish any `SemanticEvent`.                  |
+| `runLoop(agentId, message, inferenceInput, interceptionHandler?)` | Start an agent loop.                          |
 
 Calling `initializeRuntime` a second time throws `"Runtime already initialized"`. Calling any of the other functions before `initializeRuntime` throws `"Runtime not initialized"`.
 
@@ -128,11 +128,11 @@ Participants read and write this object from situation processors (and from an `
 
 A **participant** is anyone who can join the runtime. Mozaik ships two factories:
 
-| Role | Factory | What it carries |
-| ---- | ------- | --------------- |
-| **Human** | `createHuman({ name, capabilities, handlers })` | A manifest and situation handlers. Typically calls `sendMessage`. |
-| **Agent** | `createAgent({ name, capabilities, instruction, tools, handlers })` | Manifest, handlers, an instruction, tools, and memory (`agent.getMemory().getContext()`). Typically starts thinking with `runLoop`. |
-| **Observer** | Either factory, handlers only | Never calls `sendMessage` or `runLoop` — only reacts. |
+| Role         | Factory                                                             | What it carries                                                                                                                     |
+| ------------ | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Human**    | `createHuman({ name, capabilities, handlers })`                     | A manifest and situation handlers. Typically calls `sendMessage`.                                                                   |
+| **Agent**    | `createAgent({ name, capabilities, instruction, tools, handlers })` | Manifest, handlers, an instruction, tools, and memory (`agent.getMemory().getContext()`). Typically starts thinking with `runLoop`. |
+| **Observer** | Either factory, handlers only                                       | Never calls `sendMessage` or `runLoop` — only reacts.                                                                               |
 
 Every participant has a **manifest** (`id`, `name`, `role`, `capabilities`) and a list of **situation handlers**. Identity is the manifest; behavior is the handlers you register — not method overrides on a base class.
 
@@ -194,12 +194,12 @@ An agent can wait until a collaborator has joined (`participant.joined`) before 
 
 The runtime is an event bus. Everything interesting is a **`SemanticEvent`**:
 
-| Field | Meaning |
-| ----- | ------- |
-| `type` | String name of the event (`"message.sent"`, `"inference.completed"`, …). |
-| `producerId` | Id of the participant that caused it. |
-| `occurredAt` | When it was created. |
-| `payload` | Typed data for that event. |
+| Field        | Meaning                                                                  |
+| ------------ | ------------------------------------------------------------------------ |
+| `type`       | String name of the event (`"message.sent"`, `"inference.completed"`, …). |
+| `producerId` | Id of the participant that caused it.                                    |
+| `occurredAt` | When it was created.                                                     |
+| `payload`    | Typed data for that event.                                               |
 
 `publish` delivers every event to every joined participant. There is no built-in “internal vs external” split — a situation specification filters on `event.type` and on `event.producerId` versus `participant.getId()`.
 
@@ -207,29 +207,29 @@ Participants never poll. Custom events go through `sendEvent(event, senderId)` w
 
 ### Lifecycle and messaging
 
-| Event | Published when | Payload |
-| ----- | -------------- | ------- |
-| `participant.joined` | `join(participant)` | Participant manifest (`id`, `name`, `role`, `capabilities`) |
-| `participant.left` | `leave(participant)` | Participant manifest |
-| `message.sent` | `sendMessage(message, senderId)` | `{ message: string }` |
-| _custom_ | `sendEvent(event, senderId)` | Whatever you put on the event |
+| Event                | Published when                   | Payload                                                     |
+| -------------------- | -------------------------------- | ----------------------------------------------------------- |
+| `participant.joined` | `join(participant)`              | Participant manifest (`id`, `name`, `role`, `capabilities`) |
+| `participant.left`   | `leave(participant)`             | Participant manifest                                        |
+| `message.sent`       | `sendMessage(message, senderId)` | `{ message: string }`                                       |
+| _custom_             | `sendEvent(event, senderId)`     | Whatever you put on the event                               |
 
 ### Agent loop
 
 Producer is the agent whose loop is running:
 
-| Event | Published when | Payload |
-| ----- | -------------- | ------- |
-| `context_update.started` | The loop begins appending the user message | Received message plus `loopId` |
-| `context_update.completed` | Context is ready for inference | `InferenceInput` plus `loopId` |
-| `inference.started` | The model call begins | `InferenceInput` |
-| `inference.stream` | Each streaming chunk (only when `streaming: true`) | The inner provider event |
-| `inference.completed` | The model call finished | `InferenceOutput` (`items`, `tokenUsage`, `rowResponse`) |
-| `function_call.started` | A tool is about to run | `{ call, inferenceInput }` |
-| `function_call.completed` | The tool returned | `FunctionCallOutputItem` |
-| `model.answer` | The assistant message is committed | `{ answer: ModelMessageItem }` |
-| `interception.started` | An `InterceptionHandler` matched a transition | The pending `LoopTransition` |
-| `interception.finished` | The handler returned (possibly rewritten) | The transition that will execute |
+| Event                      | Published when                                     | Payload                                                  |
+| -------------------------- | -------------------------------------------------- | -------------------------------------------------------- |
+| `context_update.started`   | The loop begins appending the user message         | Received message plus `loopId`                           |
+| `context_update.completed` | Context is ready for inference                     | `InferenceInput` plus `loopId`                           |
+| `inference.started`        | The model call begins                              | `InferenceInput`                                         |
+| `inference.stream`         | Each streaming chunk (only when `streaming: true`) | The inner provider event                                 |
+| `inference.completed`      | The model call finished                            | `InferenceOutput` (`items`, `tokenUsage`, `rowResponse`) |
+| `function_call.started`    | A tool is about to run                             | `{ call, inferenceInput }`                               |
+| `function_call.completed`  | The tool returned                                  | `FunctionCallOutputItem`                                 |
+| `model.answer`             | The assistant message is committed                 | `{ answer: ModelMessageItem }`                           |
+| `interception.started`     | An `InterceptionHandler` matched a transition      | The pending `LoopTransition`                             |
+| `interception.finished`    | The handler returned (possibly rewritten)          | The transition that will execute                         |
 
 ### Streaming
 
@@ -352,26 +352,22 @@ Each step: optionally intercept the pending transition, execute the state, then 
 ```mermaid
 flowchart TD
     Start([runLoop]) --> CU[context_update]
-    CU -->|streaming true| INF_S[inference_streaming]
-    CU -->|else| INF[inference]
+    CU --> INF[inference]
     INF -->|function_call item| FC[function_call]
     INF -->|assistant message| MM[model_message]
-    INF_S -->|function_call item| FC
-    INF_S -->|assistant message| MM
-    FC -->|streaming true| INF_S
-    FC -->|else| INF
+    FC --> INF
     MM --> Idle[idle]
 ```
 
-| State | What it does |
-| ----- | ------------ |
-| `context_update` | Appends the user message to the agent's context. |
-| `inference` | Calls the model and waits for the full response. |
-| `inference_streaming` | Same call, streaming; each chunk is published as `inference.stream`. |
-| `function_call` | Runs the matching tool, writes the call and output back into context, then returns to inference. |
-| `model_message` | Publishes `model.answer`, then the loop goes `idle`. |
+| State                 | What it does                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| `context_update`      | Appends the user message to the agent's context.                                                 |
+| `inference`           | Calls the model and waits for the full response.                                                 |
+| `inference_streaming` | Same call, streaming; each chunk is published as `inference.stream`.                             |
+| `function_call`       | Runs the matching tool, writes the call and output back into context, then returns to inference. |
+| `model_message`       | Publishes `model.answer`, then the loop goes `idle`.                                             |
 
-Transitions use the first matching rule. If inference returns both a function call and an assistant message, the function-call rule wins. After a tool finishes, the loop goes back to `inference` or `inference_streaming` (it does not re-run `context_update`).
+Transitions use the first matching rule. If inference returns both a function call and an assistant message, the function-call rule wins. After a tool finishes, the loop goes back to `inference` (it does not re-run `context_update`).
 
 The cycle around every state:
 
@@ -436,7 +432,7 @@ Working examples are available here: [mozaik-examples](https://github.com/jigjoy
 
 ```mermaid
 flowchart LR
-    Conductor[Conductor] -->|"RunStart / LevelCompute / StorySpawn"| Bus(("Mozaik Bus"))
+    Conductor[Conductor] -->|"RunStart / LevelCompute / StorySpawn"| Bus(("Mozaik Runtime"))
     Factory[StoryFactory] -->|"spawn StoryAgent"| Bus
     Story[StoryAgent] -->|"StoryResult / retries"| Bus
     Librarian[Librarian] -->|"index exploration outputs"| Bus
