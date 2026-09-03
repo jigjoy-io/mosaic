@@ -1,6 +1,6 @@
 {
 	"name": "@mozaik-ai/core",
-	"version": "4.0.0",
+	"version": "4.0.1",
 	"description": "A TypeScript framework for building interoperable AI agents",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
@@ -76,7 +76,7 @@
 		"@anthropic-ai/sdk": "^0.74.0",
 		"@google/genai": "^2.6.0",
 		"@modelcontextprotocol/sdk": "^1.29.0",
-		"@mozaik-ai/cloud-sdk": "^0.0.3",
+		"@mozaik-ai/cloud-sdk": "^0.1.0",
 		"dotenv": "^17.4.1",
 		"openai": "^6.38.0",
 		"zod": "^4.3.6"
