@@ -7,6 +7,7 @@ import { RuntimeService } from "@app/services/runtime"
 import { RuntimeState } from "../runtime-state"
 import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { CloudClient, createCloudClient } from "@mozaik-ai/cloud-sdk"
+import { Agent } from "../participant/agent"
 
 export class EventPublisherLoopVisitor implements LoopVisitor {
 	private readonly cloud: CloudClient
@@ -19,11 +20,11 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 	}
 
 	visitContextUpdateStarted(input: ReceivedMessage): void {
-		this.publish("context_update.started", { ...input, loopId: this.loopId })
+		this.publish("context_update.started", input)
 	}
 
 	visitContextUpdateCompleted(output: InferenceInput): void {
-		this.publish("context_update.completed", { ...output, loopId: this.loopId })
+		this.publish("context_update.completed", output)
 	}
 
 	visitInferenceStarted(input: InferenceInput): void {
@@ -63,7 +64,23 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 		this.runtime.publish(event)
 
 		if (this.cloud.enabled) {
-			this.cloud.send(event)
+			const participant = this.runtime.getParticipant(this.agentId)
+			const agent = participant as Agent
+			if (agent) {
+				this.cloud.send({
+					...event,
+					payload: {
+						...payload,
+						loopId: this.loopId,
+						agent: {
+							manfifeset: agent.getManifest(),
+							developerMessage: agent.getDeveloperMessage(),
+							tools: agent.getTools(),
+							memory: agent.getMemory().getContext().getItems(),
+						},
+					},
+				})
+			}
 		}
 	}
 }
