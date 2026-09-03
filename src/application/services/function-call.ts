@@ -1,0 +1,15 @@
+import { FunctionCallRunner } from "@app/states/function-call"
+import { Tool } from "@domain/generative-model/tool"
+import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
+import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
+
+export class DefaultFunctionCallRunner implements FunctionCallRunner {
+	async run(input: FunctionCallItem, tool: Tool): Promise<FunctionCallOutputItem> {
+		try {
+			const result = await tool.invoke(JSON.parse(input.args))
+			return FunctionCallOutputItem.create(input.callId, JSON.stringify(result))
+		} catch (error) {
+			return FunctionCallOutputItem.create(input.callId, `Error calling tool: ${error}`)
+		}
+	}
+}

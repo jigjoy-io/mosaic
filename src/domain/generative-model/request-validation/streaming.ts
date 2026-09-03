@@ -1,13 +1,12 @@
-import { ModelSpecification } from "@domain/generative-model/generative-model"
-import { RequestValidationRule } from "./rule"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelName } from "@domain/generative-model/generative-model"
+import type { ModelSpecification } from "@domain/generative-model/generative-model"
+import type { RequestValidationRule } from "./rule"
+import type { InferenceInput } from "@app/states/inference"
 
 export class StreamingValidation implements RequestValidationRule {
 	readonly name = "streaming"
 
-	isValid(inferenceParams: InferenceParams<ModelName>, model: ModelSpecification): boolean {
-		if (!inferenceParams.streaming) {
+	isValid(inferenceInput: InferenceInput, model: ModelSpecification): boolean {
+		if (!inferenceInput.streaming) {
 			return true
 		}
 

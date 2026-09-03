@@ -1,5 +1,5 @@
-import { InputText } from "@domain/model-context/context-item/item-content/input-text"
-import { SummaryText } from "@domain/model-context/context-item/item-content/summary-text"
+import type { InputText } from "@domain/model-context/context-item/item-content/input-text"
+import type { SummaryText } from "@domain/model-context/context-item/item-content/summary-text"
 import { ContextItem } from "@domain/model-context/context-item/context-item"
 
 export class ReasoningItem extends ContextItem {

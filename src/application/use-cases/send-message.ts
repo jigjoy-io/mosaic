@@ -1,13 +1,18 @@
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
-import { Participant } from "@domain/agentic-environment/participant"
-import { SendMessageUseCase } from "@domain/agentic-environment/use-cases/send-message"
+import { RuntimeService } from "@app/services/runtime"
+import { RuntimeState } from "@domain/agentic-environment/runtime-state"
+import { MessageSentEvent } from "@domain/agentic-environment/semantic-event/event"
 
-export class SendMessage implements SendMessageUseCase {
-	async execute(environment: AgenticEnvironment, message: string, caller: Participant): Promise<void> {
-		if (!caller.isJoinedTo(environment)) {
-			throw new Error("Not joined to environment")
+export function createSendMessage<TRuntimeState extends RuntimeState>(
+	resolveRuntime: () => RuntimeService<TRuntimeState>,
+) {
+	return function sendMessage(message: string, senderId: string): void {
+		const runtime = resolveRuntime()
+		const participant = runtime.getParticipant(senderId)
+		if (!participant) {
+			throw new Error(`Participant ${senderId} not found`)
 		}
 
-		environment.deliverMessage(caller, message)
+		const userMessage: MessageSentEvent = MessageSentEvent.init(senderId, message)
+		runtime.publish(userMessage)
 	}
 }

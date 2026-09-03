@@ -1,11 +1,14 @@
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { GoogleGenAI } from "@google/genai"
-import { Endpoint } from "@domain/generative-model/endpoint"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelName } from "@domain/generative-model/generative-model"
+import type { Endpoint } from "@domain/generative-model/endpoint"
+import type { InferenceInput, InferenceOutput } from "@app/states/inference"
 import { GeminiGenerateContentMapper } from "./gemini-generate-content-mapper"
-import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+
+export interface GeminiConnectionConfig {
+	baseURL?: string
+	apiKey?: string
+}
 
 /**
  * Native Gemini adapter on the `@google/genai` SDK (`generateContent` /
@@ -17,32 +20,52 @@ import { InferenceEndpointMapper } from "@domain/generative-model/inference-endp
  */
 export class GeminiGenerateContent implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
-	private readonly client: GoogleGenAI
+	private _client?: GoogleGenAI
+	private readonly clientConfig: GeminiConnectionConfig
 
-	constructor(endpointMapper: InferenceEndpointMapper = new GeminiGenerateContentMapper()) {
+	constructor(
+		endpointMapper: InferenceEndpointMapper = new GeminiGenerateContentMapper(),
+		config: GeminiConnectionConfig = {},
+	) {
 		this.endpointMapper = endpointMapper
-		this.client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+		this.clientConfig = config
 	}
 
-	async infer(inferenceParams: InferenceParams<ModelName>): Promise<InferenceResponse> {
-		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
-		const response = await this.client.models.generateContent(inferenceRequest)
+	private get client(): GoogleGenAI {
+		return (this._client ??= new GoogleGenAI({
+			apiKey: this.clientConfig.apiKey ?? process.env.GEMINI_API_KEY,
+			...(this.clientConfig.baseURL ? { httpOptions: { baseUrl: this.clientConfig.baseURL } } : {}),
+		}))
+	}
+
+	async infer(inferenceInput: InferenceInput): Promise<InferenceOutput> {
+		const request = this.endpointMapper.toRequest(inferenceInput)
+		const response = await this.client.models.generateContent(request)
 
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(
-		inferenceParams: InferenceParams<ModelName>,
-		signal?: AbortSignal,
-	): AsyncIterable<SemanticEvent<unknown>> {
-		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
-		const stream = await this.client.models.generateContentStream(inferenceRequest)
+	async *stream(inferenceInput: InferenceInput): AsyncIterable<SemanticEvent> {
+		const request = this.endpointMapper.toRequest(inferenceInput)
+		const stream: any = await this.client.models.generateContentStream(request)
 
+		let lastEvent: SemanticEvent | undefined = undefined
 		for await (const chunk of stream) {
-			if (signal?.aborted) {
-				break
-			}
-			yield new SemanticEvent("generate_content_chunk", chunk)
+			lastEvent = chunk
+			yield chunk
+		}
+
+		if (!lastEvent) {
+			throw new Error("Last event not found")
+		}
+
+		const output = this.endpointMapper.toResponse(lastEvent)
+
+		yield {
+			type: "inference.output",
+			producerId: request.model,
+			occurredAt: new Date(),
+			payload: output,
 		}
 	}
 }

@@ -1,11 +1,10 @@
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { Endpoint } from "@domain/generative-model/endpoint"
+import type { InferenceOutput } from "@app/states/inference"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
+import type { Endpoint } from "@domain/generative-model/endpoint"
 import { OpenAIChatCompletionsMapper } from "./openai-chat-completions-mapper"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelName } from "@domain/generative-model/generative-model"
+import type { InferenceInput } from "@app/states/inference"
 import OpenAI from "openai"
-import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
 /**
  * Optional connection config. When omitted, the `openai` SDK reads
@@ -47,7 +46,8 @@ export interface OpenAICompatibleConfig {
  */
 export class OpenAIChatCompletions implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
-	private readonly client: OpenAI
+	private _client?: OpenAI
+	private readonly clientConfig: OpenAICompatibleConfig
 	private readonly extraBody: Record<string, unknown>
 
 	constructor(
@@ -55,39 +55,46 @@ export class OpenAIChatCompletions implements Endpoint {
 		config: OpenAICompatibleConfig = {},
 	) {
 		this.endpointMapper = endpointMapper
-		// Passing `undefined` for baseURL/apiKey lets the SDK fall back
-		// to OPENAI_BASE_URL / OPENAI_API_KEY from the environment.
-		this.client = new OpenAI({
-			baseURL: config.baseURL,
-			apiKey: config.apiKey,
-		})
+		this.clientConfig = config
 		this.extraBody = config.extraBody ?? {}
 	}
 
-	private buildRequest(inferenceParams: InferenceParams<ModelName>): any {
+	private get client(): OpenAI {
+		// Passing `undefined` for baseURL/apiKey lets the SDK fall back
+		// to OPENAI_BASE_URL / OPENAI_API_KEY from the environment.
+		return (this._client ??= new OpenAI({
+			baseURL: this.clientConfig.baseURL,
+			apiKey: this.clientConfig.apiKey,
+		}))
+	}
+
+	private buildRequest(inferenceInput: InferenceInput): any {
 		return {
 			...this.extraBody,
-			...this.endpointMapper.toRequest(inferenceParams),
+			...this.endpointMapper.toRequest(inferenceInput),
 		}
 	}
 
-	async infer(inferenceParams: InferenceParams<ModelName>): Promise<InferenceResponse> {
-		const response = await this.client.chat.completions.create(this.buildRequest(inferenceParams))
+	async infer(inferenceInput: InferenceInput): Promise<InferenceOutput> {
+		const response = await this.client.chat.completions.create(this.buildRequest(inferenceInput))
 
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(
-		inferenceParams: InferenceParams<ModelName>,
-		signal?: AbortSignal,
-	): AsyncIterable<SemanticEvent<unknown>> {
-		const stream: any = await this.client.chat.completions.create(this.buildRequest(inferenceParams))
+	async *stream(inferenceInput: InferenceInput): AsyncIterable<SemanticEvent> {
+		const stream = this.client.chat.completions.stream(this.buildRequest(inferenceInput))
 
-		for await (const event of stream) {
-			if (signal?.aborted) {
-				break
-			}
-			yield new SemanticEvent(event.object ?? "chat.completion.chunk", event)
+		for await (const chunk of stream) {
+			yield chunk as unknown as SemanticEvent
+		}
+
+		const output = this.endpointMapper.toResponse(await stream.finalChatCompletion())
+
+		yield {
+			type: "inference.output",
+			payload: output,
+			occurredAt: new Date(),
+			producerId: inferenceInput.model,
 		}
 	}
 }

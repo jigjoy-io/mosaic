@@ -1,8 +1,6 @@
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import { ModelName } from "./generative-model"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { InferenceInput, InferenceOutput } from "@app/states/inference"
 
 export interface InferenceEndpointMapper {
-	toRequest(inferenceParams: InferenceParams<ModelName>): any
-	toResponse(response: any): InferenceResponse
+	toRequest(inferenceInput: InferenceInput): any
+	toResponse(response: any): InferenceOutput
 }

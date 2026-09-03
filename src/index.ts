@@ -10,53 +10,46 @@ import { FunctionCallOutputItem } from "@domain/model-context/context-item/clien
 import { ModelContextRepository } from "@domain/model-context/model-context-repository"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 import { Tool } from "@domain/generative-model/tool"
-import { InMemoryModelContextRepository } from "@infra/repository/in-memory-model-context-repository"
+import { McpClient, type McpServerConfig, type McpToolSpec } from "@infra/mcp/mcp-client"
+import { McpToolRegistry } from "@infra/mcp/mcp-tool-registry"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
-import { Participant } from "@domain/agentic-environment/participant"
-import { AgenticEnvironment } from "@domain/agentic-environment/agentic-environment"
-import { AgenticError } from "@domain/agentic-environment/errors/base-error"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 import { Endpoint } from "@domain/generative-model/endpoint"
-import { RunInference } from "@app/use-cases/run-inference"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ExecuteFunctionCall } from "@app/use-cases/execute-function-call"
-import { FunctionCallRunner } from "@app/services/function-call-runner"
-import { BaseParticipant } from "@app/participants/participant"
-import { SendMessage } from "@app/use-cases/send-message"
-import { ModelName } from "@domain/generative-model/generative-model"
-import { GenerativeModelRepository } from "@domain/generative-model/generative-model-repository"
-import { InMemoryGenerativeModelRepository } from "@infra/repository/generative-model-repository"
-import { InferenceRequestValidator } from "@domain/generative-model/request-validation/inference-request-validator"
-
-const generativeModelRepository: GenerativeModelRepository = new InMemoryGenerativeModelRepository()
-const inferenceRequestValidator = new InferenceRequestValidator()
-const runInferenceUseCase = new RunInference(generativeModelRepository, inferenceRequestValidator)
-const executeFunctionCallUseCase = new ExecuteFunctionCall(new FunctionCallRunner())
-const sendMessageUseCase = new SendMessage()
-
-const runInference = (inferenceParams: InferenceParams<ModelName>): void => {
-	runInferenceUseCase.execute(inferenceParams)
-}
-
-const executeFunctionCall = (
-	environment: AgenticEnvironment,
-	functionCallItem: FunctionCallItem,
-	tool: Tool,
-	caller: Participant,
-): void => {
-	executeFunctionCallUseCase.execute(environment, functionCallItem, tool, caller)
-}
-
-const sendMessage = (environment: AgenticEnvironment, message: string, caller: Participant): void => {
-	sendMessageUseCase.execute(environment, message, caller)
-}
+import { InferenceInput, InferenceOutput, InferenceRunner } from "@app/states/inference"
+import { Participant } from "@domain/agentic-environment/participant/participant"
+import { createAgent } from "@app/use-cases/create-agent"
+import { createHuman } from "@app/use-cases/create-human"
+import { RuntimeState } from "@domain/agentic-environment/runtime-state"
+import { defineRuntime, type InferenceRunnerConfig } from "./define-runtime"
+import { supportedModels } from "@app/services/models"
+import { OpenAIResponses } from "@infra/providers/openai/endpoints/openai-responses"
+import { OpenAIChatCompletions } from "@infra/providers/openai/endpoints/openai-chat-completions"
+import { AnthropicMessages } from "@infra/providers/anthropic/endpoints/anthropic-messages"
+import { GeminiGenerateContent } from "@infra/providers/gemini/endpoints/gemini-generate-content"
+import { Agent } from "@domain/agentic-environment/participant/agent"
+import { Human } from "@domain/agentic-environment/participant/human"
+import {
+	SituationContext,
+	SituationHandler,
+	SituationProcessor,
+} from "@domain/agentic-environment/situation/situation-handler"
+import { SituationSpecification } from "@domain/agentic-environment/situation/situation-specification"
+import { DefaultInferenceRunner } from "@app/services/inference-runner"
+import { InterceptionHandler } from "@domain/agentic-environment/loop/interception"
+import {
+	ExecutableLoopStateId,
+	ExecutableTransition,
+	LoopStateExecution,
+	LoopTransition,
+} from "@domain/agentic-environment/loop/loop-state"
 
 export {
+	defineRuntime,
+	RuntimeState,
+	createAgent,
+	createHuman,
 	ModelContext,
 	ModelContextRepository,
-	ModelName,
-	InMemoryModelContextRepository,
 	ContextItem,
 	SemanticEvent,
 	UserMessageItem,
@@ -71,14 +64,31 @@ export {
 	InputTokenDetails,
 	OutputTokenDetails,
 	Tool,
+	McpClient,
+	type McpServerConfig,
+	type McpToolSpec,
+	McpToolRegistry,
 	Endpoint,
-	AgenticEnvironment,
+	supportedModels,
+	OpenAIResponses,
+	OpenAIChatCompletions,
+	AnthropicMessages,
+	GeminiGenerateContent,
 	Participant,
-	BaseParticipant,
-	AgenticError,
-	InferenceResponse,
-	InferenceParams,
-	runInference,
-	executeFunctionCall,
-	sendMessage,
+	Agent,
+	Human,
+	SituationHandler,
+	SituationProcessor,
+	SituationSpecification,
+	SituationContext,
+	InterceptionHandler,
+	LoopStateExecution,
+	LoopTransition,
+	ExecutableLoopStateId,
+	ExecutableTransition,
+	InferenceOutput,
+	InferenceInput,
+	InferenceRunner,
+	DefaultInferenceRunner,
+	InferenceRunnerConfig,
 }

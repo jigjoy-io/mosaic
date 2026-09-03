@@ -1,0 +1,69 @@
+import { InferenceInput, InferenceOutput } from "@app/states/inference"
+import { LoopTransition, ModelMessageParams, ReceivedMessage } from "./loop-state"
+import { LoopVisitor } from "./loop-visitor"
+import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
+import { FunctionCallParams } from "@app/states/function-call"
+import { RuntimeService } from "@app/services/runtime"
+import { RuntimeState } from "../runtime-state"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
+import { CloudClient, createCloudClient } from "@mozaik-ai/cloud-sdk"
+
+export class EventPublisherLoopVisitor implements LoopVisitor {
+	private readonly cloud: CloudClient
+	constructor(
+		private readonly agentId: string,
+		private readonly loopId: string,
+		private readonly runtime: RuntimeService<RuntimeState>,
+	) {
+		this.cloud = createCloudClient()
+	}
+
+	visitContextUpdateStarted(input: ReceivedMessage): void {
+		this.publish("context_update.started", { ...input, loopId: this.loopId })
+	}
+
+	visitContextUpdateCompleted(output: InferenceInput): void {
+		this.publish("context_update.completed", { ...output, loopId: this.loopId })
+	}
+
+	visitInferenceStarted(input: InferenceInput): void {
+		this.publish("inference.started", input)
+	}
+
+	visitInferenceEvent(event: SemanticEvent): void {
+		this.publish("inference.stream", event)
+	}
+
+	visitInferenceCompleted(output: InferenceOutput): void {
+		this.publish("inference.completed", output)
+	}
+
+	visitFunctionCallStarted(input: FunctionCallParams): void {
+		this.publish("function_call.started", input)
+	}
+
+	visitFunctionCallCompleted(output: FunctionCallOutputItem): void {
+		this.publish("function_call.completed", output)
+	}
+
+	visitModelAnswer(input: ModelMessageParams): void {
+		this.publish("model.answer", input)
+	}
+
+	visitInterceptionStarted(transition: LoopTransition): void {
+		this.publish("interception.started", transition)
+	}
+
+	visitInterceptionFinished(transition: LoopTransition): void {
+		this.publish("interception.finished", transition)
+	}
+
+	private publish<TPayload>(type: string, payload: TPayload): void {
+		const event = new SemanticEvent(type, this.agentId, new Date(), payload)
+		this.runtime.publish(event)
+
+		if (this.cloud.enabled) {
+			this.cloud.send(event)
+		}
+	}
+}

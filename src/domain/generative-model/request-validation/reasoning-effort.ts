@@ -1,12 +1,12 @@
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { RequestValidationRule } from "./rule"
-import { ModelName, ModelSpecification } from "../generative-model"
+import type { InferenceInput } from "@app/states/inference"
+import type { RequestValidationRule } from "./rule"
+import type { ModelSpecification } from "../generative-model"
 
 export class ReasoningEffortValidation implements RequestValidationRule {
 	readonly name = "reasoning-effort"
 
-	isValid(inferenceParams: InferenceParams<ModelName>, model: ModelSpecification): boolean {
-		if (inferenceParams.reasoningEffort === undefined) {
+	isValid(inferenceInput: InferenceInput, model: ModelSpecification): boolean {
+		if (inferenceInput.reasoningEffort === undefined) {
 			return true
 		}
 
@@ -14,6 +14,6 @@ export class ReasoningEffortValidation implements RequestValidationRule {
 			return false
 		}
 
-		return model.supportedReasoningEfforts.includes(inferenceParams.reasoningEffort)
+		return model.supportedReasoningEfforts.includes(inferenceInput.reasoningEffort)
 	}
 }

@@ -1,11 +1,14 @@
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { Endpoint } from "@domain/generative-model/endpoint"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelName } from "@domain/generative-model/generative-model"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
+import type { Endpoint } from "@domain/generative-model/endpoint"
+import type { InferenceInput, InferenceOutput } from "@app/states/inference"
 import { AnthropicMessagesMapper } from "./anthropic-messages-mapper"
 import Anthropic from "@anthropic-ai/sdk"
-import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+
+export interface AnthropicConnectionConfig {
+	baseURL?: string
+	apiKey?: string
+}
 
 /**
  * Native Anthropic adapter on the `@anthropic-ai/sdk` (`messages.create`).
@@ -14,32 +17,46 @@ import { InferenceEndpointMapper } from "@domain/generative-model/inference-endp
  */
 export class AnthropicMessages implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
-	private readonly client: Anthropic
+	private _client?: Anthropic
+	private readonly clientConfig: AnthropicConnectionConfig
 
-	constructor(endpointMapper: InferenceEndpointMapper = new AnthropicMessagesMapper()) {
+	constructor(
+		endpointMapper: InferenceEndpointMapper = new AnthropicMessagesMapper(),
+		config: AnthropicConnectionConfig = {},
+	) {
 		this.endpointMapper = endpointMapper
-		this.client = new Anthropic()
+		this.clientConfig = config
 	}
 
-	async infer(inferenceParams: InferenceParams<ModelName>): Promise<InferenceResponse> {
-		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
-		const response = await this.client.messages.create(inferenceRequest)
+	private get client(): Anthropic {
+		return (this._client ??= new Anthropic({
+			baseURL: this.clientConfig.baseURL,
+			apiKey: this.clientConfig.apiKey,
+		}))
+	}
+
+	async infer(inferenceInput: InferenceInput): Promise<InferenceOutput> {
+		const request = this.endpointMapper.toRequest(inferenceInput)
+		const response = await this.client.messages.create(request)
 
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(
-		inferenceParams: InferenceParams<ModelName>,
-		signal?: AbortSignal,
-	): AsyncIterable<SemanticEvent<unknown>> {
-		const inferenceRequest = this.endpointMapper.toRequest(inferenceParams)
-		const stream: any = await this.client.messages.create(inferenceRequest)
+	async *stream(inferenceInput: InferenceInput): AsyncIterable<SemanticEvent> {
+		const request = this.endpointMapper.toRequest(inferenceInput)
+		const stream = this.client.messages.stream(request)
 
 		for await (const event of stream) {
-			if (signal?.aborted) {
-				break
-			}
-			yield new SemanticEvent(event.type, event)
+			yield event as unknown as SemanticEvent
+		}
+
+		const output = this.endpointMapper.toResponse(await stream.finalMessage())
+
+		yield {
+			type: "inference.output",
+			producerId: request.model,
+			occurredAt: new Date(),
+			payload: output,
 		}
 	}
 }

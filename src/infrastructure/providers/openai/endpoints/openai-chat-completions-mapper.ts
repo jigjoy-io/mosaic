@@ -1,27 +1,25 @@
-import { ModelName } from "@domain/generative-model/generative-model"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import type { InferenceInput, InferenceItem, InferenceOutput } from "@app/states/inference"
+import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 import { DeveloperMessageItem } from "@domain/model-context/context-item/client-item/developer-message"
 import { FunctionCallOutputItem } from "@domain/model-context/context-item/client-item/function-call-output"
 import { SystemMessageItem } from "@domain/model-context/context-item/client-item/system-message"
 import { UserMessageItem } from "@domain/model-context/context-item/client-item/user-message"
 import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
 import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
 import { InputText } from "@domain/model-context/context-item/item-content/input-text"
 import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { ContextItem } from "@domain/model-context/context-item/context-item"
+import type { ContextItem } from "@domain/model-context/context-item/context-item"
 import { InputTokenDetails, OutputTokenDetails, TokenUsage } from "@domain/generative-model/token-usage"
 
 export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
-	toRequest(inferenceParams: InferenceParams<ModelName>) {
+	toRequest(inferenceInput: InferenceInput) {
 		const request: any = {
-			model: inferenceParams.model,
-			messages: this.mapContextItems(inferenceParams),
+			model: inferenceInput.model,
+			messages: this.mapContextItems(inferenceInput),
 		}
 
-		if (inferenceParams.tools && inferenceParams.tools.length > 0) {
-			request.tools = inferenceParams.tools.map((tool) => ({
+		if (inferenceInput.tools && inferenceInput.tools.length > 0) {
+			request.tools = inferenceInput.tools.map((tool) => ({
 				type: "function",
 				function: {
 					name: tool.name,
@@ -31,27 +29,21 @@ export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
 			}))
 		}
 
-		if (inferenceParams.reasoningEffort) {
-			request.reasoning_effort = inferenceParams.reasoningEffort
+		if (inferenceInput.reasoningEffort) {
+			request.reasoning_effort = inferenceInput.reasoningEffort
 		}
 
-		if (inferenceParams.streaming) {
-			request.stream = inferenceParams.streaming
+		if (inferenceInput.streaming) {
+			request.stream = inferenceInput.streaming
 		}
 
 		return request
 	}
 
-	toResponse(response: any): InferenceResponse {
-		const contextItems = this.extractContextItems(response)
-		const tokenUsage = this.extractTokenUsage(response)
-		return new InferenceResponse(contextItems, tokenUsage)
-	}
-
-	mapContextItems(inferenceParams: InferenceParams<ModelName>): any[] {
+	mapContextItems(inferenceInput: InferenceInput): any[] {
 		const messages: any[] = []
 
-		for (const item of inferenceParams.context.getItems()) {
+		for (const item of inferenceInput.context.getItems()) {
 			if (item instanceof DeveloperMessageItem || item instanceof SystemMessageItem) {
 				messages.push({ role: "system", content: item.content.text })
 				continue
@@ -104,11 +96,11 @@ export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
 		)
 	}
 
-	extractContextItems(response: any): ContextItem[] {
-		const items: ContextItem[] = []
+	toResponse(response: any): InferenceOutput {
+		const items: InferenceItem[] = []
 		const message = response.choices?.[0]?.message
 		if (!message) {
-			return items
+			return { items: [], tokenUsage: this.extractTokenUsage(response), rowResponse: response }
 		}
 
 		if (message.reasoning_content) {
@@ -135,6 +127,6 @@ export class OpenAIChatCompletionsMapper implements InferenceEndpointMapper {
 			)
 		}
 
-		return items
+		return { items, tokenUsage: this.extractTokenUsage(response), rowResponse: response }
 	}
 }

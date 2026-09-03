@@ -1,40 +1,56 @@
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { InferenceResponse } from "@domain/agentic-environment/inference/response"
-import { Endpoint } from "@domain/generative-model/endpoint"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
+import type { InferenceOutput } from "@app/states/inference"
+import type { Endpoint } from "@domain/generative-model/endpoint"
 import OpenAI from "openai"
-import { ModelName } from "@domain/generative-model/generative-model"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { InferenceInput } from "@app/states/inference"
 import { OpenAIResponsesMapper } from "./openai-responses-mapper"
-import { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
+import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
 export class OpenAIResponses implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
-	private readonly client: OpenAI
+	private _client?: OpenAI
 
 	constructor(endpointMapper: InferenceEndpointMapper = new OpenAIResponsesMapper()) {
 		this.endpointMapper = endpointMapper
-		this.client = new OpenAI()
 	}
 
-	async infer(inferenceParams: InferenceParams<ModelName>): Promise<InferenceResponse> {
-		const request = this.endpointMapper.toRequest(inferenceParams)
+	private get client(): OpenAI {
+		return (this._client ??= new OpenAI())
+	}
+
+	async infer(inferenceInput: InferenceInput): Promise<InferenceOutput> {
+		const request = this.endpointMapper.toRequest(inferenceInput)
 		const response = await this.client.responses.create(request)
 
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(
-		inferenceParams: InferenceParams<ModelName>,
-		signal?: AbortSignal,
-	): AsyncIterable<SemanticEvent<unknown>> {
-		const request = this.endpointMapper.toRequest(inferenceParams)
-		const response: any = await this.client.responses.create(request)
+	async *stream(inferenceInput: InferenceInput): AsyncIterable<SemanticEvent> {
+		const request = this.endpointMapper.toRequest(inferenceInput)
+		const stream: any = await this.client.responses.create({ ...request, stream: true })
 
-		for await (const event of response) {
-			if (signal?.aborted) {
-				break
+		// Only the terminal `response.completed` event carries the assembled
+		// response; the deltas before it cannot be mapped to an InferenceOutput.
+		let completedResponse: any = undefined
+		for await (const event of stream) {
+			if (event.type === "response.completed") {
+				completedResponse = event.response
 			}
-			yield new SemanticEvent(event.type, event)
+
+			yield event
+		}
+
+		if (!completedResponse) {
+			throw new Error("Stream ended without a completed response")
+		}
+
+		const output = this.endpointMapper.toResponse(completedResponse)
+
+		yield {
+			type: "inference.output",
+			payload: output,
+			occurredAt: new Date(),
+			producerId: inferenceInput.model,
 		}
 	}
 }

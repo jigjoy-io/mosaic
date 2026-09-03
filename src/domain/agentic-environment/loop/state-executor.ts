@@ -1,0 +1,58 @@
+import { ExecutableLoopStateId, LoopStateExecution, LoopTransition } from "./loop-state"
+import { LoopVisitor } from "./loop-visitor"
+import { FunctionCallState } from "@app/states/function-call"
+import { InferenceState } from "@app/states/inference"
+import { ContextUpdateState } from "@app/states/context-update"
+import { ModelMessageState } from "@app/states/model-message"
+import { InferenceStreamingState } from "@app/states/inference-streaming"
+
+export class LoopStateExecutor {
+	constructor(
+		private readonly contextUpdateState: ContextUpdateState,
+		private readonly inferenceState: InferenceState,
+		private readonly inferenceStreamingState: InferenceStreamingState,
+		private readonly functionCallState: FunctionCallState,
+		private readonly modelMessageState: ModelMessageState,
+	) {}
+
+	execute(
+		transition: LoopTransition<"context_update">,
+		loopVisitor: LoopVisitor,
+	): Promise<LoopStateExecution<"context_update">>
+
+	execute(transition: LoopTransition<"inference">, loopVisitor: LoopVisitor): Promise<LoopStateExecution<"inference">>
+
+	execute(
+		transition: LoopTransition<"function_call">,
+		loopVisitor: LoopVisitor,
+	): Promise<LoopStateExecution<"function_call">>
+
+	execute(
+		transition: LoopTransition<"model_message">,
+		loopVisitor: LoopVisitor,
+	): Promise<LoopStateExecution<"model_message">>
+
+	execute(transition: LoopTransition<ExecutableLoopStateId>, loopVisitor: LoopVisitor): Promise<LoopStateExecution>
+
+	async execute(
+		transition: LoopTransition<ExecutableLoopStateId>,
+		loopVisitor: LoopVisitor,
+	): Promise<LoopStateExecution> {
+		switch (transition.nextStateId) {
+			case "context_update":
+				return await this.contextUpdateState.run(transition.input, loopVisitor)
+
+			case "inference":
+				return await this.inferenceState.run(transition.input, loopVisitor)
+
+			case "inference_streaming":
+				return await this.inferenceStreamingState.run(transition.input, loopVisitor)
+
+			case "function_call":
+				return await this.functionCallState.run(transition.input, loopVisitor)
+
+			case "model_message":
+				return await this.modelMessageState.run(transition.input, loopVisitor)
+		}
+	}
+}

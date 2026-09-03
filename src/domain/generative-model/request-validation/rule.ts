@@ -1,7 +1,7 @@
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelName, ModelSpecification } from "../generative-model"
+import type { InferenceInput } from "@app/states/inference"
+import type { ModelSpecification } from "../generative-model"
 
 export interface RequestValidationRule {
 	readonly name: string
-	isValid(inferenceParams: InferenceParams<ModelName>, model: ModelSpecification): boolean
+	isValid(inferenceInput: InferenceInput, model: ModelSpecification): boolean
 }

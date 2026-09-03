@@ -1,6 +1,6 @@
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelName, ModelSpecification } from "../generative-model"
-import { RequestValidationRule } from "./rule"
+import type { InferenceInput } from "@app/states/inference"
+import type { ModelSpecification } from "../generative-model"
+import type { RequestValidationRule } from "./rule"
 
 export type StructuredOutputFormat = {
 	name?: string
@@ -11,8 +11,8 @@ export type StructuredOutputFormat = {
 export class StructuredOutputValidation implements RequestValidationRule {
 	readonly name = "structured-output"
 
-	isValid(inferenceParams: InferenceParams<ModelName>, model: ModelSpecification): boolean {
-		if (inferenceParams.structuredOutput === undefined) {
+	isValid(inferenceInput: InferenceInput, model: ModelSpecification): boolean {
+		if (inferenceInput.structuredOutput === undefined) {
 			return true
 		}
 

@@ -1,4 +1,4 @@
-import { ModelSpecification } from "@domain/generative-model/generative-model"
+import type { ModelSpecification } from "@domain/generative-model/generative-model"
 
 export const gpt54NanoSpecification: ModelSpecification = {
 	name: "gpt-5.4-nano",

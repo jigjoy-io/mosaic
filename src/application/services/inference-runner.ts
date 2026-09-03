@@ -1,37 +1,35 @@
-import { FunctionCallItem } from "@domain/model-context/context-item/model-item/function-call"
-import { ModelMessageItem } from "@domain/model-context/context-item/model-item/model-message"
-import { ReasoningItem } from "@domain/model-context/context-item/model-item/reasoning"
-import { SemanticEvent } from "@domain/model-context/semantic-event/semantic-event"
-import { Endpoint } from "@domain/generative-model/endpoint"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
-import { ModelName } from "@domain/generative-model/generative-model"
+import type { InferenceInput, InferenceOutput, InferenceRunner } from "@app/states/inference"
+import type { InferenceInputValidator } from "@domain/generative-model/request-validation/inference-request-validator"
+import { GenerativeModel } from "@domain/generative-model/generative-model"
+import { SemanticEvent } from "@domain/agentic-environment/semantic-event/event"
 
-type InferenceItem = ReasoningItem | FunctionCallItem | ModelMessageItem | SemanticEvent<unknown>
+export type InferenceCompletedParams = { answer: string; producerId: string; price?: number }
 
-export interface InferenceRunner {
-	run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem>
-}
+export class DefaultInferenceRunner implements InferenceRunner {
+	constructor(
+		private readonly supportedModels: GenerativeModel[],
+		private readonly requestValidator: InferenceInputValidator,
+	) {}
 
-export class StreamingInference implements InferenceRunner {
-	async *run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem> {
-		if (request.signal?.aborted) {
-			return
+	async run(input: InferenceInput): Promise<InferenceOutput> {
+		const generativeModel = this.supportedModels.find((model) => model.specification.name === input.model)
+		if (!generativeModel) {
+			throw new Error(`Unsupported model: ${input.model}`)
 		}
-		yield* endpoint.stream(request, request.signal)
+
+		this.requestValidator.validate(input, generativeModel.specification)
+
+		return await generativeModel.endpoint.infer(input)
 	}
-}
 
-export class NonStreamingInference implements InferenceRunner {
-	async *run(request: InferenceParams<ModelName>, endpoint: Endpoint): AsyncIterable<InferenceItem> {
-		if (request.signal?.aborted) {
-			return
+	async *stream(input: InferenceInput): AsyncGenerator<SemanticEvent> {
+		const generativeModel = this.supportedModels.find((model) => model.specification.name === input.model)
+		if (!generativeModel) {
+			throw new Error(`Unsupported model: ${input.model}`)
 		}
-		const response = await endpoint.infer(request)
-		for (const item of response.contextItems) {
-			if (request.signal?.aborted) {
-				break
-			}
-			yield item as InferenceItem
-		}
+
+		this.requestValidator.validate(input, generativeModel.specification)
+
+		yield* generativeModel.endpoint.stream(input)
 	}
 }

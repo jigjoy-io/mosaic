@@ -1,12 +1,12 @@
-import { RequestValidationRule } from "./rule"
-import { ModelName, ModelSpecification } from "../generative-model"
-import { InferenceParams } from "@domain/agentic-environment/inference/params"
+import type { RequestValidationRule } from "./rule"
+import type { ModelSpecification } from "../generative-model"
+import type { InferenceInput } from "@app/states/inference"
 
 export class ToolCallingValidation implements RequestValidationRule {
 	readonly name = "tool-calling"
 
-	isValid(inferenceParams: InferenceParams<ModelName>, model: ModelSpecification): boolean {
-		if (inferenceParams.tools === undefined) {
+	isValid(inferenceInput: InferenceInput, model: ModelSpecification): boolean {
+		if (inferenceInput.tools === undefined) {
 			return true
 		}
 
