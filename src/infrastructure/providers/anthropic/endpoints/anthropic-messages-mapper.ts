@@ -38,7 +38,7 @@ export class AnthropicMessagesMapper implements InferenceEndpointMapper {
 		if (inferenceInput.structuredOutput) {
 			outputConfig.format = {
 				type: "json_schema",
-				json_schema: inferenceInput.structuredOutput.schema,
+				schema: inferenceInput.structuredOutput.schema,
 			}
 		}
 
