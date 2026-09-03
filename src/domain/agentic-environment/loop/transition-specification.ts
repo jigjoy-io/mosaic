@@ -40,7 +40,7 @@ export class NotSpecification implements TransitionSpecification {
 
 export class MessageReceivedSpecification implements TransitionSpecification {
 	isSatisfiedBy(execution: LoopStateExecution): boolean {
-		return execution.stateId === "context_update"
+		return execution.stateId === "message_received"
 	}
 }
 

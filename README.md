@@ -218,18 +218,18 @@ Participants never poll. Custom events go through `sendEvent(event, senderId)` w
 
 Producer is the agent whose loop is running:
 
-| Event                      | Published when                                     | Payload                                                  |
-| -------------------------- | -------------------------------------------------- | -------------------------------------------------------- |
-| `context_update.started`   | The loop begins appending the user message         | Received message plus `loopId`                           |
-| `context_update.completed` | Context is ready for inference                     | `InferenceInput` plus `loopId`                           |
-| `inference.started`        | The model call begins                              | `InferenceInput`                                         |
-| `inference.stream`         | Each streaming chunk (only when `streaming: true`) | The inner provider event                                 |
-| `inference.completed`      | The model call finished                            | `InferenceOutput` (`items`, `tokenUsage`, `rowResponse`) |
-| `function_call.started`    | A tool is about to run                             | `{ call, inferenceInput }`                               |
-| `function_call.completed`  | The tool returned                                  | `FunctionCallOutputItem`                                 |
-| `model.answer`             | The assistant message is committed                 | `{ answer: ModelMessageItem }`                           |
-| `interception.started`     | An `InterceptionHandler` matched a transition      | The pending `LoopTransition`                             |
-| `interception.finished`    | The handler returned (possibly rewritten)          | The transition that will execute                         |
+| Event                        | Published when                                     | Payload                                                  |
+| ---------------------------- | -------------------------------------------------- | -------------------------------------------------------- |
+| `message_received.started`   | The loop begins appending the user message         | Received message plus `loopId`                           |
+| `message_received.completed` | Context is ready for inference                     | `InferenceInput` plus `loopId`                           |
+| `inference.started`          | The model call begins                              | `InferenceInput`                                         |
+| `inference.stream`           | Each streaming chunk (only when `streaming: true`) | The inner provider event                                 |
+| `inference.completed`        | The model call finished                            | `InferenceOutput` (`items`, `tokenUsage`, `rowResponse`) |
+| `function_call.started`      | A tool is about to run                             | `{ call, inferenceInput }`                               |
+| `function_call.completed`    | The tool returned                                  | `FunctionCallOutputItem`                                 |
+| `model.answer`               | The assistant message is committed                 | `{ answer: ModelMessageItem }`                           |
+| `interception.started`       | An `InterceptionHandler` matched a transition      | The pending `LoopTransition`                             |
+| `interception.finished`      | The handler returned (possibly rewritten)          | The transition that will execute                         |
 
 ### Streaming
 
@@ -345,13 +345,13 @@ Three things to note:
 
 ## The agent loop
 
-`runLoop(agentId, message, inferenceInput, interceptionHandler?)` drives one agent turn as a state machine. It starts at `context_update` and runs until `idle`. Tool execution and the follow-up inference live inside the loop — you do not call a separate function-call runner.
+`runLoop(agentId, message, inferenceInput, interceptionHandler?)` drives one agent turn as a state machine. It starts at `message_received` and runs until `idle`. Tool execution and the follow-up inference live inside the loop — you do not call a separate function-call runner.
 
 Each step: optionally intercept the pending transition, execute the state, then resolve the next transition.
 
 ```mermaid
 flowchart TD
-    Start([runLoop]) --> CU[context_update]
+    Start([runLoop]) --> CU[message_received]
     CU --> INF[inference]
     INF -->|function_call item| FC[function_call]
     INF -->|assistant message| MM[model_message]
@@ -361,7 +361,7 @@ flowchart TD
 
 | State                 | What it does                                                                                     |
 | --------------------- | ------------------------------------------------------------------------------------------------ |
-| `context_update`      | Appends the user message to the agent's context.                                                 |
+| `message_received`    | Appends the user message to the agent's context.                                                 |
 | `inference`           | Calls the model and waits for the full response.                                                 |
 | `inference_streaming` | Same call, streaming; each chunk is published as `inference.stream`.                             |
 | `function_call`       | Runs the matching tool, writes the call and output back into context, then returns to inference. |

@@ -19,12 +19,12 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 		this.cloud = createCloudClient()
 	}
 
-	visitContextUpdateStarted(input: ReceivedMessage): void {
-		this.publish("context_update.started", input)
+	visitMessageReceivedStarted(input: ReceivedMessage): void {
+		this.publish("message_received.started", input)
 	}
 
-	visitContextUpdateCompleted(output: InferenceInput): void {
-		this.publish("context_update.completed", output)
+	visitMessageReceivedCompleted(output: InferenceInput): void {
+		this.publish("message_received.completed", output)
 	}
 
 	visitInferenceStarted(input: InferenceInput): void {

@@ -5,9 +5,9 @@ import { FunctionCallOutputItem } from "@domain/model-context/context-item/clien
 import { LoopTransition, ModelMessageParams, ReceivedMessage } from "./loop-state"
 
 export interface LoopVisitor {
-	visitContextUpdateStarted(input: ReceivedMessage): void
+	visitMessageReceivedStarted(input: ReceivedMessage): void
 
-	visitContextUpdateCompleted(output: InferenceInput): void
+	visitMessageReceivedCompleted(output: InferenceInput): void
 
 	visitInferenceStarted(input: InferenceInput): void
 

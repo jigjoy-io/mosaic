@@ -6,7 +6,7 @@ import { LoopVisitor } from "./loop-visitor"
 import { InterceptionOutput, InterceptionParams } from "./interception"
 
 export type LoopStateId =
-	| "context_update"
+	| "message_received"
 	| "inference"
 	| "inference_streaming"
 	| "function_call"
@@ -31,7 +31,7 @@ export interface ModelMessageParams {
 // ============================================================
 
 export interface LoopStateContract {
-	context_update: {
+	message_received: {
 		input: ReceivedMessage
 		output: InferenceInput
 	}

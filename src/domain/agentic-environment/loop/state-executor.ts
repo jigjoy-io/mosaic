@@ -2,13 +2,13 @@ import { ExecutableLoopStateId, LoopStateExecution, LoopTransition } from "./loo
 import { LoopVisitor } from "./loop-visitor"
 import { FunctionCallState } from "@app/states/function-call"
 import { InferenceState } from "@app/states/inference"
-import { ContextUpdateState } from "@app/states/context-update"
+import { MessageReceivedState } from "@app/states/message-received"
 import { ModelMessageState } from "@app/states/model-message"
 import { InferenceStreamingState } from "@app/states/inference-streaming"
 
 export class LoopStateExecutor {
 	constructor(
-		private readonly contextUpdateState: ContextUpdateState,
+		private readonly messageReceivedState: MessageReceivedState,
 		private readonly inferenceState: InferenceState,
 		private readonly inferenceStreamingState: InferenceStreamingState,
 		private readonly functionCallState: FunctionCallState,
@@ -16,9 +16,9 @@ export class LoopStateExecutor {
 	) {}
 
 	execute(
-		transition: LoopTransition<"context_update">,
+		transition: LoopTransition<"message_received">,
 		loopVisitor: LoopVisitor,
-	): Promise<LoopStateExecution<"context_update">>
+	): Promise<LoopStateExecution<"message_received">>
 
 	execute(transition: LoopTransition<"inference">, loopVisitor: LoopVisitor): Promise<LoopStateExecution<"inference">>
 
@@ -39,8 +39,8 @@ export class LoopStateExecutor {
 		loopVisitor: LoopVisitor,
 	): Promise<LoopStateExecution> {
 		switch (transition.nextStateId) {
-			case "context_update":
-				return await this.contextUpdateState.run(transition.input, loopVisitor)
+			case "message_received":
+				return await this.messageReceivedState.run(transition.input, loopVisitor)
 
 			case "inference":
 				return await this.inferenceState.run(transition.input, loopVisitor)

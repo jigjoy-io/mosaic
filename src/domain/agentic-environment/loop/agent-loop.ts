@@ -14,7 +14,7 @@ export class AgentLoop {
 
 	async run(message: ReceivedMessage, loopVisitor: LoopVisitor): Promise<void> {
 		let transition: LoopTransition = {
-			nextStateId: "context_update",
+			nextStateId: "message_received",
 			input: message,
 		}
 
