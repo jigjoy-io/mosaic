@@ -60,7 +60,10 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 	}
 
 	private publish<TPayload>(type: string, payload: TPayload): void {
-		const event = new SemanticEvent(type, this.agentId, new Date(), payload)
+		const event = new SemanticEvent(type, this.agentId, new Date(), {
+			...payload,
+			loopId: this.loopId,
+		})
 		this.runtime.publish(event)
 
 		if (this.cloud.enabled) {
@@ -73,7 +76,7 @@ export class EventPublisherLoopVisitor implements LoopVisitor {
 						...payload,
 						loopId: this.loopId,
 						agent: {
-							manfifeset: agent.getManifest(),
+							manifest: agent.getManifest(),
 							developerMessage: agent.getDeveloperMessage(),
 							tools: agent.getTools(),
 							memory: agent.getMemory().getContext().getItems(),
