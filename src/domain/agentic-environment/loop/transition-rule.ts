@@ -76,6 +76,7 @@ export class InferenceToModelMessageRule implements LoopTransitionRule {
 		if (!modelMessageItem) {
 			throw new Error("Expected inference model-message output")
 		}
+		execution.input.context.addContextItem(modelMessageItem)
 
 		return {
 			nextStateId: "model_message",

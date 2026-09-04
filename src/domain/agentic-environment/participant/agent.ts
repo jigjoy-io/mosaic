@@ -40,7 +40,7 @@ export class Agent extends Participant {
 		const manifest: ParticipantManifest = { id, name, capabilities, role: "agent" }
 
 		const developerMessage = DeveloperMessageItem.create(instruction)
-		memory.getContext().addItem(developerMessage)
+		memory.getContext().addContextItem(developerMessage)
 		return new Agent(manifest, instruction, tools, memory, handlers)
 	}
 

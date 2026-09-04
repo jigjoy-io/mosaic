@@ -23,7 +23,7 @@ export class ModelContext {
 		return this
 	}
 
-	addItem(item: ContextItem): ModelContext {
+	addContextItem(item: ContextItem): ModelContext {
 		this.items.push(item)
 		return this
 	}
