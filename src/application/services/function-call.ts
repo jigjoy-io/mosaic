@@ -7,7 +7,11 @@ export class DefaultFunctionCallRunner implements FunctionCallRunner {
 	async run(input: FunctionCallItem, tool: Tool): Promise<FunctionCallOutputItem> {
 		try {
 			const result = await tool.invoke(JSON.parse(input.args))
-			return FunctionCallOutputItem.create(input.callId, JSON.stringify(result))
+
+			return FunctionCallOutputItem.create(
+				input.callId,
+				typeof result === "string" ? result : JSON.stringify(result),
+			)
 		} catch (error) {
 			return FunctionCallOutputItem.create(input.callId, `Error calling tool: ${error}`)
 		}
